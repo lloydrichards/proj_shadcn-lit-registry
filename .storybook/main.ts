@@ -1,4 +1,5 @@
 import type { StorybookConfig } from "@storybook/web-components-vite";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 const config: StorybookConfig = {
   stories: [
@@ -14,6 +15,13 @@ const config: StorybookConfig = {
     name: "@storybook/web-components-vite",
     options: {},
   },
-  staticDirs: ["../public"],
+  async viteFinal(config) {
+    // Merge custom configuration into the default config
+    const { mergeConfig } = await import("vite");
+
+    return mergeConfig(config, {
+      plugins: [tsconfigPaths()],
+    });
+  },
 };
 export default config;
