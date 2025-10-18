@@ -24,7 +24,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./registry/*"]
+      "@/*": ["./*"],
+      "@/lib/tailwindMixin": ["./registry/lib/tailwindMixin.ts"],
+      "@/styles/tailwind.global.css": ["./registry/styles/tailwind.global.css"]
     },
     "allowJs": true,
     "incremental": true,
