@@ -1,8 +1,8 @@
+import type { FC } from "react";
 import { CommandBlock } from "@/components/command-block";
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getBaseUrl } from "@/lib/utils";
-import { FC } from "react";
 
 export const RegistryItemRow: FC<{
   item: { name: string; title: string; description?: string };

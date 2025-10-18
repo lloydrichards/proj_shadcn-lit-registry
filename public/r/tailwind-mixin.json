@@ -28,8 +28,5 @@
       "type": "registry:style"
     }
   ],
-  "categories": [
-    "ui",
-    "web-component"
-  ]
+  "categories": ["ui", "web-component"]
 }

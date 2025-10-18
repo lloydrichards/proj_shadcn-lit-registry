@@ -32,7 +32,7 @@ export const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 );
 
 type ButtonVariants = VariantProps<typeof buttonVariants>;
