@@ -1,23 +1,192 @@
-# registry-template
+# Shadcn Lit Component Registry
 
-You can use the `shadcn` CLI to run your own component registry. Running your own
-component registry allows you to distribute your custom components, hooks, pages, and
-other files to any React project.
+A component registry for Lit-based web components, designed to work seamlessly
+with the shadcn CLI. This registry combines the power of Lit for creating fast,
+lightweight web components with the utility-first approach of Tailwind CSS for
+styling.
 
-> [!IMPORTANT]  
-> This template uses Tailwind v4. For Tailwind v3, see [registry-template-v3](https://github.com/shadcn-ui/registry-template-v3).
+## Overview
 
-## Getting Started
+This registry provides reusable Lit web components that can be easily installed
+into your projects using the shadcn CLI. Unlike traditional React-based shadcn
+registries, this registry focuses on framework-agnostic web components built
+with Lit.
 
-This is a template for creating a custom registry using Next.js.
+**Key benefits:**
 
-- The template uses a `registry.json` file to define components and their files.
-- The `shadcn build` command is used to build the registry.
-- The registry items are served as static files under `public/r/[name].json`.
-- The template also includes a route handler for serving registry items.
-- Every registry item are compatible with the `shadcn` CLI.
-- We have also added v0 integration using the `Open in v0` api.
+- **Lit Components**: Leverage the performance and simplicity of Lit for
+  building web components
+- **Tailwind CSS Integration**: Utilize Tailwind's utility classes for rapid
+  styling and customization
+- **Shadcn CLI Compatibility**: Easily add and manage components using the
+  familiar shadcn CLI
+- **Framework Agnostic**: Use these components across different web projects,
+  regardless of the framework
+
+## How to Use
+
+### Prerequisites
+
+Ensure you have the shadcn CLI installed in your project. If not, create a
+`components.json` file with the following:
+
+```json
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york-v4",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "iconLibrary": "lucide"
+}
+```
+
+### Configuration
+
+Add this registry to your `components.json` file:
+
+```json
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "registries": {
+    "@lit": "https://lit-registry.lloydrichards.dev/v2/r/{name}.json"
+  }
+}
+```
+
+### Add Tailwind Mixin
+
+Before adding any components, ensure you have the Tailwind Mixin library
+installed, as it is a required dependency for most components in this registry:
+
+```bash
+npx shadcn@latest add @lit/tailwind-mixin
+```
+
+### Adding Components
+
+Install components from this registry using the shadcn CLI:
+
+```bash
+npx shadcn@latest add @lit/button
+
+# Or install directly via URL
+npx shadcn@latest add https://lit-registry.lloydrichards.dev/r/button.json
+```
+
+### Using Components
+
+After installation, you can import and use the components in your project:
+
+```typescript
+import '@/components/ui/button';
+
+// In your HTML or template
+<ui-button variant="default">Click me</ui-button>
+```
+
+## Available Components
+
+### Components
+
+- **Button** - An atomic button component with multiple variants (default,
+  destructive, outline, secondary, ghost, link) and sizes (default, sm, lg,
+  icon)
+
+### Libraries
+
+- **Tailwind Mixin** - A set of Tailwind CSS mixins for Lit components, enabling
+  easy integration of Tailwind styles within web components. This is a required
+  dependency for most components in this registry.
+
+## How to Contribute
+
+We welcome contributions to expand and improve this component registry!
+
+### Development Setup
+
+1. Fork and clone this repository
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Start Storybook for component development:
+
+   ```bash
+   npm run storybook
+   ```
+
+### Adding a New Component
+
+1. Create your component in the `registry/ui/` directory (e.g.,
+   `registry/ui/your-component.ts`)
+2. Create a Storybook story for your component (e.g.,
+   `registry/ui/your-component.stories.ts`)
+3. Add your component definition to `registry.json`:
+
+   ```json
+   {
+     "name": "your-component",
+     "type": "registry:component",
+     "title": "Your Component",
+     "description": "Description of your component",
+     "categories": ["ui", "web-component"],
+     "dependencies": [],
+     "files": [
+       {
+         "path": "registry/ui/your-component.ts",
+         "type": "registry:ui"
+       }
+     ]
+   }
+   ```
+
+4. Build the registry:
+
+   ```bash
+   npm run registry:build
+   ```
+
+5. Test your component locally and in Storybook
+
+   ```bash
+   npx shadcn@latest add http://localhost:3000/r/your-component.json
+   ```
+
+6. Submit a pull request with your changes
+
+### Testing
+
+- Run tests: `npm run test`
+- Run Storybook: `npm run storybook`
+- Build registry: `npm run registry:build`
 
 ## Documentation
 
-Visit the [shadcn documentation](https://ui.shadcn.com/docs/registry) to view the full documentation.
+For more information on the technologies used in this project:
+
+- [Shadcn CLI Documentation](https://ui.shadcn.com/docs/registry)
+- [Lit Documentation](https://lit.dev/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Storybook Documentation](https://storybook.js.org/docs)

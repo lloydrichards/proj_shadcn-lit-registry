@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "biome check",
     "format": "npx prettier --write 'registry/**/*.ts' && biome format --write",
+    "test": "vitest run",
     "registry:build": "shadcn build",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
