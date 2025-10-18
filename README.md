@@ -171,6 +171,9 @@ We welcome contributions to expand and improve this component registry!
 5. Test your component locally and in Storybook
 
    ```bash
+   bun dev
+
+   # In another repo, add your component via local URL
    npx shadcn@latest add http://localhost:3000/r/your-component.json
    ```
 

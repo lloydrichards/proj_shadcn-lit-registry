@@ -24,7 +24,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./registry/*"]
     },
     "allowJs": true,
     "incremental": true,

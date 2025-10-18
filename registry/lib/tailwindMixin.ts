@@ -1,5 +1,5 @@
 import { adoptStyles, type LitElement, unsafeCSS } from "lit";
-import tailwindCss from "../styles/tailwind.global.css?inline";
+import tailwindCss from "@/styles/tailwind.global.css?inline";
 
 declare global {
   // biome-ignore lint/suspicious/noExplicitAny: Required for mixin pattern compatibility

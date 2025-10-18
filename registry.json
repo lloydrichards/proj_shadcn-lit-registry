@@ -27,8 +27,13 @@
           "type": "registry:lib"
         },
         {
+          "path": "registry/lib/utils.ts",
+          "type": "registry:lib"
+        },
+        {
           "path": "registry/styles/tailwind.global.css",
-          "type": "registry:style"
+          "type": "registry:file",
+          "target": "styles/tailwind.global.css"
         }
       ]
     },

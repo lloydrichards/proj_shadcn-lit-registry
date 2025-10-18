@@ -1,12 +1,12 @@
+import "./button";
 import type { Meta, StoryObj } from "@storybook/web-components-vite";
-import { html } from "lit";
-import "./Button";
 import type { TemplateResult } from "lit";
+import { html } from "lit";
 import type { UnsafeSVGDirective } from "lit/directives/unsafe-svg.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import type { DirectiveResult } from "lit-html/directive.js";
 import { Search } from "lucide-static";
-import type { ButtonProperties } from "./Button";
+import type { ButtonProperties } from "./button";
 
 type ButtonArgs = ButtonProperties & {
   children?:
