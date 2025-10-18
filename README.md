@@ -33,16 +33,6 @@ Ensure you have the shadcn CLI installed in your project. If not, create a
 ```json
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york-v4",
-  "rsc": true,
-  "tsx": true,
-  "tailwind": {
-    "config": "",
-    "css": "app/globals.css",
-    "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
-  },
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
@@ -50,17 +40,6 @@ Ensure you have the shadcn CLI installed in your project. If not, create a
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "iconLibrary": "lucide"
-}
-```
-
-### Configuration
-
-Add this registry to your `components.json` file:
-
-```json
-{
-  "$schema": "https://ui.shadcn.com/schema.json",
   "registries": {
     "@lit": "https://lit-registry.lloydrichards.dev/v2/r/{name}.json"
   }
