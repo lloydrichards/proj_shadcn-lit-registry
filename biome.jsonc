@@ -9,7 +9,8 @@
     "includes": [
       "**/*.{js,jsx,ts,tsx,json,css,scss,md,mdx}",
       "!**/.next",
-      "!**/node_modules"
+      "!**/node_modules",
+      "!public"
     ],
     "ignoreUnknown": false
   },

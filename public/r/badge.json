@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "badge",
+  "type": "registry:component",
+  "title": "Badge",
+  "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+  "description": "A badge component built with Lit and styled using Tailwind CSS. Supports multiple variants for different use cases.",
+  "dependencies": [],
+  "files": [
+    {
+      "path": "registry/ui/badge/badge.ts",
+      "content": "import { cva, type VariantProps } from \"class-variance-authority\";\nimport { html, LitElement, nothing } from \"lit\";\nimport { customElement, property } from \"lit/decorators.js\";\nimport { TW } from \"@/lib/tailwindMixin\";\nimport { cn } from \"@/lib/utils\";\n\nexport const badgeVariants = cva(\n  \"inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2\",\n  {\n    variants: {\n      variant: {\n        default:\n          \"border-transparent bg-primary text-primary-foreground hover:bg-primary/80\",\n        secondary:\n          \"border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80\",\n        destructive:\n          \"border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80\",\n        outline: \"text-foreground\",\n      },\n    },\n    defaultVariants: {\n      variant: \"default\",\n    },\n  },\n);\n\nexport type BadgeVariants = VariantProps<typeof badgeVariants>;\n\n@customElement(\"ui-badge\")\nexport class Badge extends TW(LitElement) {\n  @property({ type: String }) variant: BadgeVariants[\"variant\"] = \"default\";\n\n  @property({ type: String, attribute: \"aria-label\" }) accessor ariaLabel:\n    | string\n    | null = null;\n\n  private get badgeClasses() {\n    return badgeVariants({ variant: this.variant });\n  }\n\n  override render() {\n    return html`\n      <span\n        class=${cn(this.badgeClasses, this.className)}\n        role=\"status\"\n        aria-label=${this.ariaLabel || nothing}\n      >\n        <slot></slot>\n      </span>\n    `;\n  }\n}\n\ndeclare global {\n  interface HTMLElementTagNameMap {\n    \"ui-badge\": Badge;\n  }\n}\n",
+      "type": "registry:ui"
+    },
+    {
+      "path": "registry/ui/badge/badge.stories.ts",
+      "content": "import \"./badge\";\nimport type { Meta, StoryObj } from \"@storybook/web-components-vite\";\nimport { html } from \"lit\";\nimport type { BadgeVariants } from \"./badge\";\n\ntype BadgeArgs = {\n  variant?: BadgeVariants[\"variant\"];\n  ariaLabel: string | null;\n  children?: string;\n};\n\n/**\n * Displays a badge or a component that looks like a badge.\n */\nconst meta: Meta<BadgeArgs> = {\n  title: \"ui/Badge\",\n  component: \"ui-badge\",\n  tags: [\"autodocs\"],\n  argTypes: {\n    variant: {\n      control: \"select\",\n      options: [\"default\", \"secondary\", \"destructive\", \"outline\"],\n    },\n    ariaLabel: {\n      control: \"text\",\n    },\n    children: {\n      control: \"text\",\n    },\n  },\n  args: {\n    variant: \"default\",\n    children: \"Badge\",\n  },\n  parameters: {\n    layout: \"centered\",\n  },\n  render: (args) =>\n    html`<ui-badge .variant=${args.variant} .ariaLabel=${args.ariaLabel}>\n      ${args.children}\n    </ui-badge>`,\n};\n\nexport default meta;\n\ntype Story = StoryObj<BadgeArgs>;\n\n/**\n * The default form of the badge.\n */\nexport const Default: Story = {};\n\n/**\n * Use the `secondary` badge to call for less urgent information, blending\n * into the interface while still signaling minor updates or statuses.\n */\nexport const Secondary: Story = {\n  args: {\n    variant: \"secondary\",\n  },\n};\n\n/**\n * Use the `destructive` badge to  indicate errors, alerts, or the need for\n * immediate attention.\n */\nexport const Destructive: Story = {\n  args: {\n    variant: \"destructive\",\n  },\n};\n\n/**\n * Use the `outline` badge for overlaying without obscuring interface details,\n * emphasizing clarity and subtlety..\n */\nexport const Outline: Story = {\n  args: {\n    variant: \"outline\",\n  },\n};\n",
+      "type": "registry:ui"
+    }
+  ],
+  "categories": [
+    "ui",
+    "badge",
+    "web-component"
+  ]
+}

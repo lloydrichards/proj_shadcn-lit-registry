@@ -55,6 +55,25 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "badge",
+      "type": "registry:component",
+      "title": "Badge",
+      "description": "A badge component built with Lit and styled using Tailwind CSS. Supports multiple variants for different use cases.",
+      "categories": ["ui", "badge", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/ui/badge/badge.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/badge/badge.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
