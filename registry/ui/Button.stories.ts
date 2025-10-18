@@ -69,17 +69,18 @@ const meta: Meta<ButtonArgs> = {
     disabled: false,
     children: "Button",
   },
-  render: (args) => html`<ui-button
-    .variant=${args.variant}
-    .size=${args.size}
-    .type=${args.type}
-    .disabled=${args.disabled}
-    .ariaLabel=${args.ariaLabel}
-    .ariaDescribedby=${args.ariaDescribedby}
-    .ariaLabelledby=${args.ariaLabelledby}
-  >
-    ${args.children}
-  </ui-button>`,
+  render: (args) =>
+    html`<ui-button
+      .variant=${args.variant}
+      .size=${args.size}
+      .type=${args.type}
+      .disabled=${args.disabled}
+      .ariaLabel=${args.ariaLabel}
+      .ariaDescribedby=${args.ariaDescribedby}
+      .ariaLabelledby=${args.ariaLabelledby}
+    >
+      ${args.children}
+    </ui-button>`,
 };
 
 export default meta;
