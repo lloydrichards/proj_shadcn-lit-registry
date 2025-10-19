@@ -6,7 +6,8 @@
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A popover component built with Lit and styled using Tailwind CSS. Uses Floating UI for positioning with support for flip, shift, and arrow options.",
   "dependencies": [
-    "@floating-ui/dom"
+    "@floating-ui/dom",
+    "lucide-static"
   ],
   "registryDependencies": [
     "@lit/button"

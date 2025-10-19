@@ -167,7 +167,7 @@
       "categories": ["ui", "popover", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
       "registryDependencies": ["@lit/button"],
-      "dependencies": ["@floating-ui/dom"],
+      "dependencies": ["@floating-ui/dom", "lucide-static"],
       "files": [
         {
           "path": "registry/ui/popover/popover.ts",
@@ -175,6 +175,26 @@
         },
         {
           "path": "registry/ui/popover/popover.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:component",
+      "title": "Tooltip",
+      "description": "A tooltip component that displays information when an element receives keyboard focus or the mouse hovers over it. Built with Lit and uses Floating UI for smart positioning.",
+      "categories": ["ui", "tooltip", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/popover", "@lit/button"],
+      "dependencies": ["@floating-ui/dom", "lucide-static"],
+      "files": [
+        {
+          "path": "registry/ui/tooltip/tooltip.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/tooltip/tooltip.stories.ts",
           "type": "registry:ui"
         }
       ]
