@@ -198,6 +198,64 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "select",
+      "type": "registry:component",
+      "title": "Select",
+      "description": "Displays a list of options for the user to pick from—triggered by a button. Built with Lit and styled using Tailwind CSS. Features keyboard navigation, typeahead search, and form integration.",
+      "categories": ["ui", "form", "select", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/popover"],
+      "dependencies": ["lucide-static"],
+      "files": [
+        {
+          "path": "registry/ui/select/select.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/select/select.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "switch",
+      "type": "registry:component",
+      "title": "Switch",
+      "description": "A control that allows the user to toggle between checked and not checked. Built with Lit and styled using Tailwind CSS. Supports controlled and uncontrolled modes with form integration.",
+      "categories": ["ui", "form", "switch", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/ui/switch/switch.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/switch/switch.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:component",
+      "title": "Tabs",
+      "description": "A set of layered sections of content—known as tab panels—that are displayed one at a time. Built with Lit and styled using Tailwind CSS. Features keyboard navigation and accessible ARIA attributes.",
+      "categories": ["ui", "tabs", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/ui/tabs/tabs.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/tabs/tabs.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
