@@ -94,6 +94,26 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "field",
+      "type": "registry:component",
+      "title": "Field",
+      "description": "Form field components for creating accessible form layouts with labels, descriptions, and error messages. Includes fieldset, legend, and field grouping utilities.",
+      "categories": ["ui", "form", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/input"],
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/ui/field/field.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/field/field.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
