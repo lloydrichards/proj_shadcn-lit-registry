@@ -3,22 +3,26 @@ import { html, LitElement, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { X } from "lucide-static";
+import {
+  CircleCheck,
+  Info,
+  LoaderCircle,
+  OctagonX,
+  TriangleAlert,
+  X,
+} from "lucide-static";
 import { TW } from "@/lib/tailwindMixin";
+import "../button/button";
 
 export const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md border p-4 pr-6 shadow-lg transition-all",
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md p-4 pr-6 shadow-lg transition-all",
   {
     variants: {
       variant: {
-        default: "border bg-background text-foreground",
+        default: "bg-popover text-popover-foreground border",
+        outline: "bg-background text-foreground border",
         destructive:
-          "destructive group border-destructive bg-destructive text-destructive-foreground",
-        success:
-          "group border-green-500 bg-green-50 text-green-900 dark:border-green-500/50 dark:bg-green-950 dark:text-green-100",
-        warning:
-          "group border-yellow-500 bg-yellow-50 text-yellow-900 dark:border-yellow-500/50 dark:bg-yellow-950 dark:text-yellow-100",
-        info: "group border-blue-500 bg-blue-50 text-blue-900 dark:border-blue-500/50 dark:bg-blue-950 dark:text-blue-100",
+          "bg-destructive text-destructive-foreground border-destructive",
       },
       state: {
         open: "animate-in fade-in-0 slide-in-from-top-full duration-300 sm:slide-in-from-bottom-full",
@@ -33,9 +37,12 @@ export const toastVariants = cva(
 
 type ToastVariants = VariantProps<typeof toastVariants>;
 
+export type ToastType = "success" | "error" | "info" | "warning" | "loading";
+
 export interface ToastOptions {
   description?: string;
   variant?: ToastVariants["variant"];
+  type?: ToastType;
   duration?: number;
   action?: {
     label: string;
@@ -66,24 +73,20 @@ export function toast(message: string, options: ToastOptions = {}) {
   return toaster.addToast(message, options);
 }
 
-toast.success = (message: string, options: ToastOptions = {}) => {
-  return toast(message, { ...options, variant: "success" });
-};
+toast.success = (message: string, options: ToastOptions = {}) =>
+  toast(message, { ...options, type: "success" });
 
-toast.error = (message: string, options: ToastOptions = {}) => {
-  return toast(message, { ...options, variant: "destructive" });
-};
+toast.error = (message: string, options: ToastOptions = {}) =>
+  toast(message, { ...options, type: "error" });
 
-toast.warning = (message: string, options: ToastOptions = {}) => {
-  return toast(message, { ...options, variant: "warning" });
-};
+toast.warning = (message: string, options: ToastOptions = {}) =>
+  toast(message, { ...options, type: "warning" });
 
-toast.info = (message: string, options: ToastOptions = {}) => {
-  return toast(message, { ...options, variant: "info" });
-};
+toast.info = (message: string, options: ToastOptions = {}) =>
+  toast(message, { ...options, type: "info" });
 
 toast.promise = async <T>(
-  promise: Promise<T>,
+  promise: Promise<T> | (() => Promise<T>),
   messages: {
     loading: string;
     success: string | ((data: T) => string);
@@ -94,12 +97,12 @@ toast.promise = async <T>(
   const toaster = ensureToaster();
   const loadingToastId = toaster.addToast(messages.loading, {
     ...options,
-    variant: "default",
+    type: "loading",
     duration: Number.POSITIVE_INFINITY,
   });
 
   try {
-    const data = await promise;
+    const data = await (typeof promise === "function" ? promise() : promise);
     toaster.dismissToast(loadingToastId);
     const successMessage =
       typeof messages.success === "function"
@@ -190,15 +193,45 @@ export class Toaster extends TW(LitElement) {
     }, cleanupDelay);
   }
 
+  private getIcon(type?: ToastType) {
+    switch (type) {
+      case "success":
+        return CircleCheck;
+      case "info":
+        return Info;
+      case "warning":
+        return TriangleAlert;
+      case "error":
+        return OctagonX;
+      case "loading":
+        return LoaderCircle;
+      default:
+        return null;
+    }
+  }
+
   private renderToast(toast: ToastData) {
+    const icon = this.getIcon(toast.type);
+
     return html`
       <div
         class=${toastVariants({ variant: toast.variant, state: toast.state })}
-        role=${toast.variant === "destructive" ? "alert" : "status"}
-        aria-live=${toast.variant === "destructive" ? "assertive" : "polite"}
+        role=${toast.type === "error" ? "alert" : "status"}
+        aria-live=${toast.type === "error" ? "assertive" : "polite"}
         aria-atomic="true"
       >
-        <div class="grid gap-1">
+        ${
+          icon
+            ? html`<div
+              class="[&>svg]:size-4 shrink-0 ${
+                toast.type === "loading" ? "animate-spin" : ""
+              }"
+            >
+              ${unsafeHTML(icon)}
+            </div>`
+            : nothing
+        }
+        <div class="grid gap-1 flex-1">
           <div class="text-sm font-semibold [&+div]:text-xs">
             ${toast.message}
           </div>
@@ -211,25 +244,28 @@ export class Toaster extends TW(LitElement) {
         ${
           toast.action
             ? html`
-              <button
-                class="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              <ui-button
+                variant="outline"
+                size="sm"
                 @click=${() => {
                   toast.action?.onClick();
                   this.dismissToast(toast.id);
                 }}
               >
                 ${toast.action.label}
-              </button>
+              </ui-button>
             `
             : nothing
         }
-        <button
-          class="absolute right-1 top-1 rounded-md p-1 text-foreground/50 opacity-100 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-1 md:opacity-0 md:group-hover:opacity-100"
+        <ui-button
+          class="absolute right-1 top-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
+          variant="ghost"
+          size="icon-sm"
           @click=${() => this.dismissToast(toast.id)}
           aria-label="Close"
         >
           ${unsafeHTML(X)}
-        </button>
+        </ui-button>
       </div>
     `;
   }

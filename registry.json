@@ -275,6 +275,26 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "toast",
+      "type": "registry:component",
+      "title": "Toast",
+      "description": "An opinionated toast notification component for displaying messages. Built with Lit and styled using Tailwind CSS. Supports success, error, info, warning, and loading states with icons. Features promise support, action buttons, and multiple visual variants.",
+      "categories": ["ui", "toast", "notification", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/button"],
+      "dependencies": ["lucide-static"],
+      "files": [
+        {
+          "path": "registry/ui/toast/toast.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/toast/toast.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
