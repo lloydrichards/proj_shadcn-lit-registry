@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "input",
+  "type": "registry:component",
+  "title": "Input",
+  "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+  "description": "A text input component built with Lit and styled using Tailwind CSS. Supports various input types and states.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@lit/button"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/input/input.ts",
+      "content": "import { html, LitElement } from \"lit\";\nimport { customElement, property } from \"lit/decorators.js\";\nimport { TW } from \"@/registry/lib/tailwindMixin\";\nimport { cn } from \"@/registry/lib/utils\";\n\nconst TwLitElement = TW(LitElement);\n\nexport const inputStyles =\n  \"file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive\";\n\n@customElement(\"ui-input\")\nexport class Input extends TwLitElement {\n  @property({ type: String }) type = \"text\";\n  @property({ type: String }) placeholder = \"\";\n  @property({ type: Boolean }) disabled = false;\n  @property({ type: String }) value = \"\";\n  @property({ type: String }) name = \"\";\n\n  override render() {\n    return html`\n      <input\n        type=${this.type as \"text\"}\n        placeholder=${this.placeholder}\n        ?disabled=${this.disabled}\n        .value=${this.value}\n        name=${this.name}\n        class=${cn(inputStyles, this.className)}\n        @input=${this._handleInput}\n      />\n    `;\n  }\n\n  private _handleInput(e: Event) {\n    const target = e.target as HTMLInputElement;\n    this.value = target.value;\n    this.dispatchEvent(\n      new CustomEvent(\"input\", {\n        detail: { value: target.value },\n        bubbles: true,\n        composed: true,\n      })\n    );\n  }\n}\n\ndeclare global {\n  interface HTMLElementTagNameMap {\n    \"ui-input\": Input;\n  }\n}\n",
+      "type": "registry:ui"
+    },
+    {
+      "path": "registry/ui/input/input.stories.ts",
+      "content": "import \"./input\";\nimport \"../button\";\nimport type { Meta, StoryObj } from \"@storybook/web-components-vite\";\nimport { html } from \"lit\";\n\ntype InputArgs = {\n  type?: string;\n  placeholder?: string;\n  disabled?: boolean;\n};\n\n/**\n * Displays a form input field or a component that looks like an input field.\n */\nconst meta: Meta<InputArgs> = {\n  title: \"ui/Input\",\n  component: \"ui-input\",\n  tags: [\"autodocs\"],\n  argTypes: {\n    type: {\n      control: \"text\",\n    },\n    placeholder: {\n      control: \"text\",\n    },\n    disabled: {\n      control: \"boolean\",\n    },\n  },\n  args: {\n    type: \"email\",\n    placeholder: \"Email\",\n    disabled: false,\n  },\n  parameters: {\n    layout: \"centered\",\n  },\n  render: (args) =>\n    html`<ui-input\n      type=${args.type || \"text\"}\n      placeholder=${args.placeholder || \"\"}\n      ?disabled=${args.disabled}\n      class=\"w-96\"\n    ></ui-input>`,\n};\n\nexport default meta;\n\ntype Story = StoryObj<InputArgs>;\n\n/**\n * The default form of the input field.\n */\nexport const Default: Story = {};\n\n/**\n * Use the `disabled` prop to make the input non-interactive and appears faded,\n * indicating that input is not currently accepted.\n */\nexport const Disabled: Story = {\n  args: { disabled: true },\n};\n\n/**\n * Use the `Label` component to includes a clear, descriptive label above or\n * alongside the input area to guide users.\n */\nexport const WithLabel: Story = {\n  render: (args) => html`\n    <div class=\"grid gap-1.5\">\n      <label for=\"email\" class=\"text-sm font-medium\">\n        ${args.placeholder}\n      </label>\n      <ui-input\n        id=\"email\"\n        type=${args.type || \"text\"}\n        placeholder=${args.placeholder || \"\"}\n        ?disabled=${args.disabled}\n        class=\"w-96\"\n      ></ui-input>\n    </div>\n  `,\n};\n\n/**\n * Use a text element below the input field to provide additional instructions\n * or information to users.\n */\nexport const WithHelperText: Story = {\n  render: (args) => html`\n    <div class=\"grid gap-1.5\">\n      <label for=\"email-2\" class=\"text-sm font-medium\">\n        ${args.placeholder}\n      </label>\n      <ui-input\n        id=\"email-2\"\n        type=${args.type || \"text\"}\n        placeholder=${args.placeholder || \"\"}\n        ?disabled=${args.disabled}\n        class=\"w-96\"\n      ></ui-input>\n      <p class=\"text-sm text-foreground/60\">Enter your email address.</p>\n    </div>\n  `,\n};\n\n/**\n * Use the `Button` component to indicate that the input field can be submitted\n * or used to trigger an action.\n */\nexport const WithButton: Story = {\n  render: (args) => html`\n    <div class=\"flex items-center gap-2\">\n      <ui-input\n        type=${args.type || \"text\"}\n        placeholder=${args.placeholder || \"\"}\n        ?disabled=${args.disabled}\n        class=\"w-96\"\n      ></ui-input>\n      <ui-button type=\"submit\">Subscribe</ui-button>\n    </div>\n  `,\n};\n",
+      "type": "registry:ui"
+    }
+  ],
+  "categories": [
+    "ui",
+    "form",
+    "web-component"
+  ]
+}
