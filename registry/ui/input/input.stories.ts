@@ -1,5 +1,5 @@
 import "./input";
-import "../button";
+import "../button/button";
 import type { Meta, StoryObj } from "@storybook/web-components-vite";
 import { html } from "lit";
 

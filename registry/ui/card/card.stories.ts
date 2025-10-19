@@ -1,5 +1,5 @@
 import "./card";
-import "../button";
+import "../button/button";
 import type { Meta, StoryObj } from "@storybook/web-components-vite";
 import { html } from "lit";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";

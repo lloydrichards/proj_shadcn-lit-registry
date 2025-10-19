@@ -1,7 +1,7 @@
 import type { Placement, Strategy } from "@floating-ui/dom";
 import type { Meta, StoryObj } from "@storybook/web-components-vite";
 import { html } from "lit";
-import "../button";
+import "../button/button.js";
 import "./popover";
 import type { Popover } from "./popover.js";
 

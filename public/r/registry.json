@@ -47,11 +47,11 @@
       "dependencies": ["lucide-static"],
       "files": [
         {
-          "path": "registry/ui/button.ts",
+          "path": "registry/ui/button/button.ts",
           "type": "registry:ui"
         },
         {
-          "path": "registry/ui/button.stories.ts",
+          "path": "registry/ui/button/button.stories.ts",
           "type": "registry:ui"
         }
       ]

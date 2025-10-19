@@ -1,4 +1,4 @@
-import "./button";
+import "../button";
 import type { Meta, StoryObj } from "@storybook/web-components-vite";
 import type { TemplateResult } from "lit";
 import { html } from "lit";
