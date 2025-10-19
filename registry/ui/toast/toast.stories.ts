@@ -1,8 +1,8 @@
-import "./toast";
-import "../button/button";
 import type { Meta, StoryObj } from "@storybook/web-components-vite";
 import { html } from "lit";
-import { toast, type ToastOptions, type ToastType } from "./toast";
+import "../button/button";
+import "./toast";
+import { type ToastOptions, type ToastType, toast } from "./toast";
 
 type ToastArgs = {
   message: string;

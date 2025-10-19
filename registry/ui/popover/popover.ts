@@ -1,15 +1,15 @@
-import { html, LitElement, type PropertyValues, css } from "lit";
-import { customElement, property, query, state } from "lit/decorators.js";
 import {
   arrow,
   autoUpdate,
   computePosition,
   flip,
   offset,
-  shift,
   type Placement,
   type Strategy,
+  shift,
 } from "@floating-ui/dom";
+import { css, html, LitElement, type PropertyValues } from "lit";
+import { customElement, property, query, state } from "lit/decorators.js";
 import { TW } from "@/lib/tailwindMixin";
 import { cn } from "@/lib/utils";
 
