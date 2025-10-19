@@ -70,7 +70,7 @@ const Home = async () => {
                         },
                         registries: {
                           "@lit":
-                            "https://lit-registry.lloydrichards.dev/v2/r/{name}.json",
+                            "https://lit-registry.lloydrichards.dev/r/{name}.json",
                         },
                       },
                       null,

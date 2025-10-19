@@ -41,7 +41,7 @@ Ensure you have the shadcn CLI installed in your project. If not, create a
     "hooks": "@/hooks"
   },
   "registries": {
-    "@lit": "https://lit-registry.lloydrichards.dev/v2/r/{name}.json"
+    "@lit": "https://lit-registry.lloydrichards.dev/r/{name}.json"
   }
 }
 ```
