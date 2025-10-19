@@ -7,8 +7,12 @@
     "build": "next build && bun run storybook:build",
     "start": "next start",
     "lint": "biome check",
+    "type-check": "tsc --noEmit",
     "format": "npx prettier --write 'registry/**/*.ts' && biome format --write",
+    "format:check": "biome format",
     "test": "vitest run",
+    "test:unit": "vitest run --project=unit",
+    "test:storybook": "vitest run --project=storybook",
     "registry:build": "shadcn build",
     "storybook": "storybook dev --no-open -p 6006",
     "storybook:build": "storybook build -o public/storybook"
