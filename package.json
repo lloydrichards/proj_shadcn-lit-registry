@@ -9,9 +9,9 @@
     "lint": "biome check",
     "format": "npx prettier --write 'registry/**/*.ts' && biome format --write",
     "test": "vitest run",
-    "registry:build": "shadcn build -o public/storybook",
-    "storybook": "storybook dev -p 6006",
-    "storybook:build": "storybook build"
+    "registry:build": "shadcn build",
+    "storybook": "storybook dev --no-open -p 6006",
+    "storybook:build": "storybook build -o public/storybook"
   },
   "dependencies": {
     "@radix-ui/react-navigation-menu": "^1.2.14",

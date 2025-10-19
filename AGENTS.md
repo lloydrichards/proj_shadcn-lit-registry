@@ -231,6 +231,72 @@ render() {
 }
 ```
 
+### Host Class Forwarding Pattern
+
+**CRITICAL**: When creating components that wrap content in a shadow DOM element, 
+you **must** forward classes from the host element to the inner element using `this.className`.
+This allows users to apply utility classes (like `w-96`, `max-w-md`, etc.) to the component.
+
+**Why this is needed:**
+- Tailwind utility classes applied to the custom element host (e.g., `<ui-card class="w-96">`)
+  cannot be styled by Tailwind CSS inside the shadow DOM
+- Shadow DOM styles are isolated and cannot access classes on the host element
+- The solution is to copy `this.className` to the inner wrapper element
+
+**Pattern:**
+
+```typescript
+import { cn } from "@/lib/utils";
+
+@customElement("ui-my-component")
+export class MyComponent extends TW(LitElement) {
+  render() {
+    return html`
+      <div class=${cn("base-styles", this.className)}>
+        <slot></slot>
+      </div>
+    `;
+  }
+}
+```
+
+**Example - Before (broken):**
+
+```typescript
+// ❌ User's width class won't work
+render() {
+  return html`
+    <div class="bg-card rounded-xl border">
+      <slot></slot>
+    </div>
+  `;
+}
+// Usage: <ui-card class="w-96"> - w-96 has NO effect
+```
+
+**Example - After (working):**
+
+```typescript
+// ✅ User's width class is forwarded to inner div
+render() {
+  return html`
+    <div class=${cn("bg-card rounded-xl border", this.className)}>
+      <slot></slot>
+    </div>
+  `;
+}
+// Usage: <ui-card class="w-96"> - w-96 works correctly
+```
+
+**When to apply this pattern:**
+- ALL components that render a wrapper element in shadow DOM
+- Components where users might want to apply layout classes (width, height, margin, etc.)
+- Both parent components and sub-components (e.g., `ui-card`, `ui-card-header`, etc.)
+
+**When NOT to apply:**
+- Components using `display: contents` (classes apply directly to slotted content)
+- Components that render `<slot></slot>` directly without a wrapper
+
 ### Dark Mode
 
 **Setup (registry/styles/tailwind.global.css):**

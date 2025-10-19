@@ -74,6 +74,26 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "card",
+      "type": "registry:component",
+      "title": "Card",
+      "description": "A card component built with Lit and styled using Tailwind CSS. Includes subcomponents for header, title, description, action, content, and footer.",
+      "categories": ["ui", "card", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/button"],
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/ui/card/card.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/card/card.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
