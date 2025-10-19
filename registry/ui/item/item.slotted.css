@@ -1,0 +1,27 @@
+@reference "../../styles/tailwind.global.css";
+
+@layer base {
+  ::slotted([slot="header"]) {
+    @apply w-full;
+  }
+
+  ::slotted([slot="title"]) {
+    @apply font-medium leading-none m-0;
+  }
+
+  ::slotted([slot="description"]) {
+    @apply text-muted-foreground text-sm m-0;
+  }
+
+  ::slotted([slot="media"]) {
+    @apply flex shrink-0 items-center justify-center;
+  }
+
+  ::slotted([slot="actions"]) {
+    @apply flex shrink-0 items-center gap-2;
+  }
+
+  ::slotted([slot="footer"]) {
+    @apply w-full flex items-center;
+  }
+}

@@ -134,6 +134,30 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "item",
+      "type": "registry:component",
+      "title": "Item",
+      "description": "A versatile item component using named slots for flexible content composition. Includes group and separator components for organizing lists.",
+      "categories": ["ui", "list", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/button"],
+      "dependencies": ["lucide-static"],
+      "files": [
+        {
+          "path": "registry/ui/item/item.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/item/item.stories.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/item/item.slotted.css",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

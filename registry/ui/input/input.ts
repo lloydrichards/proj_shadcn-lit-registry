@@ -38,7 +38,7 @@ export class Input extends TwLitElement {
         detail: { value: target.value },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 }
