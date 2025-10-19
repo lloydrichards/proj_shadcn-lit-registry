@@ -1,4 +1,5 @@
 import type { Preview } from "@storybook/web-components-vite";
+import "../registry/styles/tailwind.global.css";
 
 const preview: Preview = {
   parameters: {

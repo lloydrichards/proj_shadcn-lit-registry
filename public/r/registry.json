@@ -158,6 +158,26 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "popover",
+      "type": "registry:component",
+      "title": "Popover",
+      "description": "A popover component built with Lit and styled using Tailwind CSS. Uses Floating UI for positioning with support for flip, shift, and arrow options.",
+      "categories": ["ui", "popover", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/button"],
+      "dependencies": ["@floating-ui/dom"],
+      "files": [
+        {
+          "path": "registry/ui/popover/popover.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/popover/popover.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
