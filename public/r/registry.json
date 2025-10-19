@@ -295,6 +295,29 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "table",
+      "type": "registry:component",
+      "title": "Table",
+      "description": "A responsive table component for displaying tabular data. Uses a simple wrapper component with CSS-based styling for native HTML table elements.",
+      "categories": ["ui", "table", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/ui/table/table.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/table/table.stories.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/table/table.css",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
