@@ -8,9 +8,7 @@ const meta: Meta = {
   tags: ["autodocs"],
   render: () => html`
     <ui-dropdown-menu>
-      <ui-dropdown-menu-trigger slot="trigger">
-        Open Menu
-      </ui-dropdown-menu-trigger>
+      <ui-dropdown-menu-trigger slot="trigger"> Open </ui-dropdown-menu-trigger>
 
       <ui-dropdown-menu-content slot="content">
         <ui-dropdown-menu-item>Profile</ui-dropdown-menu-item>
@@ -20,6 +18,9 @@ const meta: Meta = {
       </ui-dropdown-menu-content>
     </ui-dropdown-menu>
   `,
+  parameters: {
+    layout: "centered",
+  },
 };
 
 export default meta;

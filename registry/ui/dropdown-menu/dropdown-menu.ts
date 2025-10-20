@@ -7,7 +7,7 @@ import {
   state,
 } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import { Check, ChevronDown, ChevronRight, Circle } from "lucide-static";
+import { Check, ChevronRight, Circle } from "lucide-static";
 import { TW } from "@/registry/lib/tailwindMixin";
 import { cn } from "@/registry/lib/utils";
 import "@/registry/ui/popover/popover";
@@ -185,9 +185,6 @@ export class DropdownMenuTrigger
         @click=${this.handleClick}
       >
         <slot></slot>
-        <span class="ml-2 opacity-50" aria-hidden="true">
-          ${unsafeSVG(ChevronDown)}
-        </span>
       </button>
     `;
   }
@@ -213,7 +210,7 @@ export class DropdownMenuContent
   @property({ type: Number }) alignOffset = 0;
   @property({ type: Boolean }) loop = false;
 
-  @state() private isOpen = false;
+  @state() protected isOpen = false;
   @state() private highlightedIndex = -1;
   @state() private typeaheadString = "";
   private typeaheadTimeout?: number;
@@ -611,18 +608,26 @@ export class DropdownMenuSub
   @query("ui-dropdown-menu-sub-trigger") triggerElement?: HTMLElement;
 
   private hoverTimeout?: number;
+  private closeTimeout?: number;
 
   override connectedCallback() {
     super.connectedCallback();
     this.addEventListener("sub-trigger-click", this.handleTriggerClick);
     this.addEventListener("sub-trigger-mouseenter", this.handleTriggerHover);
+    this.addEventListener("sub-trigger-mouseleave", this.handleTriggerLeave);
+    this.addEventListener("sub-content-mouseenter", this.handleContentEnter);
+    this.addEventListener("sub-content-mouseleave", this.handleContentLeave);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     clearTimeout(this.hoverTimeout);
+    clearTimeout(this.closeTimeout);
     this.removeEventListener("sub-trigger-click", this.handleTriggerClick);
     this.removeEventListener("sub-trigger-mouseenter", this.handleTriggerHover);
+    this.removeEventListener("sub-trigger-mouseleave", this.handleTriggerLeave);
+    this.removeEventListener("sub-content-mouseenter", this.handleContentEnter);
+    this.removeEventListener("sub-content-mouseleave", this.handleContentLeave);
   }
 
   private handleTriggerClick = (e: Event) => {
@@ -632,9 +637,28 @@ export class DropdownMenuSub
 
   private handleTriggerHover = () => {
     clearTimeout(this.hoverTimeout);
+    clearTimeout(this.closeTimeout);
     this.hoverTimeout = window.setTimeout(() => {
       this.open = true;
     }, 200);
+  };
+
+  private handleTriggerLeave = () => {
+    clearTimeout(this.hoverTimeout);
+    this.closeTimeout = window.setTimeout(() => {
+      this.open = false;
+    }, 300);
+  };
+
+  private handleContentEnter = () => {
+    clearTimeout(this.closeTimeout);
+  };
+
+  private handleContentLeave = () => {
+    clearTimeout(this.closeTimeout);
+    this.closeTimeout = window.setTimeout(() => {
+      this.open = false;
+    }, 300);
   };
 
   override render() {
@@ -643,7 +667,8 @@ export class DropdownMenuSub
         .active=${this.open}
         .anchor=${this.triggerElement}
         placement="right-start"
-        .distance=${0}
+        strategy="fixed"
+        .distance=${4}
         .skidding=${-4}
         .flip=${true}
         .shift=${true}
@@ -699,6 +724,14 @@ export class DropdownMenuSubTrigger
 
   private handleMouseLeave = () => {
     this.highlighted = false;
+    if (!this.disabled) {
+      this.dispatchEvent(
+        new CustomEvent("sub-trigger-mouseleave", {
+          bubbles: true,
+          composed: true,
+        }),
+      );
+    }
   };
 
   override render() {
@@ -730,7 +763,51 @@ export class DropdownMenuSubTrigger
 }
 
 @customElement("ui-dropdown-menu-sub-content")
-export class DropdownMenuSubContent extends DropdownMenuContent {}
+export class DropdownMenuSubContent extends DropdownMenuContent {
+  override connectedCallback() {
+    super.connectedCallback();
+    const sub = this.closest("ui-dropdown-menu-sub");
+    if (sub) {
+      const observer = new MutationObserver(() => {
+        this.isOpen = sub.open;
+      });
+      observer.observe(sub, { attributes: true, attributeFilter: ["open"] });
+      this.isOpen = sub.open;
+    }
+  }
+
+  private handleMouseEnter = () => {
+    this.dispatchEvent(
+      new CustomEvent("sub-content-mouseenter", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  };
+
+  private handleMouseLeave = () => {
+    this.dispatchEvent(
+      new CustomEvent("sub-content-mouseleave", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  };
+
+  override render() {
+    const parentRender = super.render();
+    if (parentRender === nothing) return nothing;
+
+    return html`
+      <div
+        @mouseenter=${this.handleMouseEnter}
+        @mouseleave=${this.handleMouseLeave}
+      >
+        ${parentRender}
+      </div>
+    `;
+  }
+}
 
 @customElement("ui-dropdown-menu-separator")
 export class DropdownMenuSeparator extends TW(LitElement) {

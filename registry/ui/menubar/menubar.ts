@@ -373,7 +373,7 @@ export class MenubarContent
   @property({ type: Number }) alignOffset = 0;
   @property({ type: Boolean }) loop = false;
 
-  @state() private isOpen = false;
+  @state() protected isOpen = false;
   @state() private highlightedIndex = -1;
   @state() private typeaheadString = "";
   private typeaheadTimeout?: number;
@@ -786,18 +786,26 @@ export class MenubarSub extends TW(LitElement) implements MenubarSubProperties {
   @query("ui-menubar-sub-trigger") triggerElement?: HTMLElement;
 
   private hoverTimeout?: number;
+  private closeTimeout?: number;
 
   override connectedCallback() {
     super.connectedCallback();
     this.addEventListener("sub-trigger-click", this.handleTriggerClick);
     this.addEventListener("sub-trigger-mouseenter", this.handleTriggerHover);
+    this.addEventListener("sub-trigger-mouseleave", this.handleTriggerLeave);
+    this.addEventListener("sub-content-mouseenter", this.handleContentEnter);
+    this.addEventListener("sub-content-mouseleave", this.handleContentLeave);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     clearTimeout(this.hoverTimeout);
+    clearTimeout(this.closeTimeout);
     this.removeEventListener("sub-trigger-click", this.handleTriggerClick);
     this.removeEventListener("sub-trigger-mouseenter", this.handleTriggerHover);
+    this.removeEventListener("sub-trigger-mouseleave", this.handleTriggerLeave);
+    this.removeEventListener("sub-content-mouseenter", this.handleContentEnter);
+    this.removeEventListener("sub-content-mouseleave", this.handleContentLeave);
   }
 
   private handleTriggerClick = (e: Event) => {
@@ -807,9 +815,28 @@ export class MenubarSub extends TW(LitElement) implements MenubarSubProperties {
 
   private handleTriggerHover = () => {
     clearTimeout(this.hoverTimeout);
+    clearTimeout(this.closeTimeout);
     this.hoverTimeout = window.setTimeout(() => {
       this.open = true;
     }, 200);
+  };
+
+  private handleTriggerLeave = () => {
+    clearTimeout(this.hoverTimeout);
+    this.closeTimeout = window.setTimeout(() => {
+      this.open = false;
+    }, 300);
+  };
+
+  private handleContentEnter = () => {
+    clearTimeout(this.closeTimeout);
+  };
+
+  private handleContentLeave = () => {
+    clearTimeout(this.closeTimeout);
+    this.closeTimeout = window.setTimeout(() => {
+      this.open = false;
+    }, 300);
   };
 
   override render() {
@@ -818,7 +845,8 @@ export class MenubarSub extends TW(LitElement) implements MenubarSubProperties {
         .active=${this.open}
         .anchor=${this.triggerElement}
         placement="right-start"
-        .distance=${0}
+        strategy="fixed"
+        .distance=${4}
         .skidding=${-4}
         .flip=${true}
         .shift=${true}
@@ -874,6 +902,14 @@ export class MenubarSubTrigger
 
   private handleMouseLeave = () => {
     this.highlighted = false;
+    if (!this.disabled) {
+      this.dispatchEvent(
+        new CustomEvent("sub-trigger-mouseleave", {
+          bubbles: true,
+          composed: true,
+        }),
+      );
+    }
   };
 
   override render() {
@@ -905,7 +941,51 @@ export class MenubarSubTrigger
 }
 
 @customElement("ui-menubar-sub-content")
-export class MenubarSubContent extends MenubarContent {}
+export class MenubarSubContent extends MenubarContent {
+  override connectedCallback() {
+    super.connectedCallback();
+    const sub = this.closest("ui-menubar-sub");
+    if (sub) {
+      const observer = new MutationObserver(() => {
+        this.isOpen = sub.open;
+      });
+      observer.observe(sub, { attributes: true, attributeFilter: ["open"] });
+      this.isOpen = sub.open;
+    }
+  }
+
+  private handleMouseEnter = () => {
+    this.dispatchEvent(
+      new CustomEvent("sub-content-mouseenter", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  };
+
+  private handleMouseLeave = () => {
+    this.dispatchEvent(
+      new CustomEvent("sub-content-mouseleave", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  };
+
+  override render() {
+    const parentRender = super.render();
+    if (parentRender === nothing) return nothing;
+
+    return html`
+      <div
+        @mouseenter=${this.handleMouseEnter}
+        @mouseleave=${this.handleMouseLeave}
+      >
+        ${parentRender}
+      </div>
+    `;
+  }
+}
 
 @customElement("ui-menubar-separator")
 export class MenubarSeparator extends TW(LitElement) {
