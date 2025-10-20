@@ -9,7 +9,7 @@
   "files": [
     {
       "path": "registry/ui/table/table.ts",
-      "content": "import { adoptStyles, html, LitElement, unsafeCSS } from \"lit\";\nimport { customElement } from \"lit/decorators.js\";\nimport tableSlottedCss from \"./table.css?inline\";\nimport { tailwind } from \"@/registry/lib/tailwindMixin\";\n\nconst tableStyles = unsafeCSS(tableSlottedCss);\n\n@customElement(\"ui-table\")\nexport class Table extends LitElement {\n  override connectedCallback() {\n    super.connectedCallback();\n    if (this.shadowRoot) {\n      adoptStyles(this.shadowRoot, [tailwind, tableStyles]);\n    }\n  }\n\n  override render() {\n    return html`<slot></slot>`;\n  }\n}\n\ndeclare global {\n  interface HTMLElementTagNameMap {\n    \"ui-table\": Table;\n  }\n}\n",
+      "content": "import { adoptStyles, html, LitElement, unsafeCSS } from \"lit\";\nimport { customElement } from \"lit/decorators.js\";\nimport { tailwind } from \"@/registry/lib/tailwindMixin\";\nimport tableSlottedCss from \"./table.css?inline\";\n\nconst tableStyles = unsafeCSS(tableSlottedCss);\n\n@customElement(\"ui-table\")\nexport class Table extends LitElement {\n  override connectedCallback() {\n    super.connectedCallback();\n    if (this.shadowRoot) {\n      adoptStyles(this.shadowRoot, [tailwind, tableStyles]);\n    }\n  }\n\n  override render() {\n    return html`<slot></slot>`;\n  }\n}\n\ndeclare global {\n  interface HTMLElementTagNameMap {\n    \"ui-table\": Table;\n  }\n}\n",
       "type": "registry:ui"
     },
     {

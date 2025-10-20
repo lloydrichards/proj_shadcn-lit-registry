@@ -8,15 +8,45 @@ import {
 } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, ChevronRight, Circle } from "lucide-static";
+
 import { TW } from "@/registry/lib/tailwindMixin";
 import { cn } from "@/registry/lib/utils";
 import "@/registry/ui/popover/popover";
 
-export interface ContextMenuProperties {
+export type ContextMenuProperties = {
   open?: boolean;
   modal?: boolean;
   disabled?: boolean;
+};
+
+type VirtualAnchor = {
+  getBoundingClientRect(): DOMRect;
+};
+
+type AnchorElement = Element | VirtualAnchor;
+
+export type MenuItemWithProperties = HTMLElement & {
+  disabled?: boolean;
+  highlighted?: boolean;
+  value?: string;
+  checked?: boolean;
+};
+
+export function isMenuItemElement(
+  element: HTMLElement,
+): element is MenuItemWithProperties {
+  const validTags = [
+    "UI-CONTEXT-MENU-ITEM",
+    "UI-CONTEXT-MENU-CHECKBOX-ITEM",
+    "UI-CONTEXT-MENU-RADIO-ITEM",
+    "UI-CONTEXT-MENU-SUB-TRIGGER",
+  ];
+  return validTags.includes(element.tagName);
 }
+
+const isNode = (value: EventTarget | null): value is Node => {
+  return value instanceof Node;
+};
 
 @customElement("ui-context-menu")
 export class ContextMenu
@@ -35,17 +65,18 @@ export class ContextMenu
 
   @state() private cursorX = 0;
   @state() private cursorY = 0;
-  @state() private virtualAnchor?: { getBoundingClientRect: () => DOMRect };
+  @state() private virtualAnchor?: AnchorElement;
 
   @query("ui-popover") popoverElement?: HTMLElement;
 
   private clickAwayHandler = (e: MouseEvent) => {
     if (!this.open) return;
 
-    const target = e.target as Node;
+    if (!isNode(e.target)) return;
 
-    if (this.querySelector("ui-context-menu-content")?.contains(target)) return;
-    if (this.querySelector("ui-popover")?.contains(target)) return;
+    if (this.querySelector("ui-context-menu-content")?.contains(e.target))
+      return;
+    if (this.querySelector("ui-popover")?.contains(e.target)) return;
 
     const triggerSlot = this.shadowRoot?.querySelector<HTMLSlotElement>(
       'slot[name="trigger"]',
@@ -53,7 +84,7 @@ export class ContextMenu
     if (triggerSlot) {
       const assignedElements = triggerSlot.assignedElements({ flatten: true });
       for (const el of assignedElements) {
-        if (el.contains(target)) return;
+        if (el.contains(e.target)) return;
       }
     }
 
@@ -205,14 +236,10 @@ export class ContextMenuContent
     }
   }
 
-  private getNavigableItems() {
+  private getNavigableItems(): MenuItemWithProperties[] {
     return this.items.filter(
-      (item) =>
-        (item.tagName === "UI-CONTEXT-MENU-ITEM" ||
-          item.tagName === "UI-CONTEXT-MENU-CHECKBOX-ITEM" ||
-          item.tagName === "UI-CONTEXT-MENU-RADIO-ITEM" ||
-          item.tagName === "UI-CONTEXT-MENU-SUB-TRIGGER") &&
-        !(item as any).disabled,
+      (item): item is MenuItemWithProperties =>
+        isMenuItemElement(item) && !item.disabled,
     );
   }
 
@@ -282,9 +309,9 @@ export class ContextMenuContent
     }, 500);
   }
 
-  private updateHighlighted(items: HTMLElement[]) {
+  private updateHighlighted(items: MenuItemWithProperties[]) {
     items.forEach((item, index) => {
-      (item as any).highlighted = index === this.highlightedIndex;
+      item.highlighted = index === this.highlightedIndex;
     });
   }
 
@@ -456,18 +483,12 @@ export class ContextMenuRadioGroup
 
   override connectedCallback() {
     super.connectedCallback();
-    this.addEventListener(
-      "radio-select",
-      this.handleRadioSelect as EventListener,
-    );
+    this.addEventListener("radio-select", this.handleRadioSelect);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.removeEventListener(
-      "radio-select",
-      this.handleRadioSelect as EventListener,
-    );
+    this.removeEventListener("radio-select", this.handleRadioSelect);
   }
 
   override updated(changedProperties: PropertyValues) {
@@ -485,7 +506,8 @@ export class ContextMenuRadioGroup
     });
   }
 
-  private handleRadioSelect = (e: CustomEvent) => {
+  private handleRadioSelect = (e: Event) => {
+    if (!(e instanceof CustomEvent)) return;
     e.stopPropagation();
     this.value = e.detail.value;
     this.dispatchEvent(

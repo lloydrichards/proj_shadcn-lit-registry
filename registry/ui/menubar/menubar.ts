@@ -1,3 +1,6 @@
+import { TW } from "@/registry/lib/tailwindMixin";
+import { cn } from "@/registry/lib/utils";
+import "@/registry/ui/popover/popover";
 import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import {
   customElement,
@@ -8,13 +11,33 @@ import {
 } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, ChevronRight, Circle } from "lucide-static";
-import { TW } from "@/registry/lib/tailwindMixin";
-import { cn } from "@/registry/lib/utils";
-import "@/registry/ui/popover/popover";
 
 export interface MenubarProperties {
   value?: string;
 }
+
+export type MenuItemWithProperties = HTMLElement & {
+  disabled?: boolean;
+  highlighted?: boolean;
+  value?: string;
+  checked?: boolean;
+};
+
+export function isMenuItemElement(
+  element: HTMLElement,
+): element is MenuItemWithProperties {
+  const validTags = [
+    "UI-MENUBAR-ITEM",
+    "UI-MENUBAR-CHECKBOX-ITEM",
+    "UI-MENUBAR-RADIO-ITEM",
+    "UI-MENUBAR-SUB-TRIGGER",
+  ];
+  return validTags.includes(element.tagName);
+}
+
+const isNode = (value: EventTarget | null): value is Node => {
+  return value instanceof Node;
+};
 
 @customElement("ui-menubar")
 export class Menubar extends TW(LitElement) implements MenubarProperties {
@@ -25,7 +48,7 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
   private menus!: MenubarMenu[];
 
   private clickAwayHandler = (e: MouseEvent) => {
-    if (!this.contains(e.target as Node)) {
+    if (isNode(e.target) && !this.contains(e.target)) {
       this.value = "";
       this.hovering = false;
     }
@@ -85,7 +108,8 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
   }
 
   private handleTriggerClick = (e: CustomEvent) => {
-    const trigger = e.target as HTMLElement;
+    if (!(e.target instanceof HTMLElement)) return;
+    const trigger = e.target;
     const menu = trigger.closest("ui-menubar-menu");
     if (!menu) return;
 
@@ -100,7 +124,8 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
 
   private handleTriggerHover = (e: CustomEvent) => {
     if (this.hovering && this.value !== "") {
-      const trigger = e.target as HTMLElement;
+      if (!(e.target instanceof HTMLElement)) return;
+      const trigger = e.target;
       const menu = trigger.closest("ui-menubar-menu");
       if (menu) {
         this.value = menu.value;
@@ -114,7 +139,9 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
   };
 
   private handleKeyDown = (e: KeyboardEvent) => {
-    const menus = this.menus.filter((m) => !(m as any).disabled);
+    const menus = this.menus.filter(
+      (m) => !("disabled" in m && (m as { disabled?: boolean }).disabled),
+    );
     const currentIndex = menus.findIndex((m) => m.value === this.value);
 
     switch (e.key) {
@@ -177,7 +204,9 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
   }
 
   private updateRovingTabindex() {
-    const menus = this.menus.filter((m) => !(m as any).disabled);
+    const menus = this.menus.filter(
+      (m) => !("disabled" in m && (m as { disabled?: boolean }).disabled),
+    );
     const openIndex = menus.findIndex((m) => m.open);
     const focusIndex = openIndex >= 0 ? openIndex : 0;
 
@@ -364,15 +393,8 @@ export class MenubarContent
     }
   }
 
-  private getNavigableItems() {
-    return this.items.filter(
-      (item) =>
-        (item.tagName === "UI-MENUBAR-ITEM" ||
-          item.tagName === "UI-MENUBAR-CHECKBOX-ITEM" ||
-          item.tagName === "UI-MENUBAR-RADIO-ITEM" ||
-          item.tagName === "UI-MENUBAR-SUB-TRIGGER") &&
-        !(item as any).disabled,
-    );
+  private getNavigableItems(): MenuItemWithProperties[] {
+    return this.items.filter((item) => isMenuItemElement(item));
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
@@ -463,9 +485,9 @@ export class MenubarContent
     }, 500);
   }
 
-  private updateHighlighted(items: HTMLElement[]) {
+  private updateHighlighted(items: MenuItemWithProperties[]) {
     items.forEach((item, index) => {
-      (item as any).highlighted = index === this.highlightedIndex;
+      item.highlighted = index === this.highlightedIndex;
     });
   }
 
@@ -657,11 +679,14 @@ export class MenubarRadioGroup
   private updateRadioItems() {
     const items = this.querySelectorAll("ui-menubar-radio-item");
     items.forEach((item) => {
-      item.checked = (item as any).value === this.value;
+      if ("value" in item && typeof item.value === "string") {
+        item.checked = item.value === this.value;
+      }
     });
   }
 
-  private handleRadioSelect = (e: CustomEvent) => {
+  private handleRadioSelect = (e: Event) => {
+    if (!(e instanceof CustomEvent)) return;
     e.stopPropagation();
     this.value = e.detail.value;
     this.dispatchEvent(

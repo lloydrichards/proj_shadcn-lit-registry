@@ -17,6 +17,29 @@ export interface DropdownMenuProperties {
   modal?: boolean;
 }
 
+export type MenuItemWithProperties = HTMLElement & {
+  disabled?: boolean;
+  highlighted?: boolean;
+  value?: string;
+  checked?: boolean;
+};
+
+export function isMenuItemElement(
+  element: HTMLElement,
+): element is MenuItemWithProperties {
+  const validTags = [
+    "UI-DROPDOWN-MENU-ITEM",
+    "UI-DROPDOWN-MENU-CHECKBOX-ITEM",
+    "UI-DROPDOWN-MENU-RADIO-ITEM",
+    "UI-DROPDOWN-MENU-SUB-TRIGGER",
+  ];
+  return validTags.includes(element.tagName);
+}
+
+const isNode = (value: EventTarget | null): value is Node => {
+  return value instanceof Node;
+};
+
 @customElement("ui-dropdown-menu")
 export class DropdownMenu
   extends TW(LitElement)
@@ -38,8 +61,9 @@ export class DropdownMenu
     if (!this.open) return;
     const content = this.querySelector("ui-dropdown-menu-content");
     if (
-      !this.contains(e.target as Node) &&
-      (!content || !content.contains(e.target as Node))
+      isNode(e.target) &&
+      !this.contains(e.target) &&
+      (!content || !content.contains(e.target))
     ) {
       this.open = false;
     }
@@ -209,14 +233,15 @@ export class DropdownMenuContent
     }
   }
 
-  private getNavigableItems() {
+  private getNavigableItems(): MenuItemWithProperties[] {
     return this.items.filter(
-      (item) =>
+      (item): item is MenuItemWithProperties =>
         (item.tagName === "UI-DROPDOWN-MENU-ITEM" ||
           item.tagName === "UI-DROPDOWN-MENU-CHECKBOX-ITEM" ||
           item.tagName === "UI-DROPDOWN-MENU-RADIO-ITEM" ||
           item.tagName === "UI-DROPDOWN-MENU-SUB-TRIGGER") &&
-        !(item as any).disabled,
+        isMenuItemElement(item) &&
+        !item.disabled,
     );
   }
 
@@ -287,9 +312,9 @@ export class DropdownMenuContent
     }, 500);
   }
 
-  private updateHighlighted(items: HTMLElement[]) {
+  private updateHighlighted(items: MenuItemWithProperties[]) {
     items.forEach((item, index) => {
-      (item as any).highlighted = index === this.highlightedIndex;
+      item.highlighted = index === this.highlightedIndex;
     });
   }
 
@@ -456,18 +481,12 @@ export class DropdownMenuRadioGroup
 
   override connectedCallback() {
     super.connectedCallback();
-    this.addEventListener(
-      "radio-select",
-      this.handleRadioSelect as EventListener,
-    );
+    this.addEventListener("radio-select", this.handleRadioSelect);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.removeEventListener(
-      "radio-select",
-      this.handleRadioSelect as EventListener,
-    );
+    this.removeEventListener("radio-select", this.handleRadioSelect);
   }
 
   override updated(changedProperties: PropertyValues) {
@@ -481,20 +500,24 @@ export class DropdownMenuRadioGroup
   private updateRadioItems() {
     const items = this.querySelectorAll("ui-dropdown-menu-radio-item");
     items.forEach((item) => {
-      item.checked = (item as any).value === this.value;
+      if (isMenuItemElement(item) && "value" in item) {
+        item.checked = item.value === this.value;
+      }
     });
   }
 
-  private handleRadioSelect = (e: CustomEvent) => {
-    e.stopPropagation();
-    this.value = e.detail.value;
-    this.dispatchEvent(
-      new CustomEvent("value-change", {
-        detail: { value: this.value },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+  private handleRadioSelect = (e: Event) => {
+    if (e instanceof CustomEvent) {
+      e.stopPropagation();
+      this.value = e.detail.value;
+      this.dispatchEvent(
+        new CustomEvent("value-change", {
+          detail: { value: this.value },
+          bubbles: true,
+          composed: true,
+        }),
+      );
+    }
   };
 
   override render() {

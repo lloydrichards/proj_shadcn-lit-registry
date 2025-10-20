@@ -85,7 +85,7 @@ export class Popover extends TW(LitElement) {
       typeof this.anchor === "object" &&
       "getBoundingClientRect" in this.anchor
     ) {
-      this.anchorEl = this.anchor as any;
+      this.anchorEl = this.anchor;
     } else {
       const slot = this.renderRoot.querySelector<HTMLSlotElement>(
         'slot[name="anchor"]',
