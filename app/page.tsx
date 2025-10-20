@@ -61,6 +61,9 @@ const Home = async () => {
                     code={JSON.stringify(
                       {
                         $schema: "https://ui.shadcn.com/schema.json",
+                        tailwind: {
+                          css: "@/styles/tailwind.global.css",
+                        },
                         aliases: {
                           components: "@/components",
                           utils: "@/lib/utils",

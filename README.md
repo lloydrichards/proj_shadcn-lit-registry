@@ -33,6 +33,9 @@ Ensure you have the shadcn CLI installed in your project. If not, create a
 ```json
 {
   "$schema": "https://ui.shadcn.com/schema.json",
+  "tailwind": {
+    "css": "@/styles/tailwind.global.css"
+  },
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
