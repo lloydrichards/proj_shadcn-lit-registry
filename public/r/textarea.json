@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "textarea",
+  "type": "registry:component",
+  "title": "Textarea",
+  "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+  "description": "Displays a form textarea or a component that looks like a textarea.",
+  "dependencies": [],
+  "files": [
+    {
+      "path": "registry/ui/textarea/textarea.stories.ts",
+      "content": "import type { Meta, StoryObj } from \"@storybook/web-components-vite\";\nimport { html } from \"lit\";\n\ntype TextareaArgs = HTMLTextAreaElement & { children?: string };\n\nconst meta: Meta<TextareaArgs> = {\n  title: \"ui/Textarea\",\n  component: \"textarea\",\n  tags: [\"autodocs\"],\n  argTypes: {\n    placeholder: {\n      control: \"text\",\n      description: \"Placeholder text shown when empty\",\n    },\n    disabled: {\n      control: \"boolean\",\n      description: \"Whether textarea is disabled\",\n    },\n    required: {\n      control: \"boolean\",\n      description: \"Whether textarea is required\",\n    },\n    rows: {\n      control: \"number\",\n      description: \"Number of visible text rows\",\n    },\n    maxLength: {\n      control: \"number\",\n      description: \"Maximum character length\",\n    },\n  },\n  args: {\n    placeholder: \"Type your message here.\",\n    disabled: false,\n    required: false,\n    rows: 3,\n  },\n  parameters: {\n    layout: \"centered\",\n  },\n  render: (args) => html`\n    <textarea\n      placeholder=${args.placeholder}\n      ?disabled=${args.disabled}\n      ?required=${args.required}\n      rows=${args.rows || 3}\n      maxlength=${args.maxLength}\n      class=\"w-96\"\n    ></textarea>\n  `,\n};\n\nexport default meta;\ntype Story = StoryObj<TextareaArgs>;\n\nexport const Default: Story = {};\n\nexport const Disabled: Story = {\n  args: { disabled: true },\n};\n\nexport const WithLabel: Story = {\n  render: (args) => html`\n    <div class=\"grid w-full gap-3\">\n      <ui-label for=\"message\">Your message</ui-label>\n      <textarea\n        id=\"message\"\n        placeholder=${args.placeholder}\n        ?disabled=${args.disabled}\n        class=\"w-96\"\n      ></textarea>\n    </div>\n  `,\n};\n\nexport const WithHelperText: Story = {\n  render: (args) => html`\n    <div class=\"grid w-full gap-3\">\n      <ui-label for=\"message-2\">Your Message</ui-label>\n      <textarea\n        id=\"message-2\"\n        placeholder=${args.placeholder || \"\"}\n        ?disabled=${args.disabled}\n        class=\"w-96\"\n      ></textarea>\n      <p class=\"text-sm text-muted-foreground\">\n        Your message will be copied to the support team.\n      </p>\n    </div>\n  `,\n};\n\nexport const WithCustomRows: Story = {\n  args: {\n    rows: 10,\n  },\n};\n\nexport const WithMaxLength: Story = {\n  args: {\n    maxLength: 500,\n    placeholder: \"Max 500 characters...\",\n  },\n};\n\nexport const NoResize: Story = {\n  render: () => html`\n    <textarea\n      placeholder=\"Type your message here.\"\n      class=\"w-96 resize-none\"\n    ></textarea>\n  `,\n};\n\nexport const CustomStyling: Story = {\n  render: () => html`\n    <textarea\n      placeholder=\"Code here...\"\n      class=\"min-h-[200px] resize-none font-mono w-96\"\n    ></textarea>\n  `,\n};\n",
+      "type": "registry:ui"
+    }
+  ],
+  "css": {
+    "@layer base": {
+      "textarea": {
+        "@apply": "placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive resize-y"
+      }
+    }
+  },
+  "categories": [
+    "ui",
+    "form",
+    "web-component"
+  ]
+}

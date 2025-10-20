@@ -349,6 +349,50 @@
           }
         }
       }
+    },
+    {
+      "name": "label",
+      "type": "registry:component",
+      "title": "Label",
+      "description": "Renders an accessible label associated with controls.",
+      "categories": ["ui", "form", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/ui/label/label.stories.ts",
+          "type": "registry:ui"
+        }
+      ],
+      "css": {
+        "@layer base": {
+          "label": {
+            "@apply": "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          }
+        }
+      }
+    },
+    {
+      "name": "textarea",
+      "type": "registry:component",
+      "title": "Textarea",
+      "description": "Displays a form textarea or a component that looks like a textarea.",
+      "categories": ["ui", "form", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/ui/textarea/textarea.stories.ts",
+          "type": "registry:ui"
+        }
+      ],
+      "css": {
+        "@layer base": {
+          "textarea": {
+            "@apply": "placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive resize-y"
+          }
+        }
+      }
     }
   ]
 }
