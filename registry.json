@@ -431,6 +431,66 @@
           }
         }
       }
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:component",
+      "title": "Dropdown Menu",
+      "description": "Displays a menu to the user—such as a set of actions or functions—triggered by a button. Supports nested submenus, checkbox items, radio groups, keyboard navigation, and accessibility features.",
+      "categories": ["ui", "menu", "dropdown", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/popover"],
+      "dependencies": ["lucide-static", "@floating-ui/dom"],
+      "files": [
+        {
+          "path": "registry/ui/dropdown-menu/dropdown-menu.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/dropdown-menu/dropdown-menu.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "context-menu",
+      "type": "registry:component",
+      "title": "Context Menu",
+      "description": "Displays a menu to the user at the cursor position when right-clicking on a trigger area. Supports checkboxes, radio groups, nested submenus, keyboard navigation, and accessibility features.",
+      "categories": ["ui", "menu", "context-menu", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/popover"],
+      "dependencies": ["lucide-static", "@floating-ui/dom"],
+      "files": [
+        {
+          "path": "registry/ui/context-menu/context-menu.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/context-menu/context-menu.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "menubar",
+      "type": "registry:component",
+      "title": "Menubar",
+      "description": "A visually persistent menu common in desktop applications that provides quick access to a consistent set of commands. Features horizontal keyboard navigation and accessible ARIA attributes.",
+      "categories": ["ui", "navigation", "menu", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/popover"],
+      "dependencies": ["lucide-static", "@floating-ui/dom"],
+      "files": [
+        {
+          "path": "registry/ui/menubar/menubar.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/menubar/menubar.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
