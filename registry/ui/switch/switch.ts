@@ -39,6 +39,14 @@ export class Switch extends TW(LitElement) implements SwitchProperties {
 
   @state() private _checked = false;
 
+  private _labelClickHandler = (e: Event) => {
+    const label = e.currentTarget as HTMLLabelElement;
+    if (label.htmlFor === this.id && !this.disabled) {
+      e.preventDefault();
+      this.handleClick();
+    }
+  };
+
   constructor() {
     super();
     this.internals = this.attachInternals();
@@ -49,6 +57,34 @@ export class Switch extends TW(LitElement) implements SwitchProperties {
     if (this.checked === undefined) {
       this._checked = this.defaultChecked;
     }
+    this._setupLabelDelegation();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._cleanupLabelDelegation();
+  }
+
+  private _setupLabelDelegation() {
+    if (!this.id) return;
+    const root = this.getRootNode() as Document | ShadowRoot;
+    const labels = root.querySelectorAll(
+      `label[for="${this.id}"]`,
+    ) as NodeListOf<HTMLLabelElement>;
+    labels.forEach((label) => {
+      label.addEventListener("click", this._labelClickHandler);
+    });
+  }
+
+  private _cleanupLabelDelegation() {
+    if (!this.id) return;
+    const root = this.getRootNode() as Document | ShadowRoot;
+    const labels = root.querySelectorAll(
+      `label[for="${this.id}"]`,
+    ) as NodeListOf<HTMLLabelElement>;
+    labels.forEach((label) => {
+      label.removeEventListener("click", this._labelClickHandler);
+    });
   }
 
   private get isChecked(): boolean {
@@ -77,17 +113,32 @@ export class Switch extends TW(LitElement) implements SwitchProperties {
     }
   }
 
+  override attributeChangedCallback(
+    name: string,
+    _old: string | null,
+    value: string | null,
+  ) {
+    super.attributeChangedCallback(name, _old, value);
+    if (name === "id" && _old !== value) {
+      this._cleanupLabelDelegation();
+      this._setupLabelDelegation();
+    }
+  }
+
   private handleClick() {
     if (this.disabled) return;
 
+    const newChecked =
+      this.checked !== undefined ? !this.checked : !this._checked;
+
     if (this.checked === undefined) {
-      this._checked = !this._checked;
+      this._checked = newChecked;
     }
 
     this.dispatchEvent(
       new CustomEvent("change", {
         detail: {
-          checked: this.checked !== undefined ? !this.checked : this._checked,
+          checked: newChecked,
         },
         bubbles: true,
         composed: true,
