@@ -57,6 +57,25 @@
       ]
     },
     {
+      "name": "avatar",
+      "type": "registry:component",
+      "title": "Avatar",
+      "description": "An image element with a fallback for representing the user. Built with Lit and styled using Tailwind CSS.",
+      "categories": ["ui", "avatar", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/ui/avatar/avatar.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/avatar/avatar.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "badge",
       "type": "registry:component",
       "title": "Badge",
@@ -91,6 +110,25 @@
         },
         {
           "path": "registry/ui/card/card.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "checkbox",
+      "type": "registry:component",
+      "title": "Checkbox",
+      "description": "A control that allows the user to toggle between checked and not checked. Built with Lit and styled using Tailwind CSS. Supports form integration and indeterminate state.",
+      "categories": ["ui", "form", "checkbox", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": ["lucide-static"],
+      "files": [
+        {
+          "path": "registry/ui/checkbox/checkbox.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/checkbox/checkbox.stories.ts",
           "type": "registry:ui"
         }
       ]
