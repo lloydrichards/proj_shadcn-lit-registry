@@ -1,7 +1,7 @@
 import { adoptStyles, html, LitElement, unsafeCSS } from "lit";
 import { customElement } from "lit/decorators.js";
-import tableSlottedCss from "./table.css?inline";
 import { tailwind } from "@/registry/lib/tailwindMixin";
+import tableSlottedCss from "./table.css?inline";
 
 const tableStyles = unsafeCSS(tableSlottedCss);
 
