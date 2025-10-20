@@ -9,7 +9,7 @@
   "files": [
     {
       "path": "registry/ui/table/table.ts",
-      "content": "import { html, LitElement } from \"lit\";\nimport { customElement } from \"lit/decorators.js\";\nimport tableSlottedCss from \"./table.css?inline\";\n\n// Inject global styles for nested table elements\nlet globalStylesInjected = false;\nfunction injectGlobalTableStyles() {\n  if (globalStylesInjected) return;\n\n  const styleEl = document.createElement(\"style\");\n  styleEl.setAttribute(\"data-component\", \"ui-table\");\n  styleEl.textContent = tableSlottedCss;\n  document.head.appendChild(styleEl);\n\n  globalStylesInjected = true;\n}\n\n@customElement(\"ui-table\")\nexport class Table extends LitElement {\n  override connectedCallback() {\n    super.connectedCallback();\n    injectGlobalTableStyles();\n  }\n\n  override render() {\n    return html`<slot></slot>`;\n  }\n}\n\ndeclare global {\n  interface HTMLElementTagNameMap {\n    \"ui-table\": Table;\n  }\n}\n",
+      "content": "import { adoptStyles, html, LitElement, unsafeCSS } from \"lit\";\nimport { customElement } from \"lit/decorators.js\";\nimport tableSlottedCss from \"./table.css?inline\";\nimport { tailwind } from \"@/registry/lib/tailwindMixin\";\n\nconst tableStyles = unsafeCSS(tableSlottedCss);\n\n@customElement(\"ui-table\")\nexport class Table extends LitElement {\n  override connectedCallback() {\n    super.connectedCallback();\n    if (this.shadowRoot) {\n      adoptStyles(this.shadowRoot, [tailwind, tableStyles]);\n    }\n  }\n\n  override render() {\n    return html`<slot></slot>`;\n  }\n}\n\ndeclare global {\n  interface HTMLElementTagNameMap {\n    \"ui-table\": Table;\n  }\n}\n",
       "type": "registry:ui"
     },
     {
@@ -19,10 +19,38 @@
     },
     {
       "path": "registry/ui/table/table.css",
-      "content": "@reference \"../../styles/tailwind.global.css\";\n\n@layer base {\n  :host {\n    @apply relative w-full overflow-auto block;\n  }\n}\n\n/* Global styles for table elements inside ui-table \n   These must be defined outside Shadow DOM to style nested elements */\n@layer base {\n  ui-table table {\n    @apply w-full caption-bottom text-sm;\n  }\n\n  ui-table thead {\n    @apply [&_tr]:border-b;\n  }\n\n  ui-table tbody {\n    @apply [&_tr:last-child]:border-0;\n  }\n\n  ui-table tfoot {\n    @apply bg-muted/50 border-t font-medium [&>tr]:last:border-b-0;\n  }\n\n  ui-table tr {\n    @apply hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors;\n  }\n\n  ui-table th {\n    @apply text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px];\n  }\n\n  ui-table td {\n    @apply p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px];\n  }\n\n  ui-table caption {\n    @apply text-muted-foreground mt-4 text-sm;\n  }\n}\n",
+      "content": "@reference \"../../styles/tailwind.global.css\";\n\n@layer base {\n  :host {\n    @apply relative w-full overflow-auto block;\n  }\n}\n",
       "type": "registry:ui"
     }
   ],
+  "css": {
+    "@layer base": {
+      "ui-table table": {
+        "@apply": "w-full caption-bottom text-sm"
+      },
+      "ui-table thead": {
+        "@apply": "[&_tr]:border-b"
+      },
+      "ui-table tbody": {
+        "@apply": "[&_tr:last-child]:border-0"
+      },
+      "ui-table tfoot": {
+        "@apply": "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0"
+      },
+      "ui-table tr": {
+        "@apply": "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+      },
+      "ui-table th": {
+        "@apply": "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+      },
+      "ui-table td": {
+        "@apply": "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+      },
+      "ui-table caption": {
+        "@apply": "text-muted-foreground mt-4 text-sm"
+      }
+    }
+  },
   "categories": [
     "ui",
     "table",
