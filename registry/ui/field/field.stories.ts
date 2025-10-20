@@ -1,5 +1,4 @@
 import "./field";
-import "../input/input";
 import type { Meta, StoryObj } from "@storybook/web-components-vite";
 import { html } from "lit";
 
@@ -28,11 +27,11 @@ export const WithInput: Story = {
       <ui-field-group>
         <ui-field>
           <label for="username" class="text-sm font-medium">Username</label>
-          <ui-input
+          <input
             id="username"
             type="text"
             placeholder="Max Leiter"
-          ></ui-input>
+          ></input>
           <ui-field-description>
             Choose a unique username for your account.
           </ui-field-description>
@@ -51,11 +50,11 @@ export const WithError: Story = {
       <ui-field-group>
         <ui-field .invalid=${true}>
           <label for="email-error" class="text-sm font-medium">Email</label>
-          <ui-input
+          <input
             id="email-error"
             type="email"
             placeholder="email@example.com"
-          ></ui-input>
+          ></input>
           <ui-field-error>Please enter a valid email address.</ui-field-error>
         </ui-field>
       </ui-field-group>
@@ -76,20 +75,20 @@ export const WithFieldset: Story = {
       <ui-field-group>
         <ui-field>
           <label for="street" class="text-sm font-medium">Street Address</label>
-          <ui-input
+          <input
             id="street"
             type="text"
             placeholder="123 Main St"
-          ></ui-input>
+          ></input>
         </ui-field>
         <div class="grid grid-cols-2 gap-4">
           <ui-field>
             <label for="city" class="text-sm font-medium">City</label>
-            <ui-input id="city" type="text" placeholder="New York"></ui-input>
+            <input id="city" type="text" placeholder="New York"></input>
           </ui-field>
           <ui-field>
             <label for="zip" class="text-sm font-medium">Postal Code</label>
-            <ui-input id="zip" type="text" placeholder="90502"></ui-input>
+            <input id="zip" type="text" placeholder="90502"></input>
           </ui-field>
         </div>
       </ui-field-group>

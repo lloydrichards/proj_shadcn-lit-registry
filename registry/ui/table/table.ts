@@ -1,25 +1,17 @@
-import { html, LitElement } from "lit";
+import { adoptStyles, html, LitElement, unsafeCSS } from "lit";
 import { customElement } from "lit/decorators.js";
 import tableSlottedCss from "./table.css?inline";
+import { tailwind } from "@/registry/lib/tailwindMixin";
 
-// Inject global styles for nested table elements
-let globalStylesInjected = false;
-function injectGlobalTableStyles() {
-  if (globalStylesInjected) return;
-
-  const styleEl = document.createElement("style");
-  styleEl.setAttribute("data-component", "ui-table");
-  styleEl.textContent = tableSlottedCss;
-  document.head.appendChild(styleEl);
-
-  globalStylesInjected = true;
-}
+const tableStyles = unsafeCSS(tableSlottedCss);
 
 @customElement("ui-table")
 export class Table extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
-    injectGlobalTableStyles();
+    if (this.shadowRoot) {
+      adoptStyles(this.shadowRoot, [tailwind, tableStyles]);
+    }
   }
 
   override render() {

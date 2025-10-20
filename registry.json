@@ -126,14 +126,17 @@
       "dependencies": [],
       "files": [
         {
-          "path": "registry/ui/input/input.ts",
-          "type": "registry:ui"
-        },
-        {
           "path": "registry/ui/input/input.stories.ts",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "css": {
+        "@layer base": {
+          "input": {
+            "@apply": "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+          }
+        }
+      }
     },
     {
       "name": "item",
@@ -317,7 +320,35 @@
           "path": "registry/ui/table/table.css",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "css": {
+        "@layer base": {
+          "ui-table table": {
+            "@apply": "w-full caption-bottom text-sm"
+          },
+          "ui-table thead": {
+            "@apply": "[&_tr]:border-b"
+          },
+          "ui-table tbody": {
+            "@apply": "[&_tr:last-child]:border-0"
+          },
+          "ui-table tfoot": {
+            "@apply": "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0"
+          },
+          "ui-table tr": {
+            "@apply": "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+          },
+          "ui-table th": {
+            "@apply": "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+          },
+          "ui-table td": {
+            "@apply": "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+          },
+          "ui-table caption": {
+            "@apply": "text-muted-foreground mt-4 text-sm"
+          }
+        }
+      }
     }
   ]
 }

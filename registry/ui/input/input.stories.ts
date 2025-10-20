@@ -1,20 +1,15 @@
-import "./input";
 import "../button/button";
 import type { Meta, StoryObj } from "@storybook/web-components-vite";
 import { html } from "lit";
 
-type InputArgs = {
-  type?: string;
-  placeholder?: string;
-  disabled?: boolean;
-};
+type InputArgs = HTMLInputElement;
 
 /**
  * Displays a form input field or a component that looks like an input field.
  */
 const meta: Meta<InputArgs> = {
   title: "ui/Input",
-  component: "ui-input",
+  component: "input",
   tags: ["autodocs"],
   argTypes: {
     type: {
@@ -36,12 +31,12 @@ const meta: Meta<InputArgs> = {
     layout: "centered",
   },
   render: (args) =>
-    html`<ui-input
-      type=${args.type || "text"}
-      placeholder=${args.placeholder || ""}
+    html`<input
+      type=${args.type as any}
+      placeholder=${args.placeholder}
       ?disabled=${args.disabled}
       class="w-96"
-    ></ui-input>`,
+    ></input>`,
 };
 
 export default meta;
@@ -71,13 +66,13 @@ export const WithLabel: Story = {
       <label for="email" class="text-sm font-medium">
         ${args.placeholder}
       </label>
-      <ui-input
+      <input
         id="email"
-        type=${args.type || "text"}
-        placeholder=${args.placeholder || ""}
+        type=${args.type as any}
+        placeholder=${args.placeholder}
         ?disabled=${args.disabled}
         class="w-96"
-      ></ui-input>
+      ></input>
     </div>
   `,
 };
@@ -92,13 +87,13 @@ export const WithHelperText: Story = {
       <label for="email-2" class="text-sm font-medium">
         ${args.placeholder}
       </label>
-      <ui-input
+      <input
         id="email-2"
-        type=${args.type || "text"}
-        placeholder=${args.placeholder || ""}
+        type=${args.type as any}
+        placeholder=${args.placeholder}
         ?disabled=${args.disabled}
         class="w-96"
-      ></ui-input>
+      ></input>
       <p class="text-sm text-foreground/60">Enter your email address.</p>
     </div>
   `,
@@ -111,12 +106,12 @@ export const WithHelperText: Story = {
 export const WithButton: Story = {
   render: (args) => html`
     <div class="flex items-center gap-2">
-      <ui-input
-        type=${args.type || "text"}
-        placeholder=${args.placeholder || ""}
+      <input
+        type=${args.type as any}
+        placeholder=${args.placeholder}
         ?disabled=${args.disabled}
         class="w-96"
-      ></ui-input>
+      ></input>
       <ui-button type="submit">Subscribe</ui-button>
     </div>
   `,
