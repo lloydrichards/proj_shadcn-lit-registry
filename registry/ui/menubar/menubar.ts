@@ -42,7 +42,6 @@ const isNode = (value: EventTarget | null): value is Node => {
 @customElement("ui-menubar")
 export class Menubar extends TW(LitElement) implements MenubarProperties {
   @property({ type: String }) value = "";
-  @state() private hovering = false;
 
   @queryAssignedElements({ selector: "ui-menubar-menu" })
   private menus!: MenubarMenu[];
@@ -50,7 +49,6 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
   private clickAwayHandler = (e: MouseEvent) => {
     if (isNode(e.target) && !this.contains(e.target)) {
       this.value = "";
-      this.hovering = false;
     }
   };
 
@@ -60,10 +58,6 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
       "menubar-trigger-click",
       this.handleTriggerClick as EventListener,
     );
-    this.addEventListener(
-      "menubar-trigger-hover",
-      this.handleTriggerHover as EventListener,
-    );
     this.addEventListener("menubar-item-select", this.handleItemSelect);
   }
 
@@ -72,10 +66,6 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
     this.removeEventListener(
       "menubar-trigger-click",
       this.handleTriggerClick as EventListener,
-    );
-    this.removeEventListener(
-      "menubar-trigger-hover",
-      this.handleTriggerHover as EventListener,
     );
     this.removeEventListener("menubar-item-select", this.handleItemSelect);
     document.removeEventListener("click", this.clickAwayHandler);
@@ -115,27 +105,13 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
 
     if (this.value === menu.value) {
       this.value = "";
-      this.hovering = false;
     } else {
       this.value = menu.value;
-      this.hovering = true;
-    }
-  };
-
-  private handleTriggerHover = (e: CustomEvent) => {
-    if (this.hovering && this.value !== "") {
-      if (!(e.target instanceof HTMLElement)) return;
-      const trigger = e.target;
-      const menu = trigger.closest("ui-menubar-menu");
-      if (menu) {
-        this.value = menu.value;
-      }
     }
   };
 
   private handleItemSelect = () => {
     this.value = "";
-    this.hovering = false;
   };
 
   private handleKeyDown = (e: KeyboardEvent) => {
@@ -163,10 +139,16 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
         }
         break;
       }
-      case "ArrowDown":
+      case "Enter":
         if (this.value === "" && currentIndex >= 0) {
           e.preventDefault();
           this.value = menus[currentIndex].value;
+        } else if (this.value !== "") {
+          e.preventDefault();
+          this.value = "";
+          if (currentIndex >= 0) {
+            this.focusMenu(menus[currentIndex]);
+          }
         }
         break;
       case "Home":
@@ -182,7 +164,6 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
           e.preventDefault();
           const currentMenu = menus.find((m) => m.value === this.value);
           this.value = "";
-          this.hovering = false;
           if (currentMenu) {
             this.focusMenu(currentMenu);
           }
@@ -271,7 +252,15 @@ export class MenubarMenu
           const content = this.querySelector("ui-menubar-content");
           const menu =
             content?.shadowRoot?.querySelector<HTMLElement>('[role="menu"]');
-          menu?.focus();
+          if (menu) {
+            menu.focus();
+            const contentInstance = content as MenubarContent;
+            if (contentInstance) {
+              contentInstance.highlightedIndex = 0;
+              const items = contentInstance.getNavigableItems();
+              contentInstance.updateHighlighted(items);
+            }
+          }
         }, 0);
       }
     }
@@ -319,17 +308,6 @@ export class MenubarTrigger
     }
   };
 
-  private handleMouseEnter = () => {
-    if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("menubar-trigger-hover", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
-    }
-  };
-
   override render() {
     return html`
       <button
@@ -348,7 +326,6 @@ export class MenubarTrigger
         data-state=${this.active ? "open" : "closed"}
         ?disabled=${this.disabled}
         @click=${this.handleClick}
-        @mouseenter=${this.handleMouseEnter}
       >
         <slot></slot>
       </button>
@@ -374,12 +351,12 @@ export class MenubarContent
   @property({ type: Boolean }) loop = false;
 
   @state() protected isOpen = false;
-  @state() private highlightedIndex = -1;
-  @state() private typeaheadString = "";
-  private typeaheadTimeout?: number;
+  @state() public highlightedIndex = -1;
+  @state() protected typeaheadString = "";
+  protected typeaheadTimeout?: number;
 
   @queryAssignedElements({ flatten: true })
-  private items!: HTMLElement[];
+  protected items!: HTMLElement[];
 
   override connectedCallback() {
     super.connectedCallback();
@@ -393,12 +370,23 @@ export class MenubarContent
     }
   }
 
-  private getNavigableItems(): MenuItemWithProperties[] {
-    return this.items.filter((item) => isMenuItemElement(item));
+  public getNavigableItems(): MenuItemWithProperties[] {
+    const navigable: MenuItemWithProperties[] = [];
+    for (const item of this.items) {
+      if (isMenuItemElement(item)) {
+        navigable.push(item);
+      } else if (item.tagName === "UI-MENUBAR-SUB") {
+        const trigger = item.querySelector("ui-menubar-sub-trigger");
+        if (trigger && isMenuItemElement(trigger)) {
+          navigable.push(trigger);
+        }
+      }
+    }
+    return navigable;
   }
 
-  private handleKeyDown = (e: KeyboardEvent) => {
-    const menu = this.closest("ui-menubar-menu");
+  protected handleKeyDown(e: KeyboardEvent) {
+    const menubar = this.closest("ui-menubar");
     const navItems = this.getNavigableItems();
     if (navItems.length === 0) return;
 
@@ -427,36 +415,61 @@ export class MenubarContent
         this.highlightedIndex = navItems.length - 1;
         this.updateHighlighted(navItems);
         break;
-      case "Enter":
-      case " ":
+      case "Enter": {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.highlightedIndex >= 0) {
+          const highlightedItem = navItems[this.highlightedIndex];
+          if (
+            highlightedItem &&
+            highlightedItem.tagName === "UI-MENUBAR-SUB-TRIGGER"
+          ) {
+            const sub = highlightedItem.closest("ui-menubar-sub");
+            if (sub) {
+              sub.open = true;
+              setTimeout(() => {
+                const subContent = sub.querySelector("ui-menubar-sub-content");
+                const subMenu =
+                  subContent?.shadowRoot?.querySelector<HTMLElement>(
+                    '[role="menu"]',
+                  );
+                if (subMenu) {
+                  subMenu.focus();
+                  const subContentInstance = subContent as MenubarSubContent;
+                  if (subContentInstance) {
+                    subContentInstance.highlightedIndex = 0;
+                    const subItems = subContentInstance.getNavigableItems();
+                    subContentInstance.updateHighlighted(subItems);
+                  }
+                }
+              }, 0);
+              return;
+            }
+          }
+          navItems[this.highlightedIndex]?.click();
+        }
+        if (menubar) menubar.value = "";
+        break;
+      }
+      case " ": {
         e.preventDefault();
         if (this.highlightedIndex >= 0) {
           navItems[this.highlightedIndex]?.click();
         }
-        if (menu) menu.open = false;
-        break;
-      case "ArrowLeft": {
-        e.preventDefault();
-        const menubar = this.closest("ui-menubar");
-        const menu = this.closest("ui-menubar-menu");
-        if (menubar && menu) {
-          const menus = Array.from(menubar.querySelectorAll("ui-menubar-menu"));
-          const prevIndex =
-            (menus.indexOf(menu) + 1 + menus.length) % menus.length;
-          menubar.value = menus[prevIndex].value;
-        }
+        if (menubar) menubar.value = "";
         break;
       }
-      case "ArrowRight": {
+      case "Escape": {
         e.preventDefault();
-        const menubar2 = this.closest("ui-menubar");
-        const menu2 = this.closest("ui-menubar-menu");
-        if (menubar2 && menu2) {
-          const menus = Array.from(
-            menubar2.querySelectorAll("ui-menubar-menu"),
-          );
-          const nextIndex = menus.indexOf(menu2) - (1 % menus.length);
-          menubar2.value = menus[nextIndex].value;
+        e.stopPropagation();
+        if (menubar) {
+          menubar.value = "";
+          const menu = this.closest("ui-menubar-menu");
+          if (menu) {
+            const trigger = menu.querySelector("ui-menubar-trigger");
+            const button = trigger?.shadowRoot?.querySelector("button");
+            button?.focus();
+          }
         }
         break;
       }
@@ -465,9 +478,9 @@ export class MenubarContent
           this.handleTypeahead(e.key, navItems);
         }
     }
-  };
+  }
 
-  private handleTypeahead(char: string, items: HTMLElement[]) {
+  protected handleTypeahead(char: string, items: HTMLElement[]) {
     clearTimeout(this.typeaheadTimeout);
     this.typeaheadString += char.toLowerCase();
 
@@ -485,7 +498,7 @@ export class MenubarContent
     }, 500);
   }
 
-  private updateHighlighted(items: MenuItemWithProperties[]) {
+  public updateHighlighted(items: MenuItemWithProperties[]) {
     items.forEach((item, index) => {
       item.highlighted = index === this.highlightedIndex;
     });
@@ -785,59 +798,13 @@ export class MenubarSub extends TW(LitElement) implements MenubarSubProperties {
 
   @query("ui-menubar-sub-trigger") triggerElement?: HTMLElement;
 
-  private hoverTimeout?: number;
-  private closeTimeout?: number;
-
   override connectedCallback() {
     super.connectedCallback();
-    this.addEventListener("sub-trigger-click", this.handleTriggerClick);
-    this.addEventListener("sub-trigger-mouseenter", this.handleTriggerHover);
-    this.addEventListener("sub-trigger-mouseleave", this.handleTriggerLeave);
-    this.addEventListener("sub-content-mouseenter", this.handleContentEnter);
-    this.addEventListener("sub-content-mouseleave", this.handleContentLeave);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    clearTimeout(this.hoverTimeout);
-    clearTimeout(this.closeTimeout);
-    this.removeEventListener("sub-trigger-click", this.handleTriggerClick);
-    this.removeEventListener("sub-trigger-mouseenter", this.handleTriggerHover);
-    this.removeEventListener("sub-trigger-mouseleave", this.handleTriggerLeave);
-    this.removeEventListener("sub-content-mouseenter", this.handleContentEnter);
-    this.removeEventListener("sub-content-mouseleave", this.handleContentLeave);
   }
-
-  private handleTriggerClick = (e: Event) => {
-    e.stopPropagation();
-    this.open = !this.open;
-  };
-
-  private handleTriggerHover = () => {
-    clearTimeout(this.hoverTimeout);
-    clearTimeout(this.closeTimeout);
-    this.hoverTimeout = window.setTimeout(() => {
-      this.open = true;
-    }, 200);
-  };
-
-  private handleTriggerLeave = () => {
-    clearTimeout(this.hoverTimeout);
-    this.closeTimeout = window.setTimeout(() => {
-      this.open = false;
-    }, 300);
-  };
-
-  private handleContentEnter = () => {
-    clearTimeout(this.closeTimeout);
-  };
-
-  private handleContentLeave = () => {
-    clearTimeout(this.closeTimeout);
-    this.closeTimeout = window.setTimeout(() => {
-      this.open = false;
-    }, 300);
-  };
 
   override render() {
     return html`
@@ -876,40 +843,14 @@ export class MenubarSubTrigger
     return sub?.open ? "true" : "false";
   }
 
-  private handleClick = (e: Event) => {
-    if (!this.disabled) {
-      e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-click", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
-    }
-  };
-
   private handleMouseEnter = () => {
     if (!this.disabled) {
       this.highlighted = true;
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-mouseenter", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
     }
   };
 
   private handleMouseLeave = () => {
     this.highlighted = false;
-    if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-mouseleave", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
-    }
   };
 
   override render() {
@@ -924,10 +865,11 @@ export class MenubarSubTrigger
           "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
           "hover:bg-accent focus:bg-accent data-[state=open]:bg-accent",
           "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
           this.className,
         )}
         ?data-disabled=${this.disabled}
-        @click=${this.handleClick}
+        ?data-highlighted=${this.highlighted}
         @mouseenter=${this.handleMouseEnter}
         @mouseleave=${this.handleMouseLeave}
       >
@@ -972,16 +914,128 @@ export class MenubarSubContent extends MenubarContent {
     );
   };
 
+  protected override handleKeyDown(e: KeyboardEvent) {
+    const navItems = this.getNavigableItems();
+    if (navItems.length === 0) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        e.stopPropagation();
+        this.highlightedIndex = this.loop
+          ? (this.highlightedIndex + 1) % navItems.length
+          : Math.min(this.highlightedIndex + 1, navItems.length - 1);
+        this.updateHighlighted(navItems);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        e.stopPropagation();
+        this.highlightedIndex = this.loop
+          ? (this.highlightedIndex - 1 + navItems.length) % navItems.length
+          : Math.max(this.highlightedIndex - 1, 0);
+        this.updateHighlighted(navItems);
+        break;
+      case "ArrowLeft": {
+        e.preventDefault();
+        e.stopPropagation();
+        const sub = this.closest("ui-menubar-sub");
+        if (sub) {
+          sub.open = false;
+          setTimeout(() => {
+            const trigger = sub.querySelector("ui-menubar-sub-trigger");
+            const triggerDiv = trigger?.shadowRoot?.querySelector("div");
+            if (triggerDiv instanceof HTMLElement) {
+              triggerDiv.focus();
+              if (trigger) {
+                trigger.highlighted = true;
+              }
+            }
+            const parentContent = sub.closest("ui-menubar-content");
+            const parentMenu =
+              parentContent?.shadowRoot?.querySelector<HTMLElement>(
+                '[role="menu"]',
+              );
+            parentMenu?.focus();
+          }, 0);
+        }
+        break;
+      }
+      case "Home":
+        e.preventDefault();
+        e.stopPropagation();
+        this.highlightedIndex = 0;
+        this.updateHighlighted(navItems);
+        break;
+      case "End":
+        e.preventDefault();
+        e.stopPropagation();
+        this.highlightedIndex = navItems.length - 1;
+        this.updateHighlighted(navItems);
+        break;
+      case "Enter": {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.highlightedIndex >= 0) {
+          navItems[this.highlightedIndex]?.click();
+        }
+        const menubar = this.closest("ui-menubar");
+        if (menubar) menubar.value = "";
+        break;
+      }
+      case " ": {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.highlightedIndex >= 0) {
+          navItems[this.highlightedIndex]?.click();
+        }
+        const menubar = this.closest("ui-menubar");
+        if (menubar) menubar.value = "";
+        break;
+      }
+      case "Escape": {
+        e.preventDefault();
+        e.stopPropagation();
+        const menubar = this.closest("ui-menubar");
+        if (menubar) {
+          menubar.value = "";
+          const menu = this.closest("ui-menubar-menu");
+          if (menu) {
+            const trigger = menu.querySelector("ui-menubar-trigger");
+            const button = trigger?.shadowRoot?.querySelector("button");
+            button?.focus();
+          }
+        }
+        break;
+      }
+      default:
+        if (e.key.length === 1) {
+          this.handleTypeahead(e.key, navItems);
+        }
+    }
+  }
+
   override render() {
-    const parentRender = super.render();
-    if (parentRender === nothing) return nothing;
+    if (!this.isOpen) return nothing;
 
     return html`
       <div
         @mouseenter=${this.handleMouseEnter}
         @mouseleave=${this.handleMouseLeave}
       >
-        ${parentRender}
+        <div
+          role="menu"
+          tabindex="0"
+          aria-orientation="vertical"
+          class=${cn(
+            "min-w-[8rem] max-w-[20rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+            "animate-in fade-in-80 data-[side=bottom]:slide-in-from-top-2",
+            this.className,
+          )}
+          data-side="bottom"
+          @keydown=${this.handleKeyDown}
+        >
+          <slot></slot>
+        </div>
       </div>
     `;
   }
