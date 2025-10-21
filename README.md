@@ -33,7 +33,11 @@ Ensure you have the shadcn CLI installed in your project. If not, create a
 ```json
 {
   "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
   "tailwind": {
+    "config": "",
+    "baseColor": "",
+    "cssVariables": true,
     "css": "@/styles/tailwind.global.css"
   },
   "aliases": {

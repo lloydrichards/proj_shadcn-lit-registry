@@ -61,7 +61,11 @@ const Home = async () => {
                     code={JSON.stringify(
                       {
                         $schema: "https://ui.shadcn.com/schema.json",
+                        style: "new-york",
                         tailwind: {
+                          config: "",
+                          baseColor: "",
+                          cssVariables: true,
                           css: "@/styles/tailwind.global.css",
                         },
                         aliases: {
