@@ -31,7 +31,113 @@
           "type": "registry:lib"
         }
       ],
-      "cssRaw": "@import \"tailwindcss\";@import \"tw-animate-css\";@custom-variant dark (&:is(.dark *));@theme inline {  --color-border: var(--_border);  --color-input: var(--_input);  --color-ring: var(--_ring);  --color-background: var(--_background);  --color-foreground: var(--_foreground);  --color-card: var(--_card);  --color-card-foreground: var(--_card-foreground);  --color-popover: var(--_popover);  --color-popover-foreground: var(--_popover-foreground);  --color-primary: var(--_primary);  --color-primary-foreground: var(--_primary-foreground);  --color-secondary: var(--_secondary);  --color-secondary-foreground: var(--_secondary-foreground);  --color-muted: var(--_muted);  --color-muted-foreground: var(--_muted-foreground);  --color-accent: var(--_accent);  --color-accent-foreground: var(--_accent-foreground);  --color-destructive: var(--_destructive);  --color-destructive-foreground: var(--_destructive-foreground);}@layer base {  :root,  :host {    --_background: var(--background, oklch(1 0 0));    --_foreground: var(--foreground, oklch(0.147 0.004 49.25));    --_card: var(--card, oklch(1 0 0));    --_card-foreground: var(--card-foreground, oklch(0.147 0.004 49.25));    --_popover: var(--popover, oklch(1 0 0));    --_popover-foreground: var(--popover-foreground, oklch(0.147 0.004 49.25));    --_primary: var(--primary, oklch(0.216 0.006 56.043));    --_primary-foreground: var(      --primary-foreground,      oklch(0.985 0.001 106.423)    );    --_secondary: var(--secondary, oklch(0.97 0.001 106.424));    --_secondary-foreground: var(      --secondary-foreground,      oklch(0.216 0.006 56.043)    );    --_muted: var(--muted, oklch(0.97 0.001 106.424));    --_muted-foreground: var(--muted-foreground, oklch(0.553 0.013 58.071));    --_accent: var(--accent, oklch(0.97 0.001 106.424));    --_accent-foreground: var(--accent-foreground, oklch(0.216 0.006 56.043));    --_destructive: var(--destructive, oklch(0.577 0.245 27.325));    --_destructive-foreground: var(      --destructive-foreground,      oklch(0.985 0.001 106.423)    );    --_border: var(--border, oklch(0.923 0.003 48.717));    --_input: var(--input, oklch(0.923 0.003 48.717));    --_ring: var(--ring, oklch(0.709 0.01 56.259));    --_radius: var(--radius, 0.5rem);  }  .dark,  :host(.dark),  :host-context(.dark) {    --_background: var(--background, oklch(0.147 0.004 49.25));    --_foreground: var(--foreground, oklch(0.985 0.001 106.423));    --_card: var(--card, oklch(0.216 0.006 56.043));    --_card-foreground: var(--card-foreground, oklch(0.985 0.001 106.423));    --_popover: var(--popover, oklch(0.216 0.006 56.043));    --_popover-foreground: var(      --popover-foreground,      oklch(0.985 0.001 106.423)    );    --_primary: var(--primary, oklch(0.923 0.003 48.717));    --_primary-foreground: var(--primary-foreground, oklch(0.216 0.006 56.043));    --_secondary: var(--secondary, oklch(0.268 0.007 34.298));    --_secondary-foreground: var(      --secondary-foreground,      oklch(0.985 0.001 106.423)    );    --_muted: var(--muted, oklch(0.268 0.007 34.298));    --_muted-foreground: var(--muted-foreground, oklch(0.709 0.01 56.259));    --_accent: var(--accent, oklch(0.268 0.007 34.298));    --_accent-foreground: var(--accent-foreground, oklch(0.985 0.001 106.423));    --_destructive: var(--destructive, oklch(0.704 0.191 22.216));    --_destructive-foreground: var(      --destructive-foreground,      oklch(0.985 0.001 106.423)    );    --_border: var(--border, oklch(1 0 0 / 10%));    --_input: var(--input, oklch(1 0 0 / 15%));    --_ring: var(--ring, oklch(0.553 0.013 58.071));  }}@layer base {  * {    @apply border-border outline-ring/50;  }  body {    @apply bg-background text-foreground;  }}"
+      "css": {
+        "@import tailwindcss": {},
+        "@import tw-animate-css": {},
+
+        "@custom-variant dark (&:is(.dark *))": {},
+
+        "@theme inline": {
+          "--color-border": "var(--_border)",
+          "--color-input": "var(--_input)",
+          "--color-ring": "var(--_ring)",
+          "--color-background": "var(--_background)",
+          "--color-foreground": "var(--_foreground)",
+
+          "--color-card": "var(--_card)",
+          "--color-card-foreground": "var(--_card-foreground)",
+
+          "--color-popover": "var(--_popover)",
+          "--color-popover-foreground": "var(--_popover-foreground)",
+
+          "--color-primary": "var(--_primary)",
+          "--color-primary-foreground": "var(--_primary-foreground)",
+
+          "--color-secondary": "var(--_secondary)",
+          "--color-secondary-foreground": "var(--_secondary-foreground)",
+
+          "--color-muted": "var(--_muted)",
+          "--color-muted-foreground": "var(--_muted-foreground)",
+
+          "--color-accent": "var(--_accent)",
+          "--color-accent-foreground": "var(--_accent-foreground)",
+
+          "--color-destructive": "var(--_destructive)",
+          "--color-destructive-foreground": "var(--_destructive-foreground)"
+        },
+        "@layer base": {
+          ":root,:host": {
+            "--_background": "var(--background, oklch(1 0 0))",
+            "--_foreground": "var(--foreground, oklch(0.147 0.004 49.25))",
+
+            "--_card": "var(--card, oklch(1 0 0))",
+            "--_card-foreground": "var(--card-foreground, oklch(0.147 0.004 49.25))",
+
+            "--_popover": "var(--popover, oklch(1 0 0))",
+            "--_popover-foreground": "var(--popover-foreground, oklch(0.147 0.004 49.25))",
+
+            "--_primary": "var(--primary, oklch(0.216 0.006 56.043))",
+            "--_primary-foreground": "var(--primary-foreground, oklch(0.985 0.001 106.423))",
+
+            "--_secondary": "var(--secondary, oklch(0.97 0.001 106.424))",
+            "--_secondary-foreground": "var(--secondary-foreground, oklch(0.216 0.006 56.043))",
+
+            "--_muted": "var(--muted, oklch(0.97 0.001 106.424))",
+            "--_muted-foreground": "var(--muted-foreground, oklch(0.553 0.013 58.071))",
+
+            "--_accent": "var(--accent, oklch(0.97 0.001 106.424))",
+            "--_accent-foreground": "var(--accent-foreground, oklch(0.216 0.006 56.043))",
+
+            "--_destructive": "var(--destructive, oklch(0.577 0.245 27.325))",
+            "--_destructive-foreground": "var(--destructive-foreground, oklch(0.985 0.001 106.423))",
+
+            "--_border": "var(--border, oklch(0.923 0.003 48.717))",
+            "--_input": "var(--input, oklch(0.923 0.003 48.717))",
+            "--_ring": "var(--ring, oklch(0.709 0.01 56.259))",
+
+            "--_radius": "var(--radius, 0.5rem)"
+          },
+
+          ".dark,:host(.dark),:host-context(.dark)": {
+            "--_background": "var(--background, oklch(0.147 0.004 49.25))",
+            "--_foreground": "var(--foreground, oklch(0.985 0.001 106.423))",
+
+            "--_card": "var(--card, oklch(0.216 0.006 56.043))",
+            "--_card-foreground": "var(--card-foreground, oklch(0.985 0.001 106.423))",
+
+            "--_popover": "var(--popover, oklch(0.216 0.006 56.043))",
+            "--_popover-foreground": "var(--popover-foreground, oklch(0.985 0.001 106.423))",
+
+            "--_primary": "var(--primary, oklch(0.923 0.003 48.717))",
+            "--_primary-foreground": "var(--primary-foreground, oklch(0.216 0.006 56.043))",
+
+            "--_secondary": "var(--secondary, oklch(0.268 0.007 34.298))",
+            "--_secondary-foreground": "var(--secondary-foreground, oklch(0.985 0.001 106.423))",
+
+            "--_muted": "var(--muted, oklch(0.268 0.007 34.298))",
+            "--_muted-foreground": "var(--muted-foreground, oklch(0.709 0.01 56.259))",
+
+            "--_accent": "var(--accent, oklch(0.268 0.007 34.298))",
+            "--_accent-foreground": "var(--accent-foreground, oklch(0.985 0.001 106.423))",
+
+            "--_destructive": "var(--destructive, oklch(0.704 0.191 22.216))",
+            "--_destructive-foreground": "var(--destructive-foreground, oklch(0.985 0.001 106.423))",
+
+            "--_border": "var(--border, oklch(1 0 0 / 10%))",
+            "--_input": "var(--input, oklch(1 0 0 / 15%))",
+            "--_ring": "var(--ring, oklch(0.553 0.013 58.071))"
+          }
+        },
+
+        "@layer root": {
+          " *": {
+            "@apply border-border outline-ring/50": {}
+          },
+          "body": {
+            "@apply bg-background text-foreground": {}
+          }
+        }
+      }
     },
     {
       "name": "button",
@@ -165,9 +271,9 @@
         }
       ],
       "css": {
-        "@layer base": {
+        "@layer ui-input": {
           "input": {
-            "@apply": "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+            "@apply file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive": {}
           }
         }
       }
@@ -356,30 +462,30 @@
         }
       ],
       "css": {
-        "@layer base": {
+        "@layer ui-table": {
           "ui-table table": {
-            "@apply": "w-full caption-bottom text-sm"
+            "@apply w-full caption-bottom text-sm": {}
           },
           "ui-table thead": {
-            "@apply": "[&_tr]:border-b"
+            "@apply [&_tr]:border-b": {}
           },
           "ui-table tbody": {
-            "@apply": "[&_tr:last-child]:border-0"
+            "@apply [&_tr:last-child]:border-0": {}
           },
           "ui-table tfoot": {
-            "@apply": "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0"
+            "@apply bg-muted/50 border-t font-medium [&>tr]:last:border-b-0": {}
           },
           "ui-table tr": {
-            "@apply": "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+            "@apply hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors": {}
           },
           "ui-table th": {
-            "@apply": "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+            "@apply text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]": {}
           },
           "ui-table td": {
-            "@apply": "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+            "@apply p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]": {}
           },
           "ui-table caption": {
-            "@apply": "text-muted-foreground mt-4 text-sm"
+            "@apply text-muted-foreground mt-4 text-sm": {}
           }
         }
       }
@@ -399,9 +505,9 @@
         }
       ],
       "css": {
-        "@layer base": {
+        "@layer ui-label": {
           "label": {
-            "@apply": "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            "@apply text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70": {}
           }
         }
       }
@@ -421,9 +527,9 @@
         }
       ],
       "css": {
-        "@layer base": {
+        "@layer ui-textarea": {
           "textarea": {
-            "@apply": "placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive resize-y"
+            "@apply placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive resize-y": {}
           }
         }
       }

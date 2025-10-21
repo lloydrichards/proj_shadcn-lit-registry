@@ -14,9 +14,9 @@
     }
   ],
   "css": {
-    "@layer base": {
+    "@layer ui-label": {
       "label": {
-        "@apply": "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        "@apply text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70": {}
       }
     }
   },

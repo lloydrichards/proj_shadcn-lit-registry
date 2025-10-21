@@ -24,30 +24,30 @@
     }
   ],
   "css": {
-    "@layer base": {
+    "@layer ui-table": {
       "ui-table table": {
-        "@apply": "w-full caption-bottom text-sm"
+        "@apply w-full caption-bottom text-sm": {}
       },
       "ui-table thead": {
-        "@apply": "[&_tr]:border-b"
+        "@apply [&_tr]:border-b": {}
       },
       "ui-table tbody": {
-        "@apply": "[&_tr:last-child]:border-0"
+        "@apply [&_tr:last-child]:border-0": {}
       },
       "ui-table tfoot": {
-        "@apply": "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0"
+        "@apply bg-muted/50 border-t font-medium [&>tr]:last:border-b-0": {}
       },
       "ui-table tr": {
-        "@apply": "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+        "@apply hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors": {}
       },
       "ui-table th": {
-        "@apply": "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+        "@apply text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]": {}
       },
       "ui-table td": {
-        "@apply": "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+        "@apply p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]": {}
       },
       "ui-table caption": {
-        "@apply": "text-muted-foreground mt-4 text-sm"
+        "@apply text-muted-foreground mt-4 text-sm": {}
       }
     }
   },
