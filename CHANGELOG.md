@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/lloydrichards/proj_shadcn-lit-registry/compare/v0.2.0...v0.2.1) (2025-10-21)
+
+
+### 🐛 Bug Fix
+
+* registry css import ([19c3313](https://github.com/lloydrichards/proj_shadcn-lit-registry/commit/19c3313424ce9f6741be51f16d7eb7cc2c9db3fd))
+
 # [0.2.0](https://github.com/lloydrichards/proj_shadcn-lit-registry/compare/v0.1.0...v0.2.0) (2025-10-20)
 
 
