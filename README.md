@@ -38,7 +38,7 @@ Ensure you have the shadcn CLI installed in your project. If not, create a
     "config": "",
     "baseColor": "",
     "cssVariables": true,
-    "css": "@/styles/tailwind.global.css"
+    "css": "lib/styles/tailwind.global.css"
   },
   "aliases": {
     "components": "@/components",
@@ -53,14 +53,163 @@ Ensure you have the shadcn CLI installed in your project. If not, create a
 }
 ```
 
-### Add Tailwind Mixin
+### Setup Tailwind CSS
 
-Before adding any components, ensure you have the Tailwind Mixin library
-installed, as it is a required dependency for most components in this registry:
+Before adding any components, you need to set up Tailwind CSS v4 for use with Lit web components.
+
+#### 1. Install Tailwind Mixin
 
 ```bash
 npx shadcn@latest add @lit/tailwind-mixin
 ```
+
+#### 2. Create Tailwind Global CSS
+
+Create a file at `lib/styles/tailwind.global.css` (or the path specified in your `components.json` `tailwind.css` field) with the following content:
+
+```css
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-border: var(--_border);
+  --color-input: var(--_input);
+  --color-ring: var(--_ring);
+  --color-background: var(--_background);
+  --color-foreground: var(--_foreground);
+
+  --color-card: var(--_card);
+  --color-card-foreground: var(--_card-foreground);
+
+  --color-popover: var(--_popover);
+  --color-popover-foreground: var(--_popover-foreground);
+
+  --color-primary: var(--_primary);
+  --color-primary-foreground: var(--_primary-foreground);
+
+  --color-secondary: var(--_secondary);
+  --color-secondary-foreground: var(--_secondary-foreground);
+
+  --color-muted: var(--_muted);
+  --color-muted-foreground: var(--_muted-foreground);
+
+  --color-accent: var(--_accent);
+  --color-accent-foreground: var(--_accent-foreground);
+
+  --color-destructive: var(--_destructive);
+  --color-destructive-foreground: var(--_destructive-foreground);
+}
+
+@layer base {
+  :root,
+  :host {
+    --_background: var(--background, oklch(1 0 0));
+    --_foreground: var(--foreground, oklch(0.147 0.004 49.25));
+
+    --_card: var(--card, oklch(1 0 0));
+    --_card-foreground: var(--card-foreground, oklch(0.147 0.004 49.25));
+
+    --_popover: var(--popover, oklch(1 0 0));
+    --_popover-foreground: var(--popover-foreground, oklch(0.147 0.004 49.25));
+
+    --_primary: var(--primary, oklch(0.216 0.006 56.043));
+    --_primary-foreground: var(
+      --primary-foreground,
+      oklch(0.985 0.001 106.423)
+    );
+
+    --_secondary: var(--secondary, oklch(0.97 0.001 106.424));
+    --_secondary-foreground: var(
+      --secondary-foreground,
+      oklch(0.216 0.006 56.043)
+    );
+
+    --_muted: var(--muted, oklch(0.97 0.001 106.424));
+    --_muted-foreground: var(--muted-foreground, oklch(0.553 0.013 58.071));
+
+    --_accent: var(--accent, oklch(0.97 0.001 106.424));
+    --_accent-foreground: var(--accent-foreground, oklch(0.216 0.006 56.043));
+
+    --_destructive: var(--destructive, oklch(0.577 0.245 27.325));
+    --_destructive-foreground: var(
+      --destructive-foreground,
+      oklch(0.985 0.001 106.423)
+    );
+
+    --_border: var(--border, oklch(0.923 0.003 48.717));
+    --_input: var(--input, oklch(0.923 0.003 48.717));
+    --_ring: var(--ring, oklch(0.709 0.01 56.259));
+
+    --_radius: var(--radius, 0.5rem);
+  }
+
+  .dark,
+  :host(.dark),
+  :host-context(.dark) {
+    --_background: var(--background, oklch(0.147 0.004 49.25));
+    --_foreground: var(--foreground, oklch(0.985 0.001 106.423));
+
+    --_card: var(--card, oklch(0.216 0.006 56.043));
+    --_card-foreground: var(--card-foreground, oklch(0.985 0.001 106.423));
+
+    --_popover: var(--popover, oklch(0.216 0.006 56.043));
+    --_popover-foreground: var(
+      --popover-foreground,
+      oklch(0.985 0.001 106.423)
+    );
+
+    --_primary: var(--primary, oklch(0.923 0.003 48.717));
+    --_primary-foreground: var(--primary-foreground, oklch(0.216 0.006 56.043));
+
+    --_secondary: var(--secondary, oklch(0.268 0.007 34.298));
+    --_secondary-foreground: var(
+      --secondary-foreground,
+      oklch(0.985 0.001 106.423)
+    );
+
+    --_muted: var(--muted, oklch(0.268 0.007 34.298));
+    --_muted-foreground: var(--muted-foreground, oklch(0.709 0.01 56.259));
+
+    --_accent: var(--accent, oklch(0.268 0.007 34.298));
+    --_accent-foreground: var(--accent-foreground, oklch(0.985 0.001 106.423));
+
+    --_destructive: var(--destructive, oklch(0.704 0.191 22.216));
+    --_destructive-foreground: var(
+      --destructive-foreground,
+      oklch(0.985 0.001 106.423)
+    );
+
+    --_border: var(--border, oklch(1 0 0 / 10%));
+    --_input: var(--input, oklch(1 0 0 / 15%));
+    --_ring: var(--ring, oklch(0.553 0.013 58.071));
+  }
+}
+
+@layer root {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+```
+
+#### 3. Verify Configuration
+
+Ensure your `components.json` points to the correct CSS file:
+
+```json
+{
+  "tailwind": {
+    "css": "@/styles/tailwind.global.css"
+  }
+}
+```
+
+Or adjust the path in step 2 to match your `components.json` configuration.
 
 ### Adding Components
 

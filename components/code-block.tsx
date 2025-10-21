@@ -17,7 +17,7 @@ export const CodeBlock = ({ code }: { code: string }) => {
 
   return (
     <div className="relative my-2 group">
-      <pre className="bg-muted p-3 rounded text-xs overflow-x-auto pr-12">
+      <pre className="bg-muted p-3 rounded text-xs overflow-x-auto pr-12 max-h-96">
         <code>{code}</code>
       </pre>
       <Button
