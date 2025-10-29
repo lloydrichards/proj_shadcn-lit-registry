@@ -45,7 +45,7 @@ const meta: Meta<TextareaArgs> = {
       ?required=${args.required}
       rows=${args.rows || 3}
       maxlength=${args.maxLength}
-      class="w-96"
+      class="ui-textarea w-96"
     ></textarea>
   `,
 };
@@ -62,12 +62,12 @@ export const Disabled: Story = {
 export const WithLabel: Story = {
   render: (args) => html`
     <div class="grid w-full gap-3">
-      <ui-label for="message">Your message</ui-label>
+      <label class="ui-label" for="message">Your message</label>
       <textarea
         id="message"
         placeholder=${args.placeholder}
         ?disabled=${args.disabled}
-        class="w-96"
+        class="ui-textarea w-96"
       ></textarea>
     </div>
   `,
@@ -76,12 +76,12 @@ export const WithLabel: Story = {
 export const WithHelperText: Story = {
   render: (args) => html`
     <div class="grid w-full gap-3">
-      <ui-label for="message-2">Your Message</ui-label>
+      <label class="ui-label" for="message-2">Your Message</label>
       <textarea
         id="message-2"
         placeholder=${args.placeholder || ""}
         ?disabled=${args.disabled}
-        class="w-96"
+        class="ui-textarea w-96"
       ></textarea>
       <p class="text-sm text-muted-foreground">
         Your message will be copied to the support team.
@@ -107,7 +107,7 @@ export const NoResize: Story = {
   render: () => html`
     <textarea
       placeholder="Type your message here."
-      class="w-96 resize-none"
+      class="w-96 ui-textarea resize-none"
     ></textarea>
   `,
 };
@@ -116,7 +116,7 @@ export const CustomStyling: Story = {
   render: () => html`
     <textarea
       placeholder="Code here..."
-      class="min-h-[200px] resize-none font-mono w-96"
+      class="ui-textarea min-h-[200px] resize-none font-mono w-96"
     ></textarea>
   `,
 };

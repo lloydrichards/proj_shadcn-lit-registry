@@ -88,7 +88,7 @@ export const WithLabel: Story = {
         ?disabled=${args.disabled}
         aria-label="Accept terms and conditions"
       ></ui-checkbox>
-      <label for="terms">Accept terms and conditions</label>
+      <label class="ui-label" for="terms">Accept terms and conditions</label>
     </div>
   `,
 };
@@ -102,7 +102,9 @@ export const WithLabelAndDescription: Story = {
         aria-label="Marketing emails"
       ></ui-checkbox>
       <div class="grid gap-1.5 leading-none">
-        <label for="marketing" class="font-medium">Marketing emails</label>
+        <label class="ui-label font-medium" for="marketing"
+          >Marketing emails</label
+        >
         <p class="text-sm text-muted-foreground">
           Receive emails about new products, features, and more.
         </p>
@@ -120,15 +122,15 @@ export const MultipleCheckboxes: Story = {
           aria-label="Item 1"
           default-checked
         ></ui-checkbox>
-        <label for="item-1">Item 1</label>
+        <label class="ui-label" for="item-1">Item 1</label>
       </div>
       <div class="flex items-center gap-3">
         <ui-checkbox id="item-2" aria-label="Item 2"></ui-checkbox>
-        <label for="item-2">Item 2</label>
+        <label class="ui-label" for="item-2">Item 2</label>
       </div>
       <div class="flex items-center gap-3">
         <ui-checkbox id="item-3" aria-label="Item 3"></ui-checkbox>
-        <label for="item-3">Item 3</label>
+        <label class="ui-label" for="item-3">Item 3</label>
       </div>
     </div>
   `,
@@ -150,7 +152,7 @@ export const InForm: Story = {
           value="yes"
           aria-label="Subscribe to newsletter"
         ></ui-checkbox>
-        <label>Subscribe to newsletter</label>
+        <label class="ui-label" for="subscribe">Subscribe to newsletter</label>
       </div>
       <button
         type="submit"
