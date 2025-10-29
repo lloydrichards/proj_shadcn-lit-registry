@@ -20,7 +20,7 @@ const meta: Meta<LabelArgs> = {
   parameters: {
     layout: "centered",
   },
-  render: (args) => html` <label> ${args.children} </label> `,
+  render: (args) => html` <label class="ui-label"> ${args.children} </label> `,
 };
 
 export default meta;
@@ -31,8 +31,8 @@ export const Default: Story = {};
 export const WithInput: Story = {
   render: (args) => html`
     <div class="grid w-full gap-3">
-      <label for="email">${args.children}</label>
-      <input id="email" placeholder="Enter your email" class="w-96"></input>
+      <label class="ui-label" for="email">${args.children}</label>
+      <input id="email" class="ui-input" placeholder="Enter your email" class="w-96"></input>
     </div>
   `,
 };
@@ -40,17 +40,17 @@ export const WithInput: Story = {
 export const WithRequiredIndicator: Story = {
   render: (args) => html`
     <div class="grid w-full gap-3">
-      <label for="email">
+      <label class="ui-label" for="email">
         ${args.children} <span class="text-destructive">*</span>
       </label>
-      <input type="email" required class="w-96"></input>
+      <input class="ui-input" type="email" required class="w-96"></input>
     </div>
   `,
 };
 
 export const CustomStyling: Story = {
   render: (args) => html`
-    <label class="text-base font-semibold"> ${args.children} </label>
+    <label class="ui-label text-base font-semibold"> ${args.children} </label>
   `,
   args: {
     children: "Important Field",
@@ -60,8 +60,8 @@ export const CustomStyling: Story = {
 export const WithHelperText: Story = {
   render: (args) => html`
     <div class="grid w-full gap-3">
-      <label for="email">${args.children}</label>
-      <input id="email" placeholder="Enter your email" class="w-96"></input>
+      <label class="ui-label" for="email">${args.children}</label>
+      <input id="email" class="ui-input" placeholder="Enter your email" class="w-96"></input>
       <p class="text-sm text-muted-foreground">We'll never share your email.</p>
     </div>
   `,
@@ -71,7 +71,7 @@ export const PeerDisabled: Story = {
   render: (args) => html`
     <div class="flex items-center gap-2">
       <ui-checkbox id="checkbox" class="peer" disabled checked></ui-checkbox>
-      <label for="checkbox">${args.children}</label>
+      <label class="ui-label" for="checkbox">${args.children}</label>
     </div>
   `,
   args: {

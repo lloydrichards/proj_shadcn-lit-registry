@@ -45,7 +45,7 @@ const meta: Meta<SwitchArgs> = {
         .name=${args.name || ""}
         .value=${args.value || "on"}
       ></ui-switch>
-      <label for="switch" class="text-sm font-medium">${args.label}</label>
+      <label for="switch" class="ui-label">${args.label}</label>
     </div>
   `,
 };

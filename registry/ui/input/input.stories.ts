@@ -33,6 +33,7 @@ const meta: Meta<InputArgs> = {
   render: (args) =>
     html`<input
       type=${args.type as any}
+      class="ui-input"
       placeholder=${args.placeholder}
       ?disabled=${args.disabled}
       class="w-96"
@@ -63,11 +64,11 @@ export const Disabled: Story = {
 export const WithLabel: Story = {
   render: (args) => html`
     <div class="grid gap-1.5">
-      <label for="email" class="text-sm font-medium">
+      <label for="email" class="ui-label">
         ${args.placeholder}
       </label>
       <input
-        id="email"
+        id="email" class="ui-input"
         type=${args.type as any}
         placeholder=${args.placeholder}
         ?disabled=${args.disabled}
@@ -84,11 +85,11 @@ export const WithLabel: Story = {
 export const WithHelperText: Story = {
   render: (args) => html`
     <div class="grid gap-1.5">
-      <label for="email-2" class="text-sm font-medium">
+      <label for="email-2" class="ui-label">
         ${args.placeholder}
       </label>
       <input
-        id="email-2"
+        id="email-2" class="ui-input"
         type=${args.type as any}
         placeholder=${args.placeholder}
         ?disabled=${args.disabled}
@@ -107,6 +108,7 @@ export const WithButton: Story = {
   render: (args) => html`
     <div class="flex items-center gap-2">
       <input
+      class="ui-input"
         type=${args.type as any}
         placeholder=${args.placeholder}
         ?disabled=${args.disabled}
