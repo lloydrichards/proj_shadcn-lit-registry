@@ -833,12 +833,6 @@ export class CommandGroup
   extends TW(LitElement)
   implements CommandGroupProperties
 {
-  static styles = css`
-    :host {
-      display: block;
-    }
-  `;
-
   @property({ type: String }) heading = "";
   @property({ type: Boolean, attribute: "force-mount" }) forceMount = false;
 

@@ -508,6 +508,19 @@
       ]
     },
     {
+      "name": "dialog",
+      "type": "registry:component",
+      "title": "Dialog",
+      "description": "A modal dialog component that overlays content on the primary window. Uses native HTML dialog element with smooth animations, focus management, and accessibility features. Supports ESC key and backdrop click to close.",
+      "categories": ["ui", "dialog", "modal", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": ["lucide-static"],
+      "files": [
+        {
+          "path": "registry/ui/dialog/dialog.ts",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
