@@ -487,6 +487,26 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "command",
+      "type": "registry:component",
+      "title": "Command",
+      "description": "Fast, composable, unstyled command menu component. Features search/filtering, keyboard navigation, item grouping, and accessibility support. Based on the cmdk library pattern.",
+      "categories": ["ui", "command", "search", "menu", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": ["lucide-static"],
+      "files": [
+        {
+          "path": "registry/ui/command/command.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/command/command.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
     }
   ]
 }
