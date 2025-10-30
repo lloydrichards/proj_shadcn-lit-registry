@@ -1,3 +1,18 @@
+# [0.3.0](https://github.com/lloydrichards/proj_shadcn-lit-registry/compare/v0.2.1...v0.3.0) (2025-10-30)
+
+
+### ✨ Feature
+
+* add accordion and collapsible ([8de9507](https://github.com/lloydrichards/proj_shadcn-lit-registry/commit/8de95079b7407d06e236e2854bfc00ebe586faed))
+* add Command ([ba51b5f](https://github.com/lloydrichards/proj_shadcn-lit-registry/commit/ba51b5f3e5e656329da6b396c236c446ad183dbe))
+* add Dialog ([2c450bd](https://github.com/lloydrichards/proj_shadcn-lit-registry/commit/2c450bd5b91b3542ab4a8460867320ef2981d6d8))
+
+
+### 🐛 Bug Fix
+
+* event type ([9628a58](https://github.com/lloydrichards/proj_shadcn-lit-registry/commit/9628a58d6572ae9ebeab16338a6ade7c08d9b596))
+* turn input, label and textarea into utility ([98bd5b3](https://github.com/lloydrichards/proj_shadcn-lit-registry/commit/98bd5b307eb4d96b797968b9b19bf8f3696bddc5))
+
 ## [0.2.1](https://github.com/lloydrichards/proj_shadcn-lit-registry/compare/v0.2.0...v0.2.1) (2025-10-21)
 
 
