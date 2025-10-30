@@ -170,3 +170,57 @@
     @apply text-muted-foreground mt-4 text-sm;
   }
 }
+
+@layer utilities {
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  .animate-accordion-down {
+    animation: accordion-down 0.2s ease-out forwards;
+  }
+
+  .animate-accordion-up {
+    animation: accordion-up 0.2s ease-out forwards;
+  }
+
+  @keyframes collapsible-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--collapsible-content-height);
+    }
+  }
+
+  @keyframes collapsible-up {
+    from {
+      height: var(--collapsible-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  .animate-collapsible-down {
+    animation: collapsible-down 0.2s ease-out forwards;
+  }
+
+  .animate-collapsible-up {
+    animation: collapsible-up 0.2s ease-out forwards;
+  }
+}
