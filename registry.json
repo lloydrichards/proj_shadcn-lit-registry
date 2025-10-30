@@ -515,6 +515,44 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "accordion",
+      "type": "registry:component",
+      "title": "Accordion",
+      "description": "A vertically stacked set of interactive headings that each reveal a section of content. Supports single and multiple open items with smooth animations and full keyboard navigation.",
+      "categories": ["ui", "accordion", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": ["lucide-static"],
+      "files": [
+        {
+          "path": "registry/ui/accordion/accordion.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/accordion/accordion.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "collapsible",
+      "type": "registry:component",
+      "title": "Collapsible",
+      "description": "An interactive component which expands/collapses a panel. Useful for showing and hiding content with smooth animations and accessibility features.",
+      "categories": ["ui", "collapsible", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": ["lucide-static"],
+      "files": [
+        {
+          "path": "registry/ui/collapsible/collapsible.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/collapsible/collapsible.stories.ts",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
