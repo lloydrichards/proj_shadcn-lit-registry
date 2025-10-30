@@ -28,6 +28,10 @@ export interface DialogCloseEvent {
   reason: "escape" | "backdrop" | "close-button" | "programmatic";
 }
 
+export interface DialogOpenChangeEvent extends CustomEvent {
+  detail: { open: boolean };
+}
+
 /**
  * Root dialog container managing state
  */
@@ -78,9 +82,9 @@ export class Dialog extends TwLitElement implements DialogProperties {
     super.updated(changedProperties);
 
     if (changedProperties.has("open")) {
-      // Dispatch open-change event
+      // Dispatch dialog-open-change event
       this.dispatchEvent(
-        new CustomEvent("open-change", {
+        new CustomEvent("dialog-open-change", {
           detail: { open: this.open },
           bubbles: true,
           composed: true,
@@ -495,7 +499,7 @@ declare global {
   }
 
   interface HTMLElementEventMap {
-    "open-change": CustomEvent<{ open: boolean }>;
+    "dialog-open-change": DialogOpenChangeEvent;
     "dialog-close": CustomEvent<DialogCloseEvent>;
   }
 }
