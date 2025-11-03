@@ -1,4 +1,4 @@
-import { css, html, LitElement, nothing, type PropertyValues } from "lit";
+import { css, html, nothing, type PropertyValues } from "lit";
 import {
   customElement,
   property,
@@ -8,7 +8,9 @@ import {
 } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, ChevronRight, Circle } from "lucide-static";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { ClickAwayController } from "@/controllers/click-away-controller";
+import { MenuNavigationController } from "@/controllers/menu-navigation-controller";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
 import "@/registry/ui/popover/popover";
 
@@ -36,13 +38,9 @@ export function isMenuItemElement(
   return validTags.includes(element.tagName);
 }
 
-const isNode = (value: EventTarget | null): value is Node => {
-  return value instanceof Node;
-};
-
 @customElement("ui-dropdown-menu")
 export class DropdownMenu
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuProperties
 {
   static styles = css`
@@ -57,17 +55,17 @@ export class DropdownMenu
   @query("ui-dropdown-menu-trigger") triggerElement?: HTMLElement;
   @query("ui-popover") popoverElement?: HTMLElement;
 
-  private clickAwayHandler = (e: MouseEvent) => {
-    if (!this.open) return;
-    const content = this.querySelector("ui-dropdown-menu-content");
-    if (
-      isNode(e.target) &&
-      !this.contains(e.target) &&
-      (!content || !content.contains(e.target))
-    ) {
+  // Click-away controller
+  private clickAway = new ClickAwayController(this, {
+    onClickAway: () => {
       this.open = false;
-    }
-  };
+    },
+    isActive: () => this.open,
+    excludeElements: () => {
+      const content = this.querySelector("ui-dropdown-menu-content");
+      return content ? [content] : [];
+    },
+  });
 
   override connectedCallback() {
     super.connectedCallback();
@@ -79,18 +77,15 @@ export class DropdownMenu
     super.disconnectedCallback();
     this.removeEventListener("trigger-click", this.handleTriggerClick);
     this.removeEventListener("item-select", this.handleItemSelect);
-    document.removeEventListener("click", this.clickAwayHandler);
   }
 
   override updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
     if (changedProperties.has("open")) {
+      this.clickAway.update();
+
       if (this.open) {
-        setTimeout(
-          () => document.addEventListener("click", this.clickAwayHandler),
-          0,
-        );
         const content = this.querySelector("ui-dropdown-menu-content");
         if (content) {
           setTimeout(() => {
@@ -99,17 +94,9 @@ export class DropdownMenu
             menu?.focus();
           }, 0);
         }
-      } else {
-        document.removeEventListener("click", this.clickAwayHandler);
       }
 
-      this.dispatchEvent(
-        new CustomEvent("open-change", {
-          detail: { open: this.open },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("open-change", { open: this.open });
     }
   }
 
@@ -145,7 +132,7 @@ export interface DropdownMenuTriggerProperties {
 
 @customElement("ui-dropdown-menu-trigger")
 export class DropdownMenuTrigger
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuTriggerProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -158,12 +145,7 @@ export class DropdownMenuTrigger
   private handleClick = (e: Event) => {
     if (!this.disabled) {
       e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent("trigger-click", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("trigger-click");
     }
   };
 
@@ -200,7 +182,7 @@ export interface DropdownMenuContentProperties {
 
 @customElement("ui-dropdown-menu-content")
 export class DropdownMenuContent
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuContentProperties
 {
   @property({ type: String }) align: "start" | "center" | "end" = "start";
@@ -212,11 +194,24 @@ export class DropdownMenuContent
 
   @state() protected isOpen = false;
   @state() private highlightedIndex = -1;
-  @state() private typeaheadString = "";
-  private typeaheadTimeout?: number;
 
   @queryAssignedElements({ flatten: true })
   private items!: HTMLElement[];
+
+  // Menu navigation controller
+  private navigation = new MenuNavigationController(this, {
+    getItems: () => this.getNavigableItems(),
+    getHighlightedIndex: () => this.highlightedIndex,
+    setHighlightedIndex: (index) => {
+      this.highlightedIndex = index;
+    },
+    onSelect: (item) => item.click(),
+    onEscape: () => {
+      const menu = this.closest("ui-dropdown-menu");
+      if (menu) menu.open = false;
+    },
+    loop: () => this.loop, // Reactive getter
+  });
 
   override connectedCallback() {
     super.connectedCallback();
@@ -227,6 +222,27 @@ export class DropdownMenuContent
         this.isOpen = menu.open;
       });
       observer.observe(menu, { attributes: true, attributeFilter: ["open"] });
+    }
+  }
+
+  override willUpdate(changed: PropertyValues) {
+    super.willUpdate(changed);
+
+    // Update highlighted state when index changes
+    if (changed.has("highlightedIndex")) {
+      const items = this.getNavigableItems();
+      items.forEach((item, index) => {
+        item.highlighted = index === this.highlightedIndex;
+      });
+    }
+  }
+
+  override updated(changed: PropertyValues) {
+    super.updated(changed);
+
+    // Reset navigation state when menu closes
+    if (changed.has("isOpen") && !this.isOpen) {
+      this.navigation.reset();
     }
   }
 
@@ -243,77 +259,8 @@ export class DropdownMenuContent
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
-    const navItems = this.getNavigableItems();
-    if (navItems.length === 0) return;
-
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        this.highlightedIndex = this.loop
-          ? (this.highlightedIndex + 1) % navItems.length
-          : Math.min(this.highlightedIndex + 1, navItems.length - 1);
-        this.updateHighlighted(navItems);
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        this.highlightedIndex = this.loop
-          ? (this.highlightedIndex - 1 + navItems.length) % navItems.length
-          : Math.max(this.highlightedIndex - 1, 0);
-        this.updateHighlighted(navItems);
-        break;
-      case "Home":
-        e.preventDefault();
-        this.highlightedIndex = 0;
-        this.updateHighlighted(navItems);
-        break;
-      case "End":
-        e.preventDefault();
-        this.highlightedIndex = navItems.length - 1;
-        this.updateHighlighted(navItems);
-        break;
-      case "Enter":
-      case " ":
-        e.preventDefault();
-        if (this.highlightedIndex >= 0) {
-          navItems[this.highlightedIndex]?.click();
-        }
-        break;
-      case "Escape": {
-        e.preventDefault();
-        const menu = this.closest("ui-dropdown-menu");
-        if (menu) menu.open = false;
-        break;
-      }
-      default:
-        if (e.key.length === 1) {
-          this.handleTypeahead(e.key, navItems);
-        }
-    }
+    this.navigation.handleKeyDown(e);
   };
-
-  private handleTypeahead(char: string, items: HTMLElement[]) {
-    clearTimeout(this.typeaheadTimeout);
-    this.typeaheadString += char.toLowerCase();
-
-    const matchIndex = items.findIndex((item) =>
-      item.textContent?.toLowerCase().startsWith(this.typeaheadString),
-    );
-
-    if (matchIndex >= 0) {
-      this.highlightedIndex = matchIndex;
-      this.updateHighlighted(items);
-    }
-
-    this.typeaheadTimeout = window.setTimeout(() => {
-      this.typeaheadString = "";
-    }, 500);
-  }
-
-  private updateHighlighted(items: MenuItemWithProperties[]) {
-    items.forEach((item, index) => {
-      item.highlighted = index === this.highlightedIndex;
-    });
-  }
 
   override render() {
     if (!this.isOpen) return nothing;
@@ -344,7 +291,7 @@ export interface DropdownMenuItemProperties {
 
 @customElement("ui-dropdown-menu-item")
 export class DropdownMenuItem
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuItemProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -354,19 +301,8 @@ export class DropdownMenuItem
 
   private handleClick = () => {
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("select", {
-          detail: { value: this.textContent },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("select", { value: this.textContent });
+      this.emit("item-select");
     }
   };
 
@@ -416,7 +352,7 @@ export interface DropdownMenuCheckboxItemProperties {
 
 @customElement("ui-dropdown-menu-checkbox-item")
 export class DropdownMenuCheckboxItem
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuCheckboxItemProperties
 {
   @property({ type: Boolean }) checked = false;
@@ -427,14 +363,18 @@ export class DropdownMenuCheckboxItem
   private handleClick = () => {
     if (!this.disabled) {
       this.checked = !this.checked;
-      this.dispatchEvent(
-        new CustomEvent("checked-change", {
-          detail: { checked: this.checked },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("checked-change", { checked: this.checked });
     }
+  };
+
+  private handleMouseEnter = () => {
+    if (!this.disabled) {
+      this.highlighted = true;
+    }
+  };
+
+  private handleMouseLeave = () => {
+    this.highlighted = false;
   };
 
   override render() {
@@ -448,11 +388,15 @@ export class DropdownMenuCheckboxItem
           "relative flex cursor-default select-none items-center gap-2 rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors",
           "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
           "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
           this.className,
         )}
         data-state=${this.checked ? "checked" : "unchecked"}
         ?data-disabled=${this.disabled}
+        ?data-highlighted=${this.highlighted}
         @click=${this.handleClick}
+        @mouseenter=${this.handleMouseEnter}
+        @mouseleave=${this.handleMouseLeave}
       >
         <span
           class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center"
@@ -471,7 +415,7 @@ export interface DropdownMenuRadioGroupProperties {
 
 @customElement("ui-dropdown-menu-radio-group")
 export class DropdownMenuRadioGroup
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuRadioGroupProperties
 {
   @property({ type: String }) value = "";
@@ -507,13 +451,7 @@ export class DropdownMenuRadioGroup
     if (e instanceof CustomEvent) {
       e.stopPropagation();
       this.value = e.detail.value;
-      this.dispatchEvent(
-        new CustomEvent("value-change", {
-          detail: { value: this.value },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("value-change", { value: this.value });
     }
   };
 
@@ -534,7 +472,7 @@ export interface DropdownMenuRadioItemProperties {
 
 @customElement("ui-dropdown-menu-radio-item")
 export class DropdownMenuRadioItem
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuRadioItemProperties
 {
   @property({ type: String }) value = "";
@@ -545,20 +483,19 @@ export class DropdownMenuRadioItem
 
   private handleClick = () => {
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("radio-select", {
-          detail: { value: this.value },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("radio-select", { value: this.value });
+      this.emit("item-select");
     }
+  };
+
+  private handleMouseEnter = () => {
+    if (!this.disabled) {
+      this.highlighted = true;
+    }
+  };
+
+  private handleMouseLeave = () => {
+    this.highlighted = false;
   };
 
   override render() {
@@ -572,10 +509,14 @@ export class DropdownMenuRadioItem
           "relative flex cursor-default select-none items-center gap-2 rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors",
           "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
           "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
           this.className,
         )}
         ?data-disabled=${this.disabled}
+        ?data-highlighted=${this.highlighted}
         @click=${this.handleClick}
+        @mouseenter=${this.handleMouseEnter}
+        @mouseleave=${this.handleMouseLeave}
       >
         <span
           class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center"
@@ -594,7 +535,7 @@ export interface DropdownMenuSubProperties {
 
 @customElement("ui-dropdown-menu-sub")
 export class DropdownMenuSub
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuSubProperties
 {
   static styles = css`
@@ -686,7 +627,7 @@ export interface DropdownMenuSubTriggerProperties {
 
 @customElement("ui-dropdown-menu-sub-trigger")
 export class DropdownMenuSubTrigger
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuSubTriggerProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -701,36 +642,21 @@ export class DropdownMenuSubTrigger
   private handleClick = (e: Event) => {
     if (!this.disabled) {
       e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-click", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("sub-trigger-click");
     }
   };
 
   private handleMouseEnter = () => {
     if (!this.disabled) {
       this.highlighted = true;
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-mouseenter", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("sub-trigger-mouseenter");
     }
   };
 
   private handleMouseLeave = () => {
     this.highlighted = false;
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-mouseleave", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("sub-trigger-mouseleave");
     }
   };
 
@@ -777,21 +703,11 @@ export class DropdownMenuSubContent extends DropdownMenuContent {
   }
 
   private handleMouseEnter = () => {
-    this.dispatchEvent(
-      new CustomEvent("sub-content-mouseenter", {
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("sub-content-mouseenter");
   };
 
   private handleMouseLeave = () => {
-    this.dispatchEvent(
-      new CustomEvent("sub-content-mouseleave", {
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("sub-content-mouseleave");
   };
 
   override render() {
@@ -810,7 +726,7 @@ export class DropdownMenuSubContent extends DropdownMenuContent {
 }
 
 @customElement("ui-dropdown-menu-separator")
-export class DropdownMenuSeparator extends TW(LitElement) {
+export class DropdownMenuSeparator extends BaseElement {
   override render() {
     return html`
       <div
@@ -828,7 +744,7 @@ export interface DropdownMenuLabelProperties {
 
 @customElement("ui-dropdown-menu-label")
 export class DropdownMenuLabel
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuLabelProperties
 {
   @property({ type: Boolean }) inset = false;
@@ -849,7 +765,7 @@ export class DropdownMenuLabel
 }
 
 @customElement("ui-dropdown-menu-group")
-export class DropdownMenuGroup extends TW(LitElement) {
+export class DropdownMenuGroup extends BaseElement {
   override render() {
     return html`
       <div role="group">
@@ -860,7 +776,7 @@ export class DropdownMenuGroup extends TW(LitElement) {
 }
 
 @customElement("ui-dropdown-menu-shortcut")
-export class DropdownMenuShortcut extends TW(LitElement) {
+export class DropdownMenuShortcut extends BaseElement {
   override render() {
     return html`
       <span class="ml-auto text-xs tracking-widest text-muted-foreground">

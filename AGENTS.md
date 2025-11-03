@@ -64,6 +64,7 @@ with the shadcn CLI. It consists of:
 - **app/** - Next.js application (React)
 - **registry/** - Lit component source (Web Components)
   - **registry/lib/** - Shared utilities (tailwindMixin.ts, utils.ts)
+  - **@/controllers/** - Reusable Lit reactive controllers
   - **registry/ui/** - UI components (_.ts, _.stories.ts)
   - **registry/styles/** - Tailwind config (tailwind.global.css)
 - **.storybook/** - Storybook configuration
@@ -233,13 +234,16 @@ render() {
 
 ### Host Class Forwarding Pattern
 
-**CRITICAL**: When creating components that wrap content in a shadow DOM element, 
-you **must** forward classes from the host element to the inner element using `this.className`.
-This allows users to apply utility classes (like `w-96`, `max-w-md`, etc.) to the component.
+**CRITICAL**: When creating components that wrap content in a shadow DOM
+element, you **must** forward classes from the host element to the inner element
+using `this.className`. This allows users to apply utility classes (like `w-96`,
+`max-w-md`, etc.) to the component.
 
 **Why this is needed:**
-- Tailwind utility classes applied to the custom element host (e.g., `<ui-card class="w-96">`)
-  cannot be styled by Tailwind CSS inside the shadow DOM
+
+- Tailwind utility classes applied to the custom element host (e.g.,
+  `<ui-card class="w-96">`) cannot be styled by Tailwind CSS inside the shadow
+  DOM
 - Shadow DOM styles are isolated and cannot access classes on the host element
 - The solution is to copy `this.className` to the inner wrapper element
 
@@ -289,12 +293,17 @@ render() {
 ```
 
 **When to apply this pattern:**
+
 - ALL components that render a wrapper element in shadow DOM
-- Components where users might want to apply layout classes (width, height, margin, etc.)
-- Both parent components and sub-components (e.g., `ui-card`, `ui-card-header`, etc.)
+- Components where users might want to apply layout classes (width, height,
+  margin, etc.)
+- Both parent components and sub-components (e.g., `ui-card`, `ui-card-header`,
+  etc.)
 
 **When NOT to apply:**
-- Components using `display: contents` (classes apply directly to slotted content)
+
+- Components using `display: contents` (classes apply directly to slotted
+  content)
 - Components that render `<slot></slot>` directly without a wrapper
 
 ### Dark Mode
@@ -391,6 +400,220 @@ export class MyCounter extends TwLitElement {
 }
 ```
 
+## Reactive Controllers
+
+**Reactive Controllers** are a Lit pattern for encapsulating reusable behavior.
+This project uses controllers extensively to eliminate code duplication and
+ensure consistent behavior across components.
+
+### Available Controllers
+
+#### 1. MenuNavigationController
+
+**Purpose**: Keyboard navigation for menu-like components (dropdowns, context
+menus, selects).
+
+**Location**: `@/controllers/menu-navigation-controller.ts`
+
+**Features**:
+
+- Arrow key navigation (Up/Down or Left/Right based on orientation)
+- Home/End key support
+- Enter/Space to select
+- Escape key handling
+- Typeahead search (500ms timeout)
+- Loop support (wrap around)
+
+**Usage Pattern**:
+
+```typescript
+import { MenuNavigationController } from "@/controllers/menu-navigation-controller";
+
+export class DropdownMenuContent extends BaseElement {
+  @state() private highlightedIndex = -1;
+  @property({ type: Boolean }) loop = false;
+
+  private navigation = new MenuNavigationController(this, {
+    getItems: () => this.getNavigableItems(),
+    getHighlightedIndex: () => this.highlightedIndex,
+    setHighlightedIndex: (index) => {
+      this.highlightedIndex = index;
+    },
+    onSelect: (item) => item.click(),
+    onEscape: () => {
+      this.close();
+    },
+    loop: () => this.loop, // Reactive getter for runtime updates
+    orientation: "vertical", // or "horizontal"
+  });
+
+  override willUpdate(changed: PropertyValues) {
+    super.willUpdate(changed);
+    // Update highlighted state when index changes
+    if (changed.has("highlightedIndex")) {
+      const items = this.getNavigableItems();
+      items.forEach((item, index) => {
+        item.highlighted = index === this.highlightedIndex;
+      });
+    }
+  }
+
+  override updated(changed: PropertyValues) {
+    super.updated(changed);
+    // Reset navigation when menu closes
+    if (changed.has("isOpen") && !this.isOpen) {
+      this.navigation.reset();
+    }
+  }
+
+  private handleKeyDown = (e: KeyboardEvent) => {
+    this.navigation.handleKeyDown(e);
+  };
+}
+```
+
+**Used by**: dropdown-menu, context-menu, menubar, select
+
+#### 2. ClickAwayController
+
+**Purpose**: Detect clicks outside a component and trigger a callback.
+
+**Location**: `@/controllers/click-away-controller.ts`
+
+**Features**:
+
+- Click-outside detection
+- Multiple excluded elements support
+- Conditional activation via `isActive`
+- Capture vs bubbling phase control
+- Automatic setTimeout delay to prevent immediate triggers
+
+**Usage Pattern**:
+
+```typescript
+import { ClickAwayController } from "@/controllers/click-away-controller";
+
+export class DropdownMenu extends BaseElement {
+  @property({ type: Boolean }) open = false;
+
+  private clickAway = new ClickAwayController(this, {
+    onClickAway: () => {
+      this.open = false;
+    },
+    isActive: () => this.open,
+    excludeElements: () => {
+      const content = this.querySelector("ui-dropdown-menu-content");
+      return content ? [content] : [];
+    },
+    useCapture: false, // Set to true for context menus
+  });
+
+  override updated(changed: PropertyValues) {
+    super.updated(changed);
+    if (changed.has("open")) {
+      this.clickAway.update();
+    }
+  }
+}
+```
+
+**Used by**: dropdown-menu, context-menu, menubar, select
+
+#### 3. FocusTrapController
+
+**Purpose**: Trap focus within a container for modal dialogs and overlays.
+
+**Location**: `@/controllers/focus-trap-controller.ts`
+
+**Features**:
+
+- Tab/Shift+Tab cycles through focusable elements
+- Auto-focus first element (with autofocus attribute support)
+- Restore focus to previous element on deactivation
+- Handles empty containers gracefully
+- Configurable via `isActive` flag
+
+**Usage Pattern**:
+
+```typescript
+import { FocusTrapController } from "@/controllers/focus-trap-controller";
+
+export class Dialog extends BaseElement {
+  @property({ type: Boolean }) open = false;
+  @query("dialog") dialogElement?: HTMLDialogElement;
+
+  private focusTrap = new FocusTrapController(this, {
+    getContainer: () => this.dialogElement,
+    isActive: () => this.open,
+    autoFocus: true,
+    restoreFocus: true,
+  });
+
+  override updated(changed: PropertyValues) {
+    super.updated(changed);
+    if (changed.has("open")) {
+      this.focusTrap.update();
+    }
+  }
+}
+```
+
+**Used by**: dialog
+
+### Controller Best Practices
+
+**✅ DO:**
+
+- Keep controllers **stateless** - state belongs in the host component
+- Use `@state()` in host for reactive properties
+- Call `controller.update()` in `updated()` lifecycle
+- Use getter functions for reactive config (`loop: () => this.loop`)
+- Clean up properly in `disconnectedCallback()` (controllers do this
+  automatically)
+
+**❌ DON'T:**
+
+- Store state in controllers (use host's `@state()` instead)
+- Call `host.requestUpdate()` from controllers (triggers full re-render)
+- Forget to update controller when host state changes
+- Use static values when reactive getters are available
+
+### Creating New Controllers
+
+When creating a new controller, follow this pattern:
+
+```typescript
+import type { ReactiveController, ReactiveControllerHost } from "lit";
+
+export interface MyControllerConfig {
+  // Configuration interface
+}
+
+export class MyController implements ReactiveController {
+  private host: ReactiveControllerHost;
+  private config: Required<MyControllerConfig>;
+
+  constructor(host: ReactiveControllerHost, config: MyControllerConfig) {
+    this.config = {
+      // Defaults
+      ...config,
+    };
+    host.addController(this);
+  }
+
+  hostConnected(): void {
+    // Setup when host connects
+  }
+
+  hostDisconnected(): void {
+    // Cleanup when host disconnects
+  }
+}
+```
+
+**Controller Testing**: All controllers should have comprehensive unit tests in
+`@/controllers/*.test.ts` using Vitest.
+
 ## Testing Strategy
 
 ```bash
@@ -464,6 +687,67 @@ import { TW } from "../lib/tailwindMixin"; // ❌ Relative path
 import { TW } from "@/registry/lib/tailwindMixin"; // ✅ Use path alias
 ```
 
+### ❌ DON'T: Store State in Controllers
+
+```typescript
+// ❌ Controller owns state - causes performance issues
+export class MyController {
+  private highlightedIndex = 0; // ❌ State in controller
+
+  handleKeyDown() {
+    this.highlightedIndex++;
+    this.host.requestUpdate(); // ❌ Forces full re-render
+  }
+}
+
+// ✅ Host owns state - Lit's reactive system optimizes updates
+export class MyComponent extends BaseElement {
+  @state() private highlightedIndex = 0; // ✅ State in host
+
+  private controller = new MyController(this, {
+    getHighlightedIndex: () => this.highlightedIndex,
+    setHighlightedIndex: (index) => {
+      this.highlightedIndex = index;
+    },
+  });
+}
+```
+
+### ❌ DON'T: Forget to Update Controllers
+
+```typescript
+// ❌ Controller won't activate when state changes
+override updated(changed: PropertyValues) {
+  super.updated(changed);
+  if (changed.has("open")) {
+    // Missing controller.update()
+  }
+}
+
+// ✅ Always update controllers when relevant state changes
+override updated(changed: PropertyValues) {
+  super.updated(changed);
+  if (changed.has("open")) {
+    this.clickAway.update(); // ✅
+    this.focusTrap.update(); // ✅
+  }
+}
+```
+
+### ❌ DON'T: Use Static Config for Reactive Properties
+
+```typescript
+// ❌ Loop value captured at construction time - won't update
+private navigation = new MenuNavigationController(this, {
+  loop: this.loop, // ❌ Static value
+});
+
+// ✅ Use getter for runtime reactivity
+private navigation = new MenuNavigationController(this, {
+  loop: () => this.loop, // ✅ Reactive getter
+});
+```
+
 ## Registry Workflow
 
 ### Adding a New Component
@@ -504,6 +788,15 @@ Shift + R). For registry: run `bun run registry:build`.
 **Q: Where do I put shared utilities?**  
 A: Put them in `registry/lib/` and add to the `tailwind-mixin` registry item so
 they're copied when users install components.
+
+**Q: Should I create a new controller or use inline code?**  
+A: Create a controller if the pattern is used in 2+ components OR if it involves
+complex state management (keyboard navigation, focus trapping, etc.). Use inline
+code for simple, component-specific logic.
+
+**Q: How do I test controllers?**  
+A: All controllers have unit tests in `@/controllers/*.test.ts`. Use Vitest with
+mock hosts and DOM elements. See existing tests for patterns.
 
 ## Where to Find More Information
 
@@ -559,6 +852,14 @@ you need detailed information:
   tests
 - **No Effect/Effect-Atom** - Use Lit's built-in `@state()` and `@property()`
   only
+- **Use Reactive Controllers** - For reusable patterns (navigation, click-away,
+  focus trap). See Reactive Controllers section above.
+- **Controllers are stateless** - State belongs in host component with
+  `@state()`
+- **Update controllers in `updated()`** - Call `controller.update()` when
+  relevant properties change
+- **Test controllers** - All controllers must have unit tests in
+  `@/controllers/*.test.ts`
 
 ## 🔍 Search Command Requirements
 
@@ -581,4 +882,4 @@ documentation for all coding agents and future maintainers.
 
 ---
 
-_Last updated: 2025-01-18_
+_Last updated: 2025-01-22_

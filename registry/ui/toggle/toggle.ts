@@ -1,7 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { html, LitElement, nothing, type PropertyValues } from "lit";
+import { html, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
+import { cn } from "@/registry/lib/utils";
 
 export const toggleVariants = cva(
   "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium hover:bg-muted hover:text-muted-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&>svg]:pointer-events-none [&>svg]:size-4 [&>svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none transition-[color,box-shadow] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive whitespace-nowrap",
@@ -40,7 +41,7 @@ export interface ToggleProperties {
 }
 
 @customElement("ui-toggle")
-export class Toggle extends TW(LitElement) implements ToggleProperties {
+export class Toggle extends BaseElement implements ToggleProperties {
   static formAssociated = true;
   private internals: ElementInternals;
 
@@ -103,25 +104,22 @@ export class Toggle extends TW(LitElement) implements ToggleProperties {
       this._pressed = !this._pressed;
     }
 
-    this.dispatchEvent(
-      new CustomEvent("change", {
-        detail: {
-          pressed: this.pressed !== undefined ? !this.pressed : this._pressed,
-        },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("change", {
+      pressed: this.pressed !== undefined ? !this.pressed : this._pressed,
+    });
   }
 
   override render() {
     return html`
       <button
         type="button"
-        class=${toggleVariants({
-          variant: this.variant,
-          size: this.size,
-        })}
+        class=${cn(
+          toggleVariants({
+            variant: this.variant,
+            size: this.size,
+          }),
+          this.className,
+        )}
         ?disabled=${this.disabled}
         aria-pressed=${this.isPressed}
         aria-label=${this.ariaLabel || nothing}

@@ -1,10 +1,10 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "label",
-  "type": "registry:component",
+  "type": "registry:style",
   "title": "Label",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-  "description": "Renders an accessible label associated with controls.",
+  "description": "Tailwind CSS utility classes for form labels. Use with native HTML <label> elements.",
   "dependencies": [],
   "files": [
     {

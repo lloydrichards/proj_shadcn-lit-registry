@@ -9,6 +9,7 @@
     "lucide-static"
   ],
   "registryDependencies": [
+    "@lit/base-element",
     "@lit/button"
   ],
   "files": [

@@ -6,10 +6,13 @@
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A responsive table component for displaying tabular data. Uses a simple wrapper component with CSS-based styling for native HTML table elements.",
   "dependencies": [],
+  "registryDependencies": [
+    "@lit/base-element"
+  ],
   "files": [
     {
       "path": "registry/ui/table/table.ts",
-      "content": "import { adoptStyles, html, LitElement, unsafeCSS } from \"lit\";\nimport { customElement } from \"lit/decorators.js\";\nimport { tailwind } from \"@/registry/lib/tailwindMixin\";\nimport tableSlottedCss from \"./table.css?inline\";\n\nconst tableStyles = unsafeCSS(tableSlottedCss);\n\n@customElement(\"ui-table\")\nexport class Table extends LitElement {\n  override connectedCallback() {\n    super.connectedCallback();\n    if (this.shadowRoot) {\n      adoptStyles(this.shadowRoot, [tailwind, tableStyles]);\n    }\n  }\n\n  override render() {\n    return html`<slot></slot>`;\n  }\n}\n\ndeclare global {\n  interface HTMLElementTagNameMap {\n    \"ui-table\": Table;\n  }\n}\n",
+      "content": "import { adoptStyles, html, unsafeCSS } from \"lit\";\nimport { customElement } from \"lit/decorators.js\";\nimport { BaseElement } from \"@/registry/lib/base-element\";\nimport tableSlottedCss from \"./table.css?inline\";\n\nconst tableStyles = unsafeCSS(tableSlottedCss);\n\n@customElement(\"ui-table\")\nexport class Table extends BaseElement {\n  override connectedCallback() {\n    super.connectedCallback();\n    // Apply additional table-specific styles\n    if (this.shadowRoot) {\n      adoptStyles(this.shadowRoot, [tableStyles]);\n    }\n  }\n\n  override render() {\n    return html`<slot></slot>`;\n  }\n}\n\ndeclare global {\n  interface HTMLElementTagNameMap {\n    \"ui-table\": Table;\n  }\n}\n",
       "type": "registry:ui"
     },
     {

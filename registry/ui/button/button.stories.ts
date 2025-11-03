@@ -46,6 +46,9 @@ const meta: Meta<ButtonArgs> = {
     disabled: {
       control: "boolean",
     },
+    loading: {
+      control: "boolean",
+    },
     ariaLabel: {
       control: "text",
     },
@@ -67,6 +70,7 @@ const meta: Meta<ButtonArgs> = {
     size: "default",
     type: "button",
     disabled: false,
+    loading: false,
     children: "Button",
   },
   render: (args) =>
@@ -75,6 +79,7 @@ const meta: Meta<ButtonArgs> = {
       .size=${args.size}
       .type=${args.type}
       .disabled=${args.disabled}
+      .loading=${args.loading}
       .ariaLabel=${args.ariaLabel}
       .ariaDescribedby=${args.ariaDescribedby}
       .ariaLabelledby=${args.ariaLabelledby}
@@ -205,4 +210,134 @@ export const Disabled: Story = {
   args: {
     disabled: true,
   },
+};
+
+/**
+ * Add the `loading` prop to show a loading state.
+ */
+export const Loading: Story = {
+  args: {
+    loading: true,
+    children: "Loading...",
+  },
+};
+
+/**
+ * Loading states work with all variants.
+ */
+export const LoadingVariants: Story = {
+  render: () => html`
+    <div class="flex flex-col gap-4">
+      <ui-button loading>Default Loading</ui-button>
+      <ui-button loading variant="secondary">Secondary Loading</ui-button>
+      <ui-button loading variant="outline">Outline Loading</ui-button>
+      <ui-button loading variant="destructive">Destructive Loading</ui-button>
+    </div>
+  `,
+};
+
+/**
+ * Use the `prefix` slot to add content before the button text.
+ */
+export const WithPrefix: Story = {
+  render: () => html`
+    <ui-button>
+      <svg
+        slot="prefix"
+        class="w-4 h-4"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"
+        />
+      </svg>
+      Home
+    </ui-button>
+  `,
+};
+
+/**
+ * Use the `suffix` slot to add content after the button text.
+ */
+export const WithSuffix: Story = {
+  render: () => html`
+    <ui-button>
+      Next
+      <svg
+        slot="suffix"
+        class="w-4 h-4"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </ui-button>
+  `,
+};
+
+/**
+ * Combine prefix and suffix slots for complex button layouts.
+ */
+export const WithPrefixAndSuffix: Story = {
+  render: () => html`
+    <ui-button variant="outline">
+      <svg
+        slot="prefix"
+        class="w-4 h-4"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+        <path
+          fill-rule="evenodd"
+          d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      View Details
+      <svg
+        slot="suffix"
+        class="w-4 h-4"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </ui-button>
+  `,
+};
+
+/**
+ * Test form submission with submit and reset buttons.
+ */
+export const FormSubmission: Story = {
+  render: () => html`
+    <form
+      @submit=${(e: Event) => {
+        e.preventDefault();
+        alert("Form submitted!");
+      }}
+      class="flex flex-col gap-4 max-w-md"
+    >
+      <input
+        type="text"
+        required
+        placeholder="Enter text (required)"
+        class="px-3 py-2 border rounded-md"
+      />
+      <div class="flex gap-2">
+        <ui-button type="submit">Submit</ui-button>
+        <ui-button type="reset" variant="outline">Reset</ui-button>
+      </div>
+    </form>
+  `,
 };

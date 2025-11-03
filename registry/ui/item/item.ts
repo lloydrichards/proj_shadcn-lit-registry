@@ -1,7 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { adoptStyles, html, LitElement, nothing, unsafeCSS } from "lit";
+import { adoptStyles, html, nothing, unsafeCSS } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { TW, tailwind } from "@/registry/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
+import { tailwind } from "@/registry/lib/tailwindMixin";
 import { cn } from "@/registry/lib/utils";
 import itemSlottedCss from "./item.slotted.css?inline";
 
@@ -70,12 +71,10 @@ export interface ItemProperties {
  * </ui-item>
  * ```
  */
-const TwLitElement = TW(LitElement);
-
 const itemSlottedStyles = unsafeCSS(itemSlottedCss);
 
 @customElement("ui-item")
-export class Item extends TwLitElement implements ItemProperties {
+export class Item extends BaseElement implements ItemProperties {
   static styles = itemSlottedStyles;
 
   @property({ type: String }) variant: ItemVariants["variant"] = "default";
@@ -126,7 +125,7 @@ export class Item extends TwLitElement implements ItemProperties {
 }
 
 /**
- * Group container for organizing multiple items with consistent spacing.
+ * Groups multiple Item components with consistent spacing and list semantics.
  *
  * @example
  * ```html
@@ -138,7 +137,7 @@ export class Item extends TwLitElement implements ItemProperties {
  * ```
  */
 @customElement("ui-item-group")
-export class ItemGroup extends TW(LitElement) {
+export class ItemGroup extends BaseElement {
   override render() {
     return html`
       <div
@@ -165,7 +164,7 @@ export class ItemGroup extends TW(LitElement) {
  * ```
  */
 @customElement("ui-item-separator")
-export class ItemSeparator extends TW(LitElement) {
+export class ItemSeparator extends BaseElement {
   override render() {
     return html`
       <div

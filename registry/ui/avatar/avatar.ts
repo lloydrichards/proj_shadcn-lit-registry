@@ -1,7 +1,12 @@
 import { cva } from "class-variance-authority";
-import { html, LitElement, type PropertyValues } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { html, type PropertyValues } from "lit";
+import {
+  customElement,
+  property,
+  queryAssignedElements,
+  state,
+} from "lit/decorators.js";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
 
 export const avatarVariants = cva(
@@ -15,13 +20,16 @@ export interface AvatarProperties {
 }
 
 @customElement("ui-avatar")
-export class Avatar extends TW(LitElement) implements AvatarProperties {
+export class Avatar extends BaseElement implements AvatarProperties {
   @property({ type: String }) src?: string;
   @property({ type: String }) alt = "";
   @property({ type: String }) loading: "eager" | "lazy" = "lazy";
 
   @state() private _imageLoaded = false;
   @state() private _imageError = false;
+
+  @queryAssignedElements({ slot: "image", flatten: true })
+  private _imageSlot!: HTMLElement[];
 
   override updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
@@ -51,7 +59,7 @@ export class Avatar extends TW(LitElement) implements AvatarProperties {
   }
 
   override render() {
-    const hasImageSlot = this.querySelector('[slot="image"]');
+    const hasImageSlot = this._imageSlot.length > 0;
 
     return html`
       <span class=${cn(avatarVariants(), this.className)}>

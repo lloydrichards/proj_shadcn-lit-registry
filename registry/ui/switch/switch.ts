@@ -1,6 +1,6 @@
-import { html, LitElement, nothing, type PropertyValues } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { html, nothing, type PropertyValues } from "lit";
+import { customElement, property, query, state } from "lit/decorators.js";
+import { FormElement, type FormValue } from "@/registry/lib/form-element";
 
 export interface SwitchChangeEvent extends CustomEvent {
   detail: { checked: boolean };
@@ -10,20 +10,14 @@ export interface SwitchProperties {
   disabled?: boolean;
   required?: boolean;
   name?: string;
-  value?: string;
+  value?: FormValue;
   checked?: boolean;
   defaultChecked?: boolean;
 }
 
 @customElement("ui-switch")
-export class Switch extends TW(LitElement) implements SwitchProperties {
-  static formAssociated = true;
-  private internals: ElementInternals;
-
-  @property({ type: Boolean }) disabled = false;
-  @property({ type: Boolean }) required = false;
-  @property({ type: String }) name = "";
-  @property({ type: String }) value = "on";
+export class Switch extends FormElement implements SwitchProperties {
+  @query("button") private _button!: HTMLButtonElement;
 
   @property({ type: Boolean }) checked: boolean | undefined = undefined;
   @property({ type: Boolean, attribute: "default-checked" })
@@ -39,52 +33,17 @@ export class Switch extends TW(LitElement) implements SwitchProperties {
 
   @state() private _checked = false;
 
-  private _labelClickHandler = (e: Event) => {
-    const label = e.currentTarget as HTMLLabelElement;
-    if (label.htmlFor === this.id && !this.disabled) {
-      e.preventDefault();
-      this.handleClick();
-    }
-  };
-
-  constructor() {
-    super();
-    this.internals = this.attachInternals();
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     if (this.checked === undefined) {
       this._checked = this.defaultChecked;
     }
-    this._setupLabelDelegation();
+    this.setupLabelDelegation(() => this._handleClick());
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._cleanupLabelDelegation();
-  }
-
-  private _setupLabelDelegation() {
-    if (!this.id) return;
-    const root = this.getRootNode() as Document | ShadowRoot;
-    const labels = root.querySelectorAll(
-      `label[for="${this.id}"]`,
-    ) as NodeListOf<HTMLLabelElement>;
-    labels.forEach((label) => {
-      label.addEventListener("click", this._labelClickHandler);
-    });
-  }
-
-  private _cleanupLabelDelegation() {
-    if (!this.id) return;
-    const root = this.getRootNode() as Document | ShadowRoot;
-    const labels = root.querySelectorAll(
-      `label[for="${this.id}"]`,
-    ) as NodeListOf<HTMLLabelElement>;
-    labels.forEach((label) => {
-      label.removeEventListener("click", this._labelClickHandler);
-    });
+    this.cleanupLabelDelegation();
   }
 
   private get isChecked(): boolean {
@@ -109,7 +68,7 @@ export class Switch extends TW(LitElement) implements SwitchProperties {
         this.removeAttribute("data-disabled");
       }
 
-      this.internals.setFormValue(this.isChecked ? this.value : null);
+      this.updateFormValue();
     }
   }
 
@@ -120,12 +79,35 @@ export class Switch extends TW(LitElement) implements SwitchProperties {
   ) {
     super.attributeChangedCallback(name, _old, value);
     if (name === "id" && _old !== value) {
-      this._cleanupLabelDelegation();
-      this._setupLabelDelegation();
+      this.cleanupLabelDelegation();
+      this.setupLabelDelegation(() => this._handleClick());
     }
   }
 
-  private handleClick() {
+  /**
+   * Get the form value for this switch
+   * Returns the value when checked, null when unchecked
+   */
+  protected getFormValue(): FormValue {
+    return this.isChecked ? this.value : null;
+  }
+
+  /**
+   * Update the form value using the getFormValue method
+   */
+  protected override updateFormValue() {
+    const formValue = this.disabled ? null : this.getFormValue();
+
+    if (this.internals) {
+      if (formValue === null || formValue === undefined) {
+        this.internals.setFormValue(null);
+      } else {
+        this.internals.setFormValue(String(formValue));
+      }
+    }
+  }
+
+  private _handleClick() {
     if (this.disabled) return;
 
     const newChecked =
@@ -135,23 +117,31 @@ export class Switch extends TW(LitElement) implements SwitchProperties {
       this._checked = newChecked;
     }
 
-    this.dispatchEvent(
-      new CustomEvent("change", {
-        detail: {
-          checked: newChecked,
-        },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("change", {
+      checked: newChecked,
+    });
   }
 
-  private handleKeyDown(e: KeyboardEvent) {
+  private _handleKeyDown(e: KeyboardEvent) {
     if (this.disabled) return;
     if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
-      this.handleClick();
+      this._handleClick();
     }
+  }
+
+  /**
+   * Focus the switch button
+   */
+  focus(options?: FocusOptions): void {
+    this._button?.focus(options);
+  }
+
+  /**
+   * Blur the switch button
+   */
+  blur(): void {
+    this._button?.blur();
   }
 
   override render() {
@@ -167,8 +157,8 @@ export class Switch extends TW(LitElement) implements SwitchProperties {
         aria-labelledby=${this.ariaLabelledby || nothing}
         aria-describedby=${this.ariaDescribedby || nothing}
         data-state=${this.isChecked ? "checked" : "unchecked"}
-        @click=${this.handleClick}
-        @keydown=${this.handleKeyDown}
+        @click=${this._handleClick}
+        @keydown=${this._handleKeyDown}
       >
         <span
           class="bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"

@@ -1,10 +1,10 @@
-import { html, LitElement, nothing, type PropertyValues } from "lit";
+import { html, nothing, type PropertyValues } from "lit";
 import {
   customElement,
   property,
   queryAssignedElements,
 } from "lit/decorators.js";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
 
 export interface TabsChangeEvent extends CustomEvent {
@@ -17,7 +17,7 @@ export interface TabsProperties {
 }
 
 @customElement("ui-tabs")
-export class Tabs extends TW(LitElement) implements TabsProperties {
+export class Tabs extends BaseElement implements TabsProperties {
   @property({ type: String }) value = "";
   @property({ type: String, attribute: "default-value" }) defaultValue = "";
 
@@ -41,13 +41,7 @@ export class Tabs extends TW(LitElement) implements TabsProperties {
     const newValue = e.detail.value;
     if (newValue !== this.value) {
       this.value = newValue;
-      this.dispatchEvent(
-        new CustomEvent("change", {
-          detail: { value: newValue },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("change", { value: newValue });
     }
   };
 
@@ -84,7 +78,7 @@ export class Tabs extends TW(LitElement) implements TabsProperties {
 }
 
 @customElement("ui-tabs-list")
-export class TabsList extends TW(LitElement) {
+export class TabsList extends BaseElement {
   @queryAssignedElements({ selector: "ui-tabs-trigger" })
   private triggers!: Array<TabsTrigger>;
 
@@ -168,7 +162,7 @@ export class TabsList extends TW(LitElement) {
 }
 
 @customElement("ui-tabs-trigger")
-export class TabsTrigger extends TW(LitElement) {
+export class TabsTrigger extends BaseElement {
   @property({ type: String }) value = "";
   @property({ type: Boolean }) disabled = false;
   @property({ type: Boolean }) selected = false;
@@ -183,13 +177,7 @@ export class TabsTrigger extends TW(LitElement) {
   private handleClick = () => {
     if (this.disabled) return;
 
-    this.dispatchEvent(
-      new CustomEvent("tabs-trigger-click", {
-        detail: { value: this.value },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("tabs-trigger-click", { value: this.value });
   };
 
   override updated(changedProperties: PropertyValues) {
@@ -239,7 +227,7 @@ export class TabsTrigger extends TW(LitElement) {
 }
 
 @customElement("ui-tabs-content")
-export class TabsContent extends TW(LitElement) {
+export class TabsContent extends BaseElement {
   @property({ type: String }) value = "";
   @property({ type: Boolean }) active = false;
   @property({ type: Boolean }) forceMount = false;

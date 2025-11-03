@@ -86,6 +86,10 @@ jobs:
       - name: Install Dependencies
         uses: ./.github/actions/setup
 
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+
+
       - name: Run Component Tests
         run: bun run test:unit
 

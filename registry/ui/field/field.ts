@@ -1,13 +1,11 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { css, html, LitElement, nothing } from "lit";
+import { css, html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { TW } from "@/lib/tailwindMixin";
-import { cn } from "@/lib/utils";
-
-const TwLitElement = TW(LitElement);
+import { BaseElement } from "@/registry/lib/base-element";
+import { cn } from "@/registry/lib/utils";
 
 @customElement("ui-field-set")
-export class FieldSet extends TwLitElement {
+export class FieldSet extends BaseElement {
   static styles = css`
     :host {
       display: block;
@@ -31,7 +29,7 @@ export class FieldSet extends TwLitElement {
 }
 
 @customElement("ui-field-legend")
-export class FieldLegend extends TwLitElement {
+export class FieldLegend extends BaseElement {
   static styles = css`
     :host {
       display: contents;
@@ -58,7 +56,7 @@ export class FieldLegend extends TwLitElement {
 }
 
 @customElement("ui-field-group")
-export class FieldGroup extends TwLitElement {
+export class FieldGroup extends BaseElement {
   static styles = css`
     :host {
       display: contents;
@@ -108,7 +106,7 @@ const fieldVariants = cva(
 type FieldVariants = VariantProps<typeof fieldVariants>;
 
 @customElement("ui-field")
-export class Field extends TwLitElement {
+export class Field extends BaseElement {
   static styles = css`
     :host {
       display: contents;
@@ -208,7 +206,7 @@ export class Field extends TwLitElement {
 }
 
 @customElement("ui-field-description")
-export class FieldDescription extends TwLitElement {
+export class FieldDescription extends BaseElement {
   static styles = css`
     :host {
       display: block;
@@ -235,7 +233,7 @@ export class FieldDescription extends TwLitElement {
 }
 
 @customElement("ui-field-error")
-export class FieldError extends TwLitElement {
+export class FieldError extends BaseElement {
   static styles = css`
     :host {
       display: block;
