@@ -1,12 +1,12 @@
 import { cva } from "class-variance-authority";
-import { html, LitElement, type PropertyValues } from "lit";
+import { html, type PropertyValues } from "lit";
 import {
   customElement,
   property,
   queryAssignedElements,
   state,
 } from "lit/decorators.js";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
 
 export const avatarVariants = cva(
@@ -20,7 +20,7 @@ export interface AvatarProperties {
 }
 
 @customElement("ui-avatar")
-export class Avatar extends TW(LitElement) implements AvatarProperties {
+export class Avatar extends BaseElement implements AvatarProperties {
   @property({ type: String }) src?: string;
   @property({ type: String }) alt = "";
   @property({ type: String }) loading: "eager" | "lazy" = "lazy";
@@ -65,8 +65,9 @@ export class Avatar extends TW(LitElement) implements AvatarProperties {
       <span class=${cn(avatarVariants(), this.className)}>
         <slot name="image"></slot>
 
-        ${this.src && !hasImageSlot
-          ? html`
+        ${
+          this.src && !hasImageSlot
+            ? html`
               <img
                 class="aspect-square h-full w-full object-cover"
                 src=${this.src}
@@ -77,16 +78,19 @@ export class Avatar extends TW(LitElement) implements AvatarProperties {
                 style=${this._shouldShowImage ? "" : "display: none;"}
               />
             `
-          : ""}
-        ${this._shouldShowFallback
-          ? html`
+            : ""
+        }
+        ${
+          this._shouldShowFallback
+            ? html`
               <span
                 class="flex h-full w-full items-center justify-center rounded-full bg-muted"
               >
                 <slot></slot>
               </span>
             `
-          : ""}
+            : ""
+        }
       </span>
     `;
   }

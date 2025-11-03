@@ -1,10 +1,10 @@
-import { css, html, LitElement } from "lit";
+import { css, html } from "lit";
 import { customElement } from "lit/decorators.js";
-import { TW } from "@/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/lib/utils";
 
 @customElement("ui-card")
-export class Card extends TW(LitElement) {
+export class Card extends BaseElement {
   static styles = css`
     :host {
       display: block;
@@ -27,7 +27,7 @@ export class Card extends TW(LitElement) {
 }
 
 @customElement("ui-card-header")
-export class CardHeader extends TW(LitElement) {
+export class CardHeader extends BaseElement {
   override render() {
     return html`
       <div
@@ -44,7 +44,7 @@ export class CardHeader extends TW(LitElement) {
 }
 
 @customElement("ui-card-title")
-export class CardTitle extends TW(LitElement) {
+export class CardTitle extends BaseElement {
   override render() {
     return html`
       <div
@@ -58,7 +58,7 @@ export class CardTitle extends TW(LitElement) {
 }
 
 @customElement("ui-card-description")
-export class CardDescription extends TW(LitElement) {
+export class CardDescription extends BaseElement {
   override render() {
     return html`
       <div
@@ -72,7 +72,7 @@ export class CardDescription extends TW(LitElement) {
 }
 
 @customElement("ui-card-action")
-export class CardAction extends TW(LitElement) {
+export class CardAction extends BaseElement {
   override render() {
     return html`
       <div
@@ -89,7 +89,7 @@ export class CardAction extends TW(LitElement) {
 }
 
 @customElement("ui-card-content")
-export class CardContent extends TW(LitElement) {
+export class CardContent extends BaseElement {
   override render() {
     return html`
       <div data-slot="card-content" class=${cn("px-6", this.className)}>
@@ -100,7 +100,7 @@ export class CardContent extends TW(LitElement) {
 }
 
 @customElement("ui-card-footer")
-export class CardFooter extends TW(LitElement) {
+export class CardFooter extends BaseElement {
   override render() {
     return html`
       <div

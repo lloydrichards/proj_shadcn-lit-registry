@@ -1,9 +1,7 @@
-import { html, LitElement, nothing, type PropertyValues } from "lit";
+import { html, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
-
-const TwLitElement = TW(LitElement);
 
 /**
  * Collapsible component properties and events
@@ -30,7 +28,7 @@ export interface CollapsibleOpenChangeEvent extends CustomEvent {
  * Root collapsible container managing state
  */
 @customElement("ui-collapsible")
-export class Collapsible extends TwLitElement implements CollapsibleProperties {
+export class Collapsible extends BaseElement implements CollapsibleProperties {
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: Boolean, attribute: "default-open" }) defaultOpen = false;
   @property({ type: Boolean }) disabled = false;
@@ -63,13 +61,7 @@ export class Collapsible extends TwLitElement implements CollapsibleProperties {
     if (changedProperties.has("open")) {
       this.updateContent();
 
-      this.dispatchEvent(
-        new CustomEvent("open-change", {
-          detail: { open: this.open },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("open-change", { open: this.open });
     }
   }
 
@@ -134,7 +126,7 @@ export class Collapsible extends TwLitElement implements CollapsibleProperties {
  */
 @customElement("ui-collapsible-trigger")
 export class CollapsibleTrigger
-  extends TwLitElement
+  extends BaseElement
   implements CollapsibleTriggerProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -146,12 +138,7 @@ export class CollapsibleTrigger
       return;
     }
 
-    this.dispatchEvent(
-      new CustomEvent("collapsible-trigger-click", {
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("collapsible-trigger-click", {});
   };
 
   override render() {
@@ -176,7 +163,7 @@ export class CollapsibleTrigger
  */
 @customElement("ui-collapsible-content")
 export class CollapsibleContent
-  extends TwLitElement
+  extends BaseElement
   implements CollapsibleContentProperties
 {
   @property({ type: Boolean }) forceMount = false;
