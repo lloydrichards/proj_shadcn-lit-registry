@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "base-element",
+  "type": "registry:lib",
+  "title": "Base Element",
+  "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+  "description": "Foundation class for all registry components. Provides automatic Tailwind CSS injection, typed event emission with composed: true by default, automatic dependency registration, and host class forwarding support.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@lit/tailwind-mixin"
+  ],
+  "files": [
+    {
+      "path": "registry/lib/base-element.ts",
+      "content": "/**\n * BaseElement - Foundation class for all registry components\n *\n * Features:\n * 1. Automatic Tailwind CSS injection via TW mixin\n * 2. Typed event emission with composed: true by default\n * 3. Automatic dependency registration\n * 4. Host class forwarding support via native className property\n */\n\nimport { LitElement } from \"lit\";\nimport { TW } from \"./tailwindMixin\";\n\nexport class BaseElement extends TW(LitElement) {\n  /**\n   * Static dependencies that will be auto-registered\n   * Example: static dependencies = { \"ui-icon\": Icon }\n   */\n  static dependencies?: Record<string, CustomElementConstructor>;\n\n  /**\n   * Emit a custom event that crosses shadow DOM boundaries\n   * All events are composed and bubble by default\n   */\n  protected emit<T = Record<string, unknown>>(\n    name: string,\n    detail?: T,\n    options?: Omit<CustomEventInit<T>, \"detail\" | \"bubbles\" | \"composed\">,\n  ): boolean {\n    const event = new CustomEvent(name, {\n      bubbles: true,\n      composed: true, // CRITICAL: Must be true for shadow DOM\n      cancelable: options?.cancelable ?? false,\n      detail,\n      ...options,\n    });\n    return this.dispatchEvent(event);\n  }\n\n  override connectedCallback() {\n    super.connectedCallback();\n    this.registerDependencies();\n  }\n\n  private registerDependencies() {\n    const deps = (this.constructor as typeof BaseElement).dependencies;\n    if (deps) {\n      Object.entries(deps).forEach(([name, ctor]) => {\n        // Validate element name\n        if (!name.includes(\"-\")) {\n          console.error(\n            `Invalid custom element name \"${name}\": must contain a hyphen`,\n          );\n          return;\n        }\n\n        if (customElements.get(name)) {\n          return; // Already registered\n        }\n\n        try {\n          customElements.define(name, ctor);\n        } catch (error) {\n          console.error(`Failed to register custom element \"${name}\":`, error);\n        }\n      });\n    }\n  }\n}\n\nexport default BaseElement;\n",
+      "type": "registry:lib"
+    }
+  ],
+  "categories": [
+    "lib",
+    "base",
+    "web-component"
+  ]
+}

@@ -34,12 +34,105 @@
       "docs": "IMPORTANT: You must create a Tailwind CSS global file. See setup instructions at https://lit-registry.lloydrichards.dev or copy the template from https://github.com/lloydrichards/shadcn-lit-registry/blob/main/registry/styles/tailwind.global.css"
     },
     {
+      "name": "base-element",
+      "type": "registry:lib",
+      "title": "Base Element",
+      "description": "Foundation class for all registry components. Provides automatic Tailwind CSS injection, typed event emission with composed: true by default, automatic dependency registration, and host class forwarding support.",
+      "categories": ["lib", "base", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/tailwind-mixin"],
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/lib/base-element.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "form-element",
+      "type": "registry:lib",
+      "title": "Form Element",
+      "description": "Base class for form-associated custom elements with ElementInternals API support. Extends BaseElement with form validation, value management, and accessibility features for building custom form controls.",
+      "categories": ["lib", "form", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/base-element"],
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/lib/form-element.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "animations",
+      "type": "registry:lib",
+      "title": "Animations",
+      "description": "Animation utilities for Lit components using the Web Animations API. Includes helpers for enter/exit animations, slide transitions, and fade effects with promises and event support.",
+      "categories": ["lib", "animation", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/lib/animations.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "click-away-controller",
+      "type": "registry:lib",
+      "title": "Click Away Controller",
+      "description": "Reactive controller for detecting clicks outside a component. Useful for closing dropdowns, menus, and modals when clicking outside. Features conditional activation, multiple excluded elements support, and capture vs bubbling phase control.",
+      "categories": ["lib", "controller", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/controllers/click-away-controller.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "focus-trap-controller",
+      "type": "registry:lib",
+      "title": "Focus Trap Controller",
+      "description": "Reactive controller for trapping focus within a container for modal dialogs and overlays. Features Tab/Shift+Tab cycling, auto-focus first element, restore focus on deactivation, and handles empty containers gracefully.",
+      "categories": ["lib", "controller", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/controllers/focus-trap-controller.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "menu-navigation-controller",
+      "type": "registry:lib",
+      "title": "Menu Navigation Controller",
+      "description": "Reactive controller for keyboard navigation in menu-like components (dropdowns, context menus, selects). Features arrow key navigation, Home/End support, Enter/Space selection, Escape handling, typeahead search, and optional looping.",
+      "categories": ["lib", "controller", "web-component"],
+      "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "dependencies": [],
+      "files": [
+        {
+          "path": "registry/controllers/menu-navigation-controller.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "button",
       "type": "registry:component",
       "title": "Button",
       "description": "An atomic button component built with Lit and styled using Tailwind CSS. Supports multiple variants and sizes for versatile use in web applications.",
       "categories": ["ui", "button", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/base-element", "@lit/animations"],
       "dependencies": ["lucide-static"],
       "files": [
         {
@@ -59,6 +152,7 @@
       "description": "An image element with a fallback for representing the user. Built with Lit and styled using Tailwind CSS.",
       "categories": ["ui", "avatar", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/base-element"],
       "dependencies": [],
       "files": [
         {
@@ -78,6 +172,7 @@
       "description": "A badge component built with Lit and styled using Tailwind CSS. Supports multiple variants for different use cases.",
       "categories": ["ui", "badge", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/base-element"],
       "dependencies": [],
       "files": [
         {
@@ -97,7 +192,7 @@
       "description": "A card component built with Lit and styled using Tailwind CSS. Includes subcomponents for header, title, description, action, content, and footer.",
       "categories": ["ui", "card", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-      "registryDependencies": ["@lit/button"],
+      "registryDependencies": ["@lit/base-element", "@lit/button"],
       "dependencies": [],
       "files": [
         {
@@ -117,6 +212,7 @@
       "description": "A control that allows the user to toggle between checked and not checked. Built with Lit and styled using Tailwind CSS. Supports form integration and indeterminate state.",
       "categories": ["ui", "form", "checkbox", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/form-element"],
       "dependencies": ["lucide-static"],
       "files": [
         {
@@ -136,7 +232,7 @@
       "description": "Form field components for creating accessible form layouts with labels, descriptions, and error messages. Includes fieldset, legend, and field grouping utilities.",
       "categories": ["ui", "form", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-      "registryDependencies": ["@lit/input"],
+      "registryDependencies": ["@lit/base-element", "@lit/input"],
       "dependencies": [],
       "files": [
         {
@@ -151,9 +247,9 @@
     },
     {
       "name": "input",
-      "type": "registry:component",
+      "type": "registry:style",
       "title": "Input",
-      "description": "A text input component built with Lit and styled using Tailwind CSS. Supports various input types and states.",
+      "description": "Tailwind CSS utility classes for form input fields. Use with native HTML <input> elements.",
       "categories": ["ui", "form", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
       "registryDependencies": ["@lit/button"],
@@ -177,7 +273,7 @@
       "description": "A versatile item component using named slots for flexible content composition. Includes group and separator components for organizing lists.",
       "categories": ["ui", "list", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-      "registryDependencies": ["@lit/button"],
+      "registryDependencies": ["@lit/base-element", "@lit/button"],
       "dependencies": ["lucide-static"],
       "files": [
         {
@@ -241,7 +337,12 @@
       "description": "Displays a list of options for the user to pick from—triggered by a button. Built with Lit and styled using Tailwind CSS. Features keyboard navigation, typeahead search, and form integration.",
       "categories": ["ui", "form", "select", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-      "registryDependencies": ["@lit/popover"],
+      "registryDependencies": [
+        "@lit/base-element",
+        "@lit/click-away-controller",
+        "@lit/menu-navigation-controller",
+        "@lit/popover"
+      ],
       "dependencies": ["lucide-static"],
       "files": [
         {
@@ -261,6 +362,7 @@
       "description": "A control that allows the user to toggle between checked and not checked. Built with Lit and styled using Tailwind CSS. Supports controlled and uncontrolled modes with form integration.",
       "categories": ["ui", "form", "switch", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/form-element"],
       "dependencies": [],
       "files": [
         {
@@ -280,6 +382,7 @@
       "description": "A set of layered sections of content—known as tab panels—that are displayed one at a time. Built with Lit and styled using Tailwind CSS. Features keyboard navigation and accessible ARIA attributes.",
       "categories": ["ui", "tabs", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/base-element"],
       "dependencies": [],
       "files": [
         {
@@ -299,6 +402,7 @@
       "description": "A two-state button that can be either on or off. Built with Lit and styled using Tailwind CSS. Supports multiple variants and sizes with form integration.",
       "categories": ["ui", "toggle", "button", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/base-element"],
       "dependencies": ["lucide-static"],
       "files": [
         {
@@ -318,7 +422,7 @@
       "description": "An opinionated toast notification component for displaying messages. Built with Lit and styled using Tailwind CSS. Supports success, error, info, warning, and loading states with icons. Features promise support, action buttons, and multiple visual variants.",
       "categories": ["ui", "toast", "notification", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-      "registryDependencies": ["@lit/button"],
+      "registryDependencies": ["@lit/base-element", "@lit/button"],
       "dependencies": ["lucide-static"],
       "files": [
         {
@@ -338,6 +442,7 @@
       "description": "A responsive table component for displaying tabular data. Uses a simple wrapper component with CSS-based styling for native HTML table elements.",
       "categories": ["ui", "table", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/base-element"],
       "dependencies": [],
       "files": [
         {
@@ -384,9 +489,9 @@
     },
     {
       "name": "label",
-      "type": "registry:component",
+      "type": "registry:style",
       "title": "Label",
-      "description": "Renders an accessible label associated with controls.",
+      "description": "Tailwind CSS utility classes for form labels. Use with native HTML <label> elements.",
       "categories": ["ui", "form", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
       "dependencies": [],
@@ -404,9 +509,9 @@
     },
     {
       "name": "textarea",
-      "type": "registry:component",
+      "type": "registry:style",
       "title": "Textarea",
-      "description": "Displays a form textarea or a component that looks like a textarea.",
+      "description": "Tailwind CSS utility classes for form textareas. Use with native HTML <textarea> elements.",
       "categories": ["ui", "form", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
       "dependencies": [],
@@ -429,7 +534,12 @@
       "description": "Displays a menu to the user—such as a set of actions or functions—triggered by a button. Supports nested submenus, checkbox items, radio groups, keyboard navigation, and accessibility features.",
       "categories": ["ui", "menu", "dropdown", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-      "registryDependencies": ["@lit/popover"],
+      "registryDependencies": [
+        "@lit/base-element",
+        "@lit/click-away-controller",
+        "@lit/menu-navigation-controller",
+        "@lit/popover"
+      ],
       "dependencies": ["lucide-static", "@floating-ui/dom"],
       "files": [
         {
@@ -449,7 +559,12 @@
       "description": "Displays a menu to the user at the cursor position when right-clicking on a trigger area. Supports checkboxes, radio groups, nested submenus, keyboard navigation, and accessibility features.",
       "categories": ["ui", "menu", "context-menu", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-      "registryDependencies": ["@lit/popover"],
+      "registryDependencies": [
+        "@lit/base-element",
+        "@lit/click-away-controller",
+        "@lit/menu-navigation-controller",
+        "@lit/popover"
+      ],
       "dependencies": ["lucide-static", "@floating-ui/dom"],
       "files": [
         {
@@ -469,7 +584,12 @@
       "description": "A visually persistent menu common in desktop applications that provides quick access to a consistent set of commands. Features horizontal keyboard navigation and accessible ARIA attributes.",
       "categories": ["ui", "navigation", "menu", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-      "registryDependencies": ["@lit/popover"],
+      "registryDependencies": [
+        "@lit/base-element",
+        "@lit/click-away-controller",
+        "@lit/menu-navigation-controller",
+        "@lit/popover"
+      ],
       "dependencies": ["lucide-static", "@floating-ui/dom"],
       "files": [
         {
@@ -489,6 +609,7 @@
       "description": "Fast, composable, unstyled command menu component. Features search/filtering, keyboard navigation, item grouping, and accessibility support. Based on the cmdk library pattern.",
       "categories": ["ui", "command", "search", "menu", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/base-element"],
       "dependencies": ["lucide-static"],
       "files": [
         {
@@ -508,10 +629,19 @@
       "description": "A modal dialog component that overlays content on the primary window. Uses native HTML dialog element with smooth animations, focus management, and accessibility features. Supports ESC key and backdrop click to close.",
       "categories": ["ui", "dialog", "modal", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-      "dependencies": ["lucide-static"],
+      "registryDependencies": [
+        "@lit/base-element",
+        "@lit/focus-trap-controller",
+        "@lit/animations"
+      ],
+      "dependencies": ["lucide-static", "@lit/context"],
       "files": [
         {
           "path": "registry/ui/dialog/dialog.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/ui/dialog/dialog.stories.ts",
           "type": "registry:ui"
         }
       ]
@@ -523,6 +653,7 @@
       "description": "A vertically stacked set of interactive headings that each reveal a section of content. Supports single and multiple open items with smooth animations and full keyboard navigation.",
       "categories": ["ui", "accordion", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/base-element"],
       "dependencies": ["lucide-static"],
       "files": [
         {
@@ -542,6 +673,7 @@
       "description": "An interactive component which expands/collapses a panel. Useful for showing and hiding content with smooth animations and accessibility features.",
       "categories": ["ui", "collapsible", "web-component"],
       "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+      "registryDependencies": ["@lit/base-element"],
       "dependencies": ["lucide-static"],
       "files": [
         {

@@ -1,10 +1,10 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "input",
-  "type": "registry:component",
+  "type": "registry:style",
   "title": "Input",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
-  "description": "A text input component built with Lit and styled using Tailwind CSS. Supports various input types and states.",
+  "description": "Tailwind CSS utility classes for form input fields. Use with native HTML <input> elements.",
   "dependencies": [],
   "registryDependencies": [
     "@lit/button"

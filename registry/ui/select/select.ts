@@ -1,4 +1,4 @@
-import { html, LitElement, nothing, type PropertyValues } from "lit";
+import { html, nothing, type PropertyValues } from "lit";
 import {
   customElement,
   property,
@@ -10,7 +10,7 @@ import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, ChevronDown } from "lucide-static";
 import { ClickAwayController } from "@/controllers/click-away-controller";
 import { MenuNavigationController } from "@/controllers/menu-navigation-controller";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
 
 export interface SelectChangeEvent extends CustomEvent {
   detail: { value: string };
@@ -25,7 +25,7 @@ export interface SelectProperties {
 }
 
 @customElement("ui-select")
-export class Select extends TW(LitElement) implements SelectProperties {
+export class Select extends BaseElement implements SelectProperties {
   static formAssociated = true;
   private internals: ElementInternals;
 
@@ -87,13 +87,7 @@ export class Select extends TW(LitElement) implements SelectProperties {
       this.value = newValue;
       this.internals.setFormValue(newValue);
 
-      this.dispatchEvent(
-        new CustomEvent("change", {
-          detail: { value: newValue },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("change", { value: newValue });
     }
 
     this.open = false;
@@ -245,18 +239,13 @@ export class Select extends TW(LitElement) implements SelectProperties {
 }
 
 @customElement("ui-select-trigger")
-export class SelectTrigger extends TW(LitElement) {
+export class SelectTrigger extends BaseElement {
   @property({ type: Boolean }) disabled = false;
 
   private handleButtonClick = (e: Event) => {
     if (this.disabled) return;
     e.preventDefault();
-    this.dispatchEvent(
-      new CustomEvent("trigger-click", {
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("trigger-click");
   };
 
   override render() {
@@ -279,7 +268,7 @@ export class SelectTrigger extends TW(LitElement) {
 }
 
 @customElement("ui-select-value")
-export class SelectValue extends TW(LitElement) {
+export class SelectValue extends BaseElement {
   @property({ type: String }) placeholder = "Select...";
   @state() private selectedText = "";
 
@@ -316,7 +305,7 @@ export class SelectValue extends TW(LitElement) {
 }
 
 @customElement("ui-select-content")
-export class SelectContent extends TW(LitElement) {
+export class SelectContent extends BaseElement {
   @state() private isOpen = false;
   @state() private highlightedIndex = -1;
   @state() private triggerWidth = "auto";
@@ -465,7 +454,7 @@ export class SelectContent extends TW(LitElement) {
 }
 
 @customElement("ui-select-item")
-export class SelectItem extends TW(LitElement) {
+export class SelectItem extends BaseElement {
   @property({ type: String }) value = "";
   @property({ type: Boolean }) disabled = false;
   @property({ type: Boolean }) highlighted = false;
@@ -473,13 +462,7 @@ export class SelectItem extends TW(LitElement) {
   private handleClick = () => {
     if (this.disabled) return;
 
-    this.dispatchEvent(
-      new CustomEvent("select-item-click", {
-        detail: { value: this.value },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("select-item-click", { value: this.value });
 
     const select = this.closest("ui-select");
     const valueElement = select?.querySelector("ui-select-value");
@@ -534,7 +517,7 @@ export class SelectItem extends TW(LitElement) {
 }
 
 @customElement("ui-select-group")
-export class SelectGroup extends TW(LitElement) {
+export class SelectGroup extends BaseElement {
   override render() {
     return html`
       <div role="group" class="py-1">
@@ -545,7 +528,7 @@ export class SelectGroup extends TW(LitElement) {
 }
 
 @customElement("ui-select-label")
-export class SelectLabel extends TW(LitElement) {
+export class SelectLabel extends BaseElement {
   override render() {
     return html`
       <div class="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
@@ -556,7 +539,7 @@ export class SelectLabel extends TW(LitElement) {
 }
 
 @customElement("ui-select-separator")
-export class SelectSeparator extends TW(LitElement) {
+export class SelectSeparator extends BaseElement {
   override render() {
     return html`
       <div
