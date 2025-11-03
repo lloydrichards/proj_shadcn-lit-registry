@@ -2,8 +2,8 @@
  * Unit tests for FocusTrapController
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ReactiveControllerHost } from "lit";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FocusTrapController } from "./focus-trap-controller";
 
 describe("FocusTrapController", () => {

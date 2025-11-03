@@ -2,12 +2,12 @@
  * Unit tests for MenuNavigationController
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ReactiveControllerHost } from "lit";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  type MenuNavigationConfig,
   MenuNavigationController,
   type NavigableMenuItem,
-  type MenuNavigationConfig,
 } from "./menu-navigation-controller";
 
 describe("MenuNavigationController", () => {

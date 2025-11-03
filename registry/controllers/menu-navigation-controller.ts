@@ -123,9 +123,6 @@ export class MenuNavigationController implements ReactiveController {
     host.addController(this);
   }
 
-  /**
-   * Get the current loop setting (supports reactive getter)
-   */
   private getLoop(): boolean {
     const loop = this.config.loop;
     return typeof loop === "function" ? loop() : loop;
@@ -136,17 +133,10 @@ export class MenuNavigationController implements ReactiveController {
   }
 
   hostDisconnected(): void {
-    // Cleanup typeahead timer
     if (this.typeaheadTimer) {
       clearTimeout(this.typeaheadTimer);
     }
   }
-
-  /**
-   * Handle keyboard events for menu navigation
-   *
-   * @param e - The keyboard event
-   */
   handleKeyDown(e: KeyboardEvent): void {
     const items = this.config.getItems();
     if (items.length === 0) return;
@@ -194,10 +184,6 @@ export class MenuNavigationController implements ReactiveController {
         }
     }
   }
-
-  /**
-   * Navigate to the next item
-   */
   private navigateNext(items: NavigableMenuItem[]): void {
     const current = this.config.getHighlightedIndex();
     let next: number;
@@ -210,10 +196,6 @@ export class MenuNavigationController implements ReactiveController {
 
     this.config.setHighlightedIndex(next);
   }
-
-  /**
-   * Navigate to the previous item
-   */
   private navigatePrevious(items: NavigableMenuItem[]): void {
     const current = this.config.getHighlightedIndex();
     let prev: number;
@@ -226,24 +208,12 @@ export class MenuNavigationController implements ReactiveController {
 
     this.config.setHighlightedIndex(prev);
   }
-
-  /**
-   * Navigate to the first item
-   */
   private navigateToFirst(_items: NavigableMenuItem[]): void {
     this.config.setHighlightedIndex(0);
   }
-
-  /**
-   * Navigate to the last item
-   */
   private navigateToLast(items: NavigableMenuItem[]): void {
     this.config.setHighlightedIndex(items.length - 1);
   }
-
-  /**
-   * Select the currently highlighted item
-   */
   private selectHighlighted(items: NavigableMenuItem[]): void {
     const index = this.config.getHighlightedIndex();
     if (index >= 0 && index < items.length) {
@@ -253,20 +223,13 @@ export class MenuNavigationController implements ReactiveController {
       }
     }
   }
-
-  /**
-   * Handle typeahead search
-   */
   private handleTypeahead(char: string, items: NavigableMenuItem[]): void {
-    // Clear existing timer
     if (this.typeaheadTimer) {
       clearTimeout(this.typeaheadTimer);
     }
 
-    // Append character to search string
     this.typeaheadString += char.toLowerCase();
 
-    // Find matching item
     const matchIndex = items.findIndex((item) =>
       item.textContent?.toLowerCase().startsWith(this.typeaheadString),
     );
@@ -275,15 +238,10 @@ export class MenuNavigationController implements ReactiveController {
       this.config.setHighlightedIndex(matchIndex);
     }
 
-    // Reset typeahead string after timeout
     this.typeaheadTimer = window.setTimeout(() => {
       this.typeaheadString = "";
     }, this.config.typeaheadTimeout);
   }
-
-  /**
-   * Reset the navigation state
-   */
   reset(): void {
     this.config.setHighlightedIndex(-1);
     this.typeaheadString = "";
@@ -291,10 +249,6 @@ export class MenuNavigationController implements ReactiveController {
       clearTimeout(this.typeaheadTimer);
     }
   }
-
-  /**
-   * Get the currently highlighted index
-   */
   get currentIndex(): number {
     return this.config.getHighlightedIndex();
   }

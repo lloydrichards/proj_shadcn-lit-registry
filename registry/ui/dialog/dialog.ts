@@ -1,16 +1,16 @@
+import { consume, createContext, provide } from "@lit/context";
 import { css, html, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
-import { provide, consume, createContext } from "@lit/context";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { X } from "lucide-static";
-import { BaseElement } from "@/registry/lib/base-element";
-import { cn, uid } from "@/registry/lib/utils";
 import { FocusTrapController } from "@/controllers/focus-trap-controller";
 import {
   animations,
-  waitForAnimation,
   prefersReducedMotion,
+  waitForAnimation,
 } from "@/registry/lib/animations";
+import { BaseElement } from "@/registry/lib/base-element";
+import { cn, uid } from "@/registry/lib/utils";
 
 /**
  * Dialog Context

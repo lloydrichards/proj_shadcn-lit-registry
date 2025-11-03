@@ -96,7 +96,6 @@ export class ClickAwayController implements ReactiveController {
    * Handle click events
    */
   private handleClick = (e: MouseEvent): void => {
-    // Check if controller is active
     if (!this.config.isActive()) {
       return;
     }
@@ -106,12 +105,10 @@ export class ClickAwayController implements ReactiveController {
       return;
     }
 
-    // Check if click is on the host element
     if (this.host.contains(target)) {
       return;
     }
 
-    // Check if click is on any excluded elements
     const excludedElements = this.config.excludeElements();
     for (const element of excludedElements) {
       if (element.contains(target)) {
@@ -119,17 +116,12 @@ export class ClickAwayController implements ReactiveController {
       }
     }
 
-    // Click is outside - trigger callback
     this.config.onClickAway();
   };
 
-  /**
-   * Start listening for click events
-   */
   private startListening(): void {
     if (this.isListening) return;
 
-    // Use setTimeout to avoid triggering on the same click that opened the component
     setTimeout(() => {
       document.addEventListener(
         "click",
@@ -140,9 +132,6 @@ export class ClickAwayController implements ReactiveController {
     }, 0);
   }
 
-  /**
-   * Stop listening for click events
-   */
   private stopListening(): void {
     if (!this.isListening) return;
 
@@ -154,10 +143,6 @@ export class ClickAwayController implements ReactiveController {
     this.isListening = false;
   }
 
-  /**
-   * Update the listening state based on isActive
-   * Call this in the host component's updated() lifecycle
-   */
   update(): void {
     if (this.config.isActive()) {
       this.startListening();
@@ -165,17 +150,9 @@ export class ClickAwayController implements ReactiveController {
       this.stopListening();
     }
   }
-
-  /**
-   * Manually start listening (useful for testing)
-   */
   start(): void {
     this.startListening();
   }
-
-  /**
-   * Manually stop listening (useful for testing)
-   */
   stop(): void {
     this.stopListening();
   }

@@ -85,9 +85,6 @@ export class FocusTrapController implements ReactiveController {
     this.deactivate();
   }
 
-  /**
-   * Handle Tab key for focus trapping
-   */
   private handleKeyDown = (e: KeyboardEvent): void => {
     if (e.key !== "Tab") return;
 
@@ -124,7 +121,6 @@ export class FocusTrapController implements ReactiveController {
     const container = this.config.getContainer();
     if (!container) return;
 
-    // Store currently focused element
     if (
       this.config.restoreFocus &&
       document.activeElement instanceof HTMLElement
@@ -132,15 +128,12 @@ export class FocusTrapController implements ReactiveController {
       this.previousFocus = document.activeElement;
     }
 
-    // Attach event listener
     container.addEventListener("keydown", this.handleKeyDown);
     this.isTrapping = true;
 
-    // Auto-focus first focusable element
     if (this.config.autoFocus) {
       const focusableElements = getFocusableElements(container);
       if (focusableElements.length > 0) {
-        // Check for autofocus attribute first
         const autofocusElement = focusableElements.find((el) =>
           el.hasAttribute("autofocus"),
         );
@@ -169,17 +162,12 @@ export class FocusTrapController implements ReactiveController {
 
     this.isTrapping = false;
 
-    // Restore focus to previously focused element
     if (this.config.restoreFocus && this.previousFocus) {
       this.previousFocus.focus();
       this.previousFocus = null;
     }
   }
 
-  /**
-   * Update the focus trap state based on isActive
-   * Call this in the host component's updated() lifecycle
-   */
   update(): void {
     if (this.config.isActive()) {
       this.activate();
@@ -188,23 +176,13 @@ export class FocusTrapController implements ReactiveController {
     }
   }
 
-  /**
-   * Manually activate the focus trap
-   */
   start(): void {
     this.activate();
   }
-
-  /**
-   * Manually deactivate the focus trap
-   */
   stop(): void {
     this.deactivate();
   }
 
-  /**
-   * Check if focus trap is currently active
-   */
   get active(): boolean {
     return this.isTrapping;
   }

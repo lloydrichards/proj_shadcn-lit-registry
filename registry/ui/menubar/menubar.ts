@@ -1,6 +1,6 @@
-import { BaseElement } from "@/registry/lib/base-element";
 import { ClickAwayController } from "@/controllers/click-away-controller";
 import { MenuNavigationController } from "@/controllers/menu-navigation-controller";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
 import "@/registry/ui/popover/popover";
 import { css, html, nothing, type PropertyValues } from "lit";

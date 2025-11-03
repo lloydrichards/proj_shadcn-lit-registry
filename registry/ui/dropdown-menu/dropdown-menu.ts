@@ -8,9 +8,9 @@ import {
 } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, ChevronRight, Circle } from "lucide-static";
-import { BaseElement } from "@/registry/lib/base-element";
 import { ClickAwayController } from "@/controllers/click-away-controller";
 import { MenuNavigationController } from "@/controllers/menu-navigation-controller";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
 import "@/registry/ui/popover/popover";
 
