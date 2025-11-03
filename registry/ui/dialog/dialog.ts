@@ -4,7 +4,8 @@ import { provide, consume, createContext } from "@lit/context";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { X } from "lucide-static";
 import { BaseElement } from "@/registry/lib/base-element";
-import { cn, trapFocus, getFocusableElements, uid } from "@/registry/lib/utils";
+import { cn, uid } from "@/registry/lib/utils";
+import { FocusTrapController } from "@/controllers/focus-trap-controller";
 import {
   animations,
   waitForAnimation,
@@ -242,7 +243,14 @@ export class DialogContent
   @query("dialog") private dialogElement!: HTMLDialogElement;
 
   private previousFocus?: HTMLElement;
-  private cleanupFocusTrap?: () => void;
+
+  // Focus trap controller
+  private focusTrap = new FocusTrapController(this, {
+    getContainer: () => this.dialogElement,
+    isActive: () => this._dialogContext?.open ?? false,
+    autoFocus: true,
+    restoreFocus: false, // We handle restore manually with previousFocus
+  });
 
   override connectedCallback() {
     super.connectedCallback();
@@ -252,7 +260,6 @@ export class DialogContent
   override disconnectedCallback() {
     super.disconnectedCallback();
     document.removeEventListener("keydown", this.handleGlobalKeyDown);
-    this.cleanupFocusTrap?.();
 
     if (this.preventScroll) {
       document.body.style.overflow = "";
@@ -368,11 +375,8 @@ export class DialogContent
         this.dialogElement.show();
       }
 
-      // Focus first focusable element or dialog itself
-      this.focusFirstElement();
-
-      // Set up focus trap
-      this.cleanupFocusTrap = trapFocus(this.dialogElement);
+      // Set up focus trap (handles auto-focus automatically)
+      this.focusTrap.update();
 
       // Wait for animation
       await waitForAnimation(this.dialogElement);
@@ -385,7 +389,7 @@ export class DialogContent
 
   private async performCloseDialog() {
     // Clean up focus trap
-    this.cleanupFocusTrap?.();
+    this.focusTrap.stop();
 
     // Wait for exit animation
     if (this.dialogElement) {
@@ -406,25 +410,6 @@ export class DialogContent
     this.animationState = "idle";
 
     this.emit("dialog-close");
-  }
-
-  private focusFirstElement() {
-    // Check for autofocus element
-    const autofocus =
-      this.dialogElement?.querySelector<HTMLElement>("[autofocus]");
-    if (autofocus) {
-      autofocus.focus();
-      return;
-    }
-
-    // Focus first focusable element
-    const focusable = getFocusableElements(this.dialogElement);
-    if (focusable.length > 0) {
-      focusable[0].focus();
-    } else {
-      // Focus dialog itself as fallback
-      this.dialogElement?.focus();
-    }
   }
 
   private dismiss(reason: string) {

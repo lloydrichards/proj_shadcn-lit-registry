@@ -9,6 +9,8 @@ import {
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, ChevronRight, Circle } from "lucide-static";
 import { BaseElement } from "@/registry/lib/base-element";
+import { ClickAwayController } from "@/controllers/click-away-controller";
+import { MenuNavigationController } from "@/controllers/menu-navigation-controller";
 import { cn } from "@/registry/lib/utils";
 import "@/registry/ui/popover/popover";
 
@@ -36,10 +38,6 @@ export function isMenuItemElement(
   return validTags.includes(element.tagName);
 }
 
-const isNode = (value: EventTarget | null): value is Node => {
-  return value instanceof Node;
-};
-
 @customElement("ui-dropdown-menu")
 export class DropdownMenu
   extends BaseElement
@@ -57,17 +55,17 @@ export class DropdownMenu
   @query("ui-dropdown-menu-trigger") triggerElement?: HTMLElement;
   @query("ui-popover") popoverElement?: HTMLElement;
 
-  private clickAwayHandler = (e: MouseEvent) => {
-    if (!this.open) return;
-    const content = this.querySelector("ui-dropdown-menu-content");
-    if (
-      isNode(e.target) &&
-      !this.contains(e.target) &&
-      (!content || !content.contains(e.target))
-    ) {
+  // Click-away controller
+  private clickAway = new ClickAwayController(this, {
+    onClickAway: () => {
       this.open = false;
-    }
-  };
+    },
+    isActive: () => this.open,
+    excludeElements: () => {
+      const content = this.querySelector("ui-dropdown-menu-content");
+      return content ? [content] : [];
+    },
+  });
 
   override connectedCallback() {
     super.connectedCallback();
@@ -79,18 +77,15 @@ export class DropdownMenu
     super.disconnectedCallback();
     this.removeEventListener("trigger-click", this.handleTriggerClick);
     this.removeEventListener("item-select", this.handleItemSelect);
-    document.removeEventListener("click", this.clickAwayHandler);
   }
 
   override updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
     if (changedProperties.has("open")) {
+      this.clickAway.update();
+
       if (this.open) {
-        setTimeout(
-          () => document.addEventListener("click", this.clickAwayHandler),
-          0,
-        );
         const content = this.querySelector("ui-dropdown-menu-content");
         if (content) {
           setTimeout(() => {
@@ -99,8 +94,6 @@ export class DropdownMenu
             menu?.focus();
           }, 0);
         }
-      } else {
-        document.removeEventListener("click", this.clickAwayHandler);
       }
 
       this.emit("open-change", { open: this.open });
@@ -201,11 +194,24 @@ export class DropdownMenuContent
 
   @state() protected isOpen = false;
   @state() private highlightedIndex = -1;
-  @state() private typeaheadString = "";
-  private typeaheadTimeout?: number;
 
   @queryAssignedElements({ flatten: true })
   private items!: HTMLElement[];
+
+  // Menu navigation controller
+  private navigation = new MenuNavigationController(this, {
+    getItems: () => this.getNavigableItems(),
+    getHighlightedIndex: () => this.highlightedIndex,
+    setHighlightedIndex: (index) => {
+      this.highlightedIndex = index;
+    },
+    onSelect: (item) => item.click(),
+    onEscape: () => {
+      const menu = this.closest("ui-dropdown-menu");
+      if (menu) menu.open = false;
+    },
+    loop: () => this.loop, // Reactive getter
+  });
 
   override connectedCallback() {
     super.connectedCallback();
@@ -216,6 +222,27 @@ export class DropdownMenuContent
         this.isOpen = menu.open;
       });
       observer.observe(menu, { attributes: true, attributeFilter: ["open"] });
+    }
+  }
+
+  override willUpdate(changed: PropertyValues) {
+    super.willUpdate(changed);
+
+    // Update highlighted state when index changes
+    if (changed.has("highlightedIndex")) {
+      const items = this.getNavigableItems();
+      items.forEach((item, index) => {
+        item.highlighted = index === this.highlightedIndex;
+      });
+    }
+  }
+
+  override updated(changed: PropertyValues) {
+    super.updated(changed);
+
+    // Reset navigation state when menu closes
+    if (changed.has("isOpen") && !this.isOpen) {
+      this.navigation.reset();
     }
   }
 
@@ -232,77 +259,8 @@ export class DropdownMenuContent
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
-    const navItems = this.getNavigableItems();
-    if (navItems.length === 0) return;
-
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        this.highlightedIndex = this.loop
-          ? (this.highlightedIndex + 1) % navItems.length
-          : Math.min(this.highlightedIndex + 1, navItems.length - 1);
-        this.updateHighlighted(navItems);
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        this.highlightedIndex = this.loop
-          ? (this.highlightedIndex - 1 + navItems.length) % navItems.length
-          : Math.max(this.highlightedIndex - 1, 0);
-        this.updateHighlighted(navItems);
-        break;
-      case "Home":
-        e.preventDefault();
-        this.highlightedIndex = 0;
-        this.updateHighlighted(navItems);
-        break;
-      case "End":
-        e.preventDefault();
-        this.highlightedIndex = navItems.length - 1;
-        this.updateHighlighted(navItems);
-        break;
-      case "Enter":
-      case " ":
-        e.preventDefault();
-        if (this.highlightedIndex >= 0) {
-          navItems[this.highlightedIndex]?.click();
-        }
-        break;
-      case "Escape": {
-        e.preventDefault();
-        const menu = this.closest("ui-dropdown-menu");
-        if (menu) menu.open = false;
-        break;
-      }
-      default:
-        if (e.key.length === 1) {
-          this.handleTypeahead(e.key, navItems);
-        }
-    }
+    this.navigation.handleKeyDown(e);
   };
-
-  private handleTypeahead(char: string, items: HTMLElement[]) {
-    clearTimeout(this.typeaheadTimeout);
-    this.typeaheadString += char.toLowerCase();
-
-    const matchIndex = items.findIndex((item) =>
-      item.textContent?.toLowerCase().startsWith(this.typeaheadString),
-    );
-
-    if (matchIndex >= 0) {
-      this.highlightedIndex = matchIndex;
-      this.updateHighlighted(items);
-    }
-
-    this.typeaheadTimeout = window.setTimeout(() => {
-      this.typeaheadString = "";
-    }, 500);
-  }
-
-  private updateHighlighted(items: MenuItemWithProperties[]) {
-    items.forEach((item, index) => {
-      item.highlighted = index === this.highlightedIndex;
-    });
-  }
 
   override render() {
     if (!this.isOpen) return nothing;
@@ -409,6 +367,16 @@ export class DropdownMenuCheckboxItem
     }
   };
 
+  private handleMouseEnter = () => {
+    if (!this.disabled) {
+      this.highlighted = true;
+    }
+  };
+
+  private handleMouseLeave = () => {
+    this.highlighted = false;
+  };
+
   override render() {
     return html`
       <div
@@ -420,11 +388,15 @@ export class DropdownMenuCheckboxItem
           "relative flex cursor-default select-none items-center gap-2 rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors",
           "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
           "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
           this.className,
         )}
         data-state=${this.checked ? "checked" : "unchecked"}
         ?data-disabled=${this.disabled}
+        ?data-highlighted=${this.highlighted}
         @click=${this.handleClick}
+        @mouseenter=${this.handleMouseEnter}
+        @mouseleave=${this.handleMouseLeave}
       >
         <span
           class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center"
@@ -516,6 +488,16 @@ export class DropdownMenuRadioItem
     }
   };
 
+  private handleMouseEnter = () => {
+    if (!this.disabled) {
+      this.highlighted = true;
+    }
+  };
+
+  private handleMouseLeave = () => {
+    this.highlighted = false;
+  };
+
   override render() {
     return html`
       <div
@@ -527,10 +509,14 @@ export class DropdownMenuRadioItem
           "relative flex cursor-default select-none items-center gap-2 rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors",
           "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
           "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
           this.className,
         )}
         ?data-disabled=${this.disabled}
+        ?data-highlighted=${this.highlighted}
         @click=${this.handleClick}
+        @mouseenter=${this.handleMouseEnter}
+        @mouseleave=${this.handleMouseLeave}
       >
         <span
           class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center"

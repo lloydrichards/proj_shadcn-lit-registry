@@ -37,12 +37,20 @@ export default defineConfig({
       {
         test: {
           name: "unit",
+          include: ["registry/**/*.test.ts"],
           browser: {
             enabled: true,
             headless: true,
             provider: playwright(),
             instances: [{ browser: "chromium" }],
           },
+        },
+      },
+      {
+        test: {
+          name: "node",
+          include: ["app/**/*.test.ts"],
+          environment: "node",
         },
       },
     ],

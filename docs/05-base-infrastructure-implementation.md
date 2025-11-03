@@ -83,7 +83,6 @@ export class BaseElement extends TW(LitElement) {
       });
     }
   }
-
 }
 
 export default BaseElement;
@@ -96,9 +95,10 @@ export default BaseElement;
 - [ ] Dependencies auto-register on connectedCallback
 - [ ] className property is reactive
 
-**Note on Slot Detection**: For reactive slot content detection, use Lit's built-in
-`@queryAssignedElements` decorator instead of a custom controller. For simple non-reactive
-checks, use the `hasSlottedContent()` utility function from `registry/lib/utils.ts`.
+**Note on Slot Detection**: For reactive slot content detection, use Lit's
+built-in `@queryAssignedElements` decorator instead of a custom controller. For
+simple non-reactive checks, use the `hasSlottedContent()` utility function from
+`registry/lib/utils.ts`.
 
 ---
 
@@ -416,14 +416,15 @@ export default FormElement;
 - [ ] Form association via form attribute works
 - [ ] Form submit/reset event handling works
 
-**Note on Form Integration**: FormElement handles all form integration internally using
-ElementInternals API (95%+ browser support). No separate controller is needed.
+**Note on Form Integration**: FormElement handles all form integration
+internally using ElementInternals API (95%+ browser support). No separate
+controller is needed.
 
 ---
 
 ## Task 3: Slot Detection Patterns
 
-### File: `registry/lib/controllers/has-slot.ts`
+### File: `@/controllers/has-slot.ts`
 
 **Purpose**: Detect when slots have content and trigger re-renders when slot
 content changes.
@@ -593,7 +594,7 @@ export default HasSlotController;
 
 ## Task 4: Create FormControlController
 
-### File: `registry/lib/controllers/form-control.ts`
+### File: `@/controllers/form-control.ts`
 
 **Purpose**: Handle form submission, reset, and validation for form components.
 

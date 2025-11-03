@@ -25,7 +25,8 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@/lib/tailwindMixin": ["./registry/lib/tailwindMixin.ts"],
+      "@/controllers/*": ["./registry/controllers/*"],
+      "@/lib/*": ["./registry/lib/*"],
       "@/styles/tailwind.global.css": ["./registry/styles/tailwind.global.css"]
     },
     "allowJs": true,

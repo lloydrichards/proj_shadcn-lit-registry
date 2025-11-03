@@ -290,7 +290,7 @@ export class Input extends FormElement implements InputProperties {
 import { html, css } from "lit";
 import { customElement, property, state, query } from "lit/decorators.js";
 import { FormElement } from "@/registry/lib/form-element";
-import { HasSlotController } from "@/registry/lib/controllers/has-slot";
+import { HasSlotController } from "@/controllers/has-slot";
 
 /**
  * @element ui-select

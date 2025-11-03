@@ -220,25 +220,30 @@ export class Toaster extends TW(LitElement) {
         aria-live=${toast.type === "error" ? "assertive" : "polite"}
         aria-atomic="true"
       >
-        ${icon
-          ? html`<div
-              class="[&>svg]:size-4 shrink-0 ${toast.type === "loading"
-                ? "animate-spin"
-                : ""}"
+        ${
+          icon
+            ? html`<div
+              class="[&>svg]:size-4 shrink-0 ${
+                toast.type === "loading" ? "animate-spin" : ""
+              }"
             >
               ${unsafeHTML(icon)}
             </div>`
-          : nothing}
+            : nothing
+        }
         <div class="grid gap-1 flex-1">
           <div class="text-sm font-semibold [&+div]:text-xs">
             ${toast.message}
           </div>
-          ${toast.description
-            ? html`<div class="text-sm opacity-90">${toast.description}</div>`
-            : nothing}
+          ${
+            toast.description
+              ? html`<div class="text-sm opacity-90">${toast.description}</div>`
+              : nothing
+          }
         </div>
-        ${toast.action
-          ? html`
+        ${
+          toast.action
+            ? html`
               <ui-button
                 variant="outline"
                 size="sm"
@@ -250,7 +255,8 @@ export class Toaster extends TW(LitElement) {
                 ${toast.action.label}
               </ui-button>
             `
-          : nothing}
+            : nothing
+        }
         <ui-button
           class="absolute right-1 top-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
           variant="ghost"

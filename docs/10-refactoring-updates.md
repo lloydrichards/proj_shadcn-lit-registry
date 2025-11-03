@@ -5,27 +5,32 @@
 
 ## Overview
 
-This document summarizes the major refactoring completed to simplify the codebase by removing over-engineered controllers and adopting functional programming patterns. The changes follow **KISS (Keep It Simple)** and **YAGNI (You Aren't Gonna Need It)** principles.
+This document summarizes the major refactoring completed to simplify the
+codebase by removing over-engineered controllers and adopting functional
+programming patterns. The changes follow **KISS (Keep It Simple)** and **YAGNI
+(You Aren't Gonna Need It)** principles.
 
 ---
 
 ## What Was Removed
 
 ### 1. HasSlotController (193 lines removed)
-- **Files deleted:**
-  - `registry/lib/controllers/has-slot.ts`
-  - `registry/lib/controllers/has-slot.test.ts`
 
-- **Why removed:** 
+- **Files deleted:**
+  - `@/controllers/has-slot.ts`
+  - `@/controllers/has-slot.test.ts`
+
+- **Why removed:**
   - Never used in production code
   - Lit provides `@queryAssignedElements` decorator built-in
   - Over-engineered with dual observation mechanisms
   - Added unnecessary complexity
 
 ### 2. FormControlController (240 lines removed)
+
 - **Files deleted:**
-  - `registry/lib/controllers/form-control.ts`
-  - `registry/lib/controllers/form-control.test.ts`
+  - `@/controllers/form-control.ts`
+  - `@/controllers/form-control.test.ts`
 
 - **Why removed:**
   - Logic inlined into `FormElement` base class
@@ -34,6 +39,7 @@ This document summarizes the major refactoring completed to simplify the codebas
   - Hidden input fallback no longer needed
 
 ### 3. Context Wrapper (171 lines removed)
+
 - **Files deleted:**
   - `registry/lib/context.ts`
   - `registry/lib/context.test.ts`
@@ -45,6 +51,7 @@ This document summarizes the major refactoring completed to simplify the codebas
   - Reduces flexibility
 
 ### 4. BaseElement Cleanup (22 lines removed)
+
 - **Removed:** `hasSlotContent()` deprecated method
 - **Why removed:** Deprecated, unused, and replaced by better patterns
 
@@ -55,24 +62,24 @@ This document summarizes the major refactoring completed to simplify the codebas
 ### Pattern 1: Slot Detection
 
 #### ❌ OLD Pattern (Removed)
+
 ```typescript
-import { HasSlotController } from '@/registry/lib/controllers/has-slot';
+import { HasSlotController } from "@/controllers/has-slot";
 
 @customElement("ui-button")
 export class Button extends BaseElement {
   private hasSlot = new HasSlotController(this, "prefix", "suffix");
 
   render() {
-    return html`
-      ${this.hasSlot.test("prefix") ? html`<div>...</div>` : null}
-    `;
+    return html` ${this.hasSlot.test("prefix") ? html`<div>...</div>` : null} `;
   }
 }
 ```
 
 #### ✅ NEW Pattern (Recommended - Reactive)
+
 ```typescript
-import { queryAssignedElements } from 'lit/decorators.js';
+import { queryAssignedElements } from "lit/decorators.js";
 
 @customElement("ui-button")
 export class Button extends BaseElement {
@@ -88,27 +95,28 @@ export class Button extends BaseElement {
 ```
 
 **Benefits:**
+
 - Built-in Lit decorator (no custom code)
 - Automatically reactive
 - Type-safe
 - Zero boilerplate
 
 #### ✅ NEW Pattern (Simple - Non-Reactive)
+
 ```typescript
-import { hasSlottedContent } from '@/registry/lib/utils';
+import { hasSlottedContent } from "@/registry/lib/utils";
 
 @customElement("ui-button")
 export class Button extends BaseElement {
   render() {
     const hasPrefix = hasSlottedContent(this, "prefix");
-    return html`
-      ${hasPrefix ? html`<div>...</div>` : null}
-    `;
+    return html` ${hasPrefix ? html`<div>...</div>` : null} `;
   }
 }
 ```
 
 **Benefits:**
+
 - Pure function
 - Simple to understand
 - No state management
@@ -119,8 +127,9 @@ export class Button extends BaseElement {
 ### Pattern 2: Form Integration
 
 #### ❌ OLD Pattern (Removed)
+
 ```typescript
-import { FormControlController } from '@/registry/lib/controllers/form-control';
+import { FormControlController } from "@/controllers/form-control";
 
 export class Input extends FormElement {
   protected formController: FormControlController;
@@ -133,11 +142,12 @@ export class Input extends FormElement {
 ```
 
 #### ✅ NEW Pattern (Current Implementation)
+
 ```typescript
 export class Input extends FormElement {
   // Form integration is automatic!
   // Just extend FormElement and implement focus/blur
-  
+
   focus(options?: FocusOptions) {
     this._input?.focus(options);
   }
@@ -149,6 +159,7 @@ export class Input extends FormElement {
 ```
 
 **What FormElement Handles Automatically:**
+
 - ✅ ElementInternals integration
 - ✅ Form submit/reset event handling
 - ✅ Validation API (checkValidity, reportValidity)
@@ -156,6 +167,7 @@ export class Input extends FormElement {
 - ✅ Form association (via `form` attribute or closest form)
 
 **FormElement Internal Implementation:**
+
 ```typescript
 export abstract class FormElement extends BaseElement {
   static formAssociated = true;
@@ -171,20 +183,20 @@ export abstract class FormElement extends BaseElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    
+
     // Auto-attach to form
     this._form = this._findForm();
     if (this._form) {
       this._form.addEventListener("submit", this._handleFormSubmit);
       this._form.addEventListener("reset", this._handleFormReset);
     }
-    
+
     this.updateFormValue();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    
+
     // Auto-cleanup
     if (this._form) {
       this._form.removeEventListener("submit", this._handleFormSubmit);
@@ -208,6 +220,7 @@ export abstract class FormElement extends BaseElement {
 ```
 
 **Benefits:**
+
 - No separate controller needed
 - Uses modern ElementInternals API
 - Simpler mental model
@@ -218,8 +231,9 @@ export abstract class FormElement extends BaseElement {
 ### Pattern 3: Context API
 
 #### ❌ OLD Pattern (Removed Wrapper)
+
 ```typescript
-import { createComponentContext } from '@/registry/lib/context';
+import { createComponentContext } from "@/registry/lib/context";
 
 // Define context
 const dialogContext = createComponentContext<DialogState>("dialog");
@@ -232,6 +246,7 @@ const state = dialogContext.consume(this);
 ```
 
 #### ✅ NEW Pattern (Direct @lit/context)
+
 ```typescript
 import { createContext, provide, consume } from '@lit/context';
 
@@ -240,7 +255,7 @@ export const dialogContext = createContext<DialogState>(Symbol('dialog'));
 
 // Provider (decorator - recommended)
 @provide({context: dialogContext})
-@state() 
+@state()
 private _dialogState: DialogState = { open: false };
 
 // Consumer (decorator - recommended)
@@ -250,6 +265,7 @@ dialogState?: DialogState;
 ```
 
 **Alternative: Controller-based (when decorators not suitable)**
+
 ```typescript
 import { ContextProvider, ContextConsumer } from '@lit/context';
 
@@ -267,6 +283,7 @@ private _consumer = new ContextConsumer(this, {
 ```
 
 **Benefits:**
+
 - Standard `@lit/context` API (well-documented)
 - Decorator approach is cleaner
 - More flexible (can opt-out of subscription)
@@ -281,8 +298,9 @@ private _consumer = new ContextConsumer(this, {
 #### 1. Remove HasSlotController Usage
 
 **Before:**
+
 ```typescript
-import { HasSlotController } from '@/registry/lib/controllers/has-slot';
+import { HasSlotController } from '@/controllers/has-slot';
 
 private hasSlot = new HasSlotController(this, "prefix");
 
@@ -293,6 +311,7 @@ render() {
 ```
 
 **After (Option A - Reactive):**
+
 ```typescript
 import { queryAssignedElements } from 'lit/decorators.js';
 
@@ -306,6 +325,7 @@ render() {
 ```
 
 **After (Option B - Simple):**
+
 ```typescript
 import { hasSlottedContent } from '@/registry/lib/utils';
 
@@ -318,8 +338,9 @@ render() {
 #### 2. Remove FormControlController Usage
 
 **Before:**
+
 ```typescript
-import { FormControlController } from '@/registry/lib/controllers/form-control';
+import { FormControlController } from '@/controllers/form-control';
 
 protected formController: FormControlController;
 
@@ -330,6 +351,7 @@ constructor() {
 ```
 
 **After:**
+
 ```typescript
 // Simply remove the import and property
 // FormElement handles everything automatically
@@ -338,8 +360,9 @@ constructor() {
 #### 3. Update Context Usage
 
 **Before:**
+
 ```typescript
-import { createComponentContext } from '@/registry/lib/context';
+import { createComponentContext } from "@/registry/lib/context";
 
 const ctx = createComponentContext<T>("name");
 ctx.provide(this, value);
@@ -347,6 +370,7 @@ const val = ctx.consume(this);
 ```
 
 **After:**
+
 ```typescript
 import { createContext, provide, consume } from '@lit/context';
 
@@ -375,7 +399,7 @@ registry/lib/
 ├── utils.ts                 # ✅ Added hasSlottedContent()
 └── animations.ts            # ✅ Unchanged
 
-registry/lib/controllers/    # ❌ DELETED ENTIRE DIRECTORY
+@/controllers/    # ❌ DELETED ENTIRE DIRECTORY
 ```
 
 ### BaseElement (Current)
@@ -396,12 +420,14 @@ export class BaseElement extends TW(LitElement) {
 ```
 
 **Features:**
+
 - Tailwind CSS injection via TW mixin
 - Typed event emission (composed: true)
 - Automatic dependency registration
 - Host class forwarding support
 
 **Removed:**
+
 - ❌ `hasSlotContent()` method
 
 ### FormElement (Current)
@@ -417,12 +443,12 @@ export abstract class FormElement extends BaseElement {
   @property() value: FormValue = "";
   @property({ type: Boolean }) disabled = false;
   @property({ type: Boolean }) required = false;
-  
+
   // Validation
-  checkValidity(): boolean { }
-  reportValidity(): boolean { }
-  setCustomValidity(message: string): void { }
-  
+  checkValidity(): boolean {}
+  reportValidity(): boolean {}
+  setCustomValidity(message: string): void {}
+
   // Abstract methods for subclasses
   abstract focus(options?: FocusOptions): void;
   abstract blur(): void;
@@ -430,12 +456,14 @@ export abstract class FormElement extends BaseElement {
 ```
 
 **Features:**
+
 - Native form participation via ElementInternals
 - Automatic form submit/reset handling
 - Validation API
 - Form association (via `form` attribute)
 
 **Removed:**
+
 - ❌ `FormControlController` dependency
 
 ---
@@ -467,20 +495,20 @@ All tests pass after refactoring:
 
 ### Code Reduction
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| Controller code | 626 lines | 0 lines | **-100%** |
-| Test files | 15 | 13 | -2 files |
-| Custom abstractions | 3 | 0 | -3 |
-| Total LOC removed | - | 626+ | **-626 lines** |
+| Metric              | Before    | After   | Change         |
+| ------------------- | --------- | ------- | -------------- |
+| Controller code     | 626 lines | 0 lines | **-100%**      |
+| Test files          | 15        | 13      | -2 files       |
+| Custom abstractions | 3         | 0       | -3             |
+| Total LOC removed   | -         | 626+    | **-626 lines** |
 
 ### Complexity Reduction
 
-| Aspect | Before | After |
-|--------|--------|-------|
-| Slot detection | Custom controller (193 lines) | Built-in decorator or utility |
-| Form integration | Custom controller (240 lines) | Built into FormElement |
-| Context | Custom wrapper (171 lines) | Direct @lit/context |
+| Aspect           | Before                        | After                         |
+| ---------------- | ----------------------------- | ----------------------------- |
+| Slot detection   | Custom controller (193 lines) | Built-in decorator or utility |
+| Form integration | Custom controller (240 lines) | Built into FormElement        |
+| Context          | Custom wrapper (171 lines)    | Direct @lit/context           |
 
 ### Benefits
 
@@ -513,16 +541,19 @@ All tests pass after refactoring:
 #### Slot Detection
 
 **Use `@queryAssignedElements` when:**
+
 - You need reactive updates when slot content changes
 - You're conditionally rendering based on slot presence
 - You want type-safe access to slotted elements
 
 **Use `hasSlottedContent()` when:**
+
 - You just need a boolean check
 - You don't need reactivity
 - You're doing one-time initialization checks
 
 **Example:**
+
 ```typescript
 // ✅ Reactive - updates when slots change
 @queryAssignedElements({ slot: "icon" })
@@ -546,11 +577,13 @@ connectedCallback() {
 #### Form Integration
 
 **Always extend `FormElement` for form controls:**
+
 - Input, textarea, select, checkbox, radio, switch
 - Any component that participates in forms
 - Components that need validation
 
 **Don't extend FormElement for:**
+
 - Pure presentational components
 - Non-form UI elements
 - Components that just display data
@@ -558,11 +591,13 @@ connectedCallback() {
 #### Context
 
 **Use `@provide` and `@consume` decorators:**
+
 - Cleanest API
 - Most readable
 - Recommended by Lit
 
 **Use `ContextProvider`/`ContextConsumer` when:**
+
 - You can't use decorators (rare)
 - You need dynamic context creation
 - You need fine-grained control
@@ -573,20 +608,23 @@ connectedCallback() {
 
 ### Files Referencing Old Patterns
 
-The following documentation files reference the removed patterns and should be consulted alongside this refactoring guide:
+The following documentation files reference the removed patterns and should be
+consulted alongside this refactoring guide:
 
 1. **docs/00-research-findings.md** - Architecture decisions
 2. **docs/01-component-patterns.md** - Component patterns section
 3. **docs/02-form-component-patterns.md** - Form integration patterns
 4. **docs/03-composite-component-patterns.md** - Context patterns
 5. **docs/04-implementation-roadmap.md** - Infrastructure roadmap
-6. **docs/05-base-infrastructure-implementation.md** - Controller implementations
+6. **docs/05-base-infrastructure-implementation.md** - Controller
+   implementations
 7. **docs/06-component-migration-button.md** - Button migration
 8. **docs/07-component-migration-dialog.md** - Dialog context
 9. **docs/08-master-implementation-checklist.md** - Checklist items
 10. **docs/09-base-infrastructure-completion.md** - Completion summary
 
 **When reading these files:**
+
 - Replace `HasSlotController` references with `@queryAssignedElements` patterns
 - Replace `FormControlController` references with "handled by FormElement"
 - Replace `createComponentContext` with direct `@lit/context` usage
@@ -600,25 +638,25 @@ The following documentation files reference the removed patterns and should be c
 
 ```typescript
 // ❌ OLD - Don't import these anymore
-import { HasSlotController } from '@/registry/lib/controllers/has-slot';
-import { FormControlController } from '@/registry/lib/controllers/form-control';
-import { createComponentContext } from '@/registry/lib/context';
+import { HasSlotController } from "@/controllers/has-slot";
+import { FormControlController } from "@/controllers/form-control";
+import { createComponentContext } from "@/registry/lib/context";
 
 // ✅ NEW - Use these instead
-import { queryAssignedElements } from 'lit/decorators.js';
-import { hasSlottedContent } from '@/registry/lib/utils';
-import { createContext, provide, consume } from '@lit/context';
+import { queryAssignedElements } from "lit/decorators.js";
+import { hasSlottedContent } from "@/registry/lib/utils";
+import { createContext, provide, consume } from "@lit/context";
 ```
 
 ### Pattern Cheat Sheet
 
-| Use Case | Pattern | Import |
-|----------|---------|--------|
-| Reactive slot detection | `@queryAssignedElements()` | `lit/decorators.js` |
-| Simple slot check | `hasSlottedContent()` | `@/registry/lib/utils` |
-| Form integration | Extend `FormElement` | `@/registry/lib/form-element` |
-| Context provider | `@provide()` decorator | `@lit/context` |
-| Context consumer | `@consume()` decorator | `@lit/context` |
+| Use Case                | Pattern                    | Import                        |
+| ----------------------- | -------------------------- | ----------------------------- |
+| Reactive slot detection | `@queryAssignedElements()` | `lit/decorators.js`           |
+| Simple slot check       | `hasSlottedContent()`      | `@/registry/lib/utils`        |
+| Form integration        | Extend `FormElement`       | `@/registry/lib/form-element` |
+| Context provider        | `@provide()` decorator     | `@lit/context`                |
+| Context consumer        | `@consume()` decorator     | `@lit/context`                |
 
 ---
 
@@ -627,6 +665,7 @@ import { createContext, provide, consume } from '@lit/context';
 ### Q: Why were the controllers removed?
 
 **A:** They violated KISS and YAGNI principles:
+
 - Added complexity without clear benefit
 - Lit provides better built-in alternatives
 - Never used in production code
@@ -635,6 +674,7 @@ import { createContext, provide, consume } from '@lit/context';
 ### Q: Will this break existing components?
 
 **A:** No. The refactoring was done carefully:
+
 - All tests pass
 - No component functionality changed
 - Migration patterns are straightforward
@@ -643,6 +683,7 @@ import { createContext, provide, consume } from '@lit/context';
 ### Q: What if I need the old controller functionality?
 
 **A:** The new patterns provide all the same functionality:
+
 - `@queryAssignedElements` is more powerful than HasSlotController
 - FormElement is more robust than FormControlController
 - Direct `@lit/context` is more flexible than the wrapper
@@ -650,6 +691,7 @@ import { createContext, provide, consume } from '@lit/context';
 ### Q: Can I still use controllers for other things?
 
 **A:** Yes! Reactive Controllers are still useful for:
+
 - Complex cross-cutting concerns
 - Managing external resources (WebSocket, ResizeObserver)
 - Reusable stateful behavior
@@ -658,21 +700,25 @@ import { createContext, provide, consume } from '@lit/context';
 ### Q: Where can I learn more about these patterns?
 
 **A:** Official documentation:
+
 - Lit: https://lit.dev/docs/
 - @lit/context: https://lit.dev/docs/data/context/
-- ElementInternals: https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals
+- ElementInternals:
+  https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals
 
 ---
 
 ## Conclusion
 
 This refactoring simplifies the codebase by:
+
 - Removing 626+ lines of over-engineered code
 - Using standard Lit patterns instead of custom abstractions
 - Following functional programming principles
 - Improving maintainability and developer experience
 
-**The result:** A simpler, more maintainable codebase that's easier to understand and follows industry best practices.
+**The result:** A simpler, more maintainable codebase that's easier to
+understand and follows industry best practices.
 
 ---
 

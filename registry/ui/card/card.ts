@@ -1,7 +1,7 @@
 import { css, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { BaseElement } from "@/registry/lib/base-element";
-import { cn } from "@/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 @customElement("ui-card")
 export class Card extends BaseElement {

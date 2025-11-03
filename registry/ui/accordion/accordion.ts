@@ -3,7 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { ChevronDown } from "lucide-static";
 import { BaseElement } from "@/registry/lib/base-element";
-import { cn } from "@/registry/lib/utils";
+import { cn, uid } from "@/registry/lib/utils";
 
 /**
  * Accordion component properties and events
@@ -213,7 +213,7 @@ export class AccordionTrigger
 
   @state() _open = false;
 
-  contentId = `accordion-content-${Math.random().toString(36).substring(2, 11)}`;
+  contentId = `accordion-content-${uid()}`;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -293,8 +293,7 @@ export class AccordionContent
     "closed";
   @state() private _hasRenderedOnce = false;
 
-  private _contentId =
-    `accordion-content-${Math.random().toString(36).substring(2, 11)}`;
+  private _contentId = `accordion-content-${uid()}`;
 
   override connectedCallback() {
     super.connectedCallback();

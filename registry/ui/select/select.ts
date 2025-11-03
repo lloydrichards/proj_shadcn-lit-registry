@@ -8,6 +8,8 @@ import {
 } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, ChevronDown } from "lucide-static";
+import { ClickAwayController } from "@/controllers/click-away-controller";
+import { MenuNavigationController } from "@/controllers/menu-navigation-controller";
 import { TW } from "@/registry/lib/tailwindMixin";
 
 export interface SelectChangeEvent extends CustomEvent {
@@ -40,16 +42,16 @@ export class Select extends TW(LitElement) implements SelectProperties {
   @query("ui-select-trigger") triggerElement?: HTMLElement;
   @query("ui-popover") popupElement?: HTMLElement;
 
-  private clickAwayHandler = (e: MouseEvent) => {
-    const popup = this.popupElement;
-    if (
-      this.open &&
-      !this.contains(e.target as Node) &&
-      (!popup || !popup.contains(e.target as Node))
-    ) {
+  // Click-away controller
+  private clickAway = new ClickAwayController(this, {
+    onClickAway: () => {
       this.open = false;
-    }
-  };
+    },
+    isActive: () => this.open,
+    excludeElements: () => {
+      return this.popupElement ? [this.popupElement] : [];
+    },
+  });
 
   constructor() {
     super();
@@ -74,7 +76,6 @@ export class Select extends TW(LitElement) implements SelectProperties {
     super.disconnectedCallback();
     this.removeEventListener("trigger-click", this.handleTriggerClick);
     this.removeEventListener("select-item-click", this.handleItemClick);
-    document.removeEventListener("click", this.clickAwayHandler);
   }
 
   private handleItemClick = (e: CustomEvent) => {
@@ -158,6 +159,8 @@ export class Select extends TW(LitElement) implements SelectProperties {
 
     if (changedProperties.has("open")) {
       this.updateTriggerAriaExpanded();
+      this.clickAway.update();
+
       if (this.open) {
         const contentElement = this.querySelector("ui-select-content");
 
@@ -168,12 +171,6 @@ export class Select extends TW(LitElement) implements SelectProperties {
             );
           listbox?.focus();
         }, 0);
-
-        setTimeout(() => {
-          document.addEventListener("click", this.clickAwayHandler);
-        }, 0);
-      } else {
-        document.removeEventListener("click", this.clickAwayHandler);
       }
     }
 
@@ -327,6 +324,39 @@ export class SelectContent extends TW(LitElement) {
   @queryAssignedElements({ selector: "ui-select-item" })
   items!: Array<SelectItem>;
 
+  // Menu navigation controller
+  private navigation = new MenuNavigationController(this, {
+    getItems: () => this.getNavigableItems(),
+    getHighlightedIndex: () => this.highlightedIndex,
+    setHighlightedIndex: (index) => {
+      this.highlightedIndex = index;
+    },
+    onSelect: (item) => {
+      const div =
+        item.shadowRoot?.querySelector<HTMLElement>('[role="option"]');
+      if (div) {
+        div.click();
+      } else {
+        item.dispatchEvent(
+          new CustomEvent("select-item-click", {
+            detail: { value: (item as SelectItem).value },
+            bubbles: true,
+            composed: true,
+          }),
+        );
+      }
+    },
+    onEscape: () => {
+      const select = this.closest("ui-select");
+      if (select) {
+        select.open = false;
+        const trigger = select.querySelector("ui-select-trigger");
+        const button = trigger?.shadowRoot?.querySelector("button");
+        button?.focus();
+      }
+    },
+  });
+
   connectedCallback() {
     super.connectedCallback();
     this.updateOpenState();
@@ -337,6 +367,32 @@ export class SelectContent extends TW(LitElement) {
   disconnectedCallback() {
     super.disconnectedCallback();
     this.removeEventListener("slotchange", this.handleSlotChange);
+  }
+
+  willUpdate(changed: PropertyValues) {
+    super.willUpdate(changed);
+
+    // Update highlighted state when index changes
+    if (changed.has("highlightedIndex")) {
+      const items = this.getNavigableItems();
+      items.forEach((item, index) => {
+        if (index === this.highlightedIndex) {
+          item.highlighted = true;
+          item.scrollIntoView({ block: "nearest" });
+        } else {
+          item.highlighted = false;
+        }
+      });
+    }
+  }
+
+  updated(changed: PropertyValues) {
+    super.updated(changed);
+
+    // Reset navigation state when menu closes
+    if (changed.has("isOpen") && !this.isOpen) {
+      this.navigation.reset();
+    }
   }
 
   private handleSlotChange = () => {
@@ -374,114 +430,20 @@ export class SelectContent extends TW(LitElement) {
     const select = this.closest("ui-select");
     if (!select) return;
 
-    const items = this.items.filter((item) => !item.disabled);
+    const items = this.getNavigableItems();
     const selectedIndex = items.findIndex(
       (item) => item.value === select.value,
     );
     this.highlightedIndex = selectedIndex >= 0 ? selectedIndex : 0;
+  }
 
-    if (items[this.highlightedIndex]) {
-      items[this.highlightedIndex].highlighted = true;
-    }
+  private getNavigableItems(): SelectItem[] {
+    return this.items.filter((item) => !item.disabled);
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
-    const items = this.items.filter((item) => !item.disabled);
-    if (items.length === 0) return;
-
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        e.stopPropagation();
-        this.moveHighlight(1, items);
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        e.stopPropagation();
-        this.moveHighlight(-1, items);
-        break;
-      case "Enter":
-      case " ":
-        e.preventDefault();
-        e.stopPropagation();
-        if (this.highlightedIndex >= 0 && items[this.highlightedIndex]) {
-          const item = items[this.highlightedIndex];
-          const div =
-            item.shadowRoot?.querySelector<HTMLElement>('[role="option"]');
-          if (div) {
-            div.click();
-          } else {
-            item.dispatchEvent(
-              new CustomEvent("select-item-click", {
-                detail: { value: item.value },
-                bubbles: true,
-                composed: true,
-              }),
-            );
-          }
-        }
-        break;
-      case "Home":
-        e.preventDefault();
-        e.stopPropagation();
-        this.highlightedIndex = 0;
-        this.updateHighlightAttributes(items);
-        break;
-      case "End":
-        e.preventDefault();
-        e.stopPropagation();
-        this.highlightedIndex = items.length - 1;
-        this.updateHighlightAttributes(items);
-        break;
-      case "Escape":
-        break;
-      default:
-        if (e.key.length === 1) {
-          e.stopPropagation();
-          this.handleTypeahead(e.key, items);
-        }
-    }
+    this.navigation.handleKeyDown(e);
   };
-
-  private moveHighlight(direction: number, items: SelectItem[]) {
-    this.highlightedIndex = Math.max(
-      0,
-      Math.min(items.length - 1, this.highlightedIndex + direction),
-    );
-    this.updateHighlightAttributes(items);
-  }
-
-  private updateHighlightAttributes(items: SelectItem[]) {
-    items.forEach((item, index) => {
-      if (index === this.highlightedIndex) {
-        item.highlighted = true;
-        item.scrollIntoView({ block: "nearest" });
-      } else {
-        item.highlighted = false;
-      }
-    });
-  }
-
-  private typeaheadTimeout?: number;
-  private typeaheadString = "";
-
-  private handleTypeahead(key: string, items: SelectItem[]) {
-    clearTimeout(this.typeaheadTimeout);
-    this.typeaheadString += key.toLowerCase();
-
-    const matchIndex = items.findIndex((item) =>
-      item.textContent?.toLowerCase().trim().startsWith(this.typeaheadString),
-    );
-
-    if (matchIndex >= 0) {
-      this.highlightedIndex = matchIndex;
-      this.updateHighlightAttributes(items);
-    }
-
-    this.typeaheadTimeout = window.setTimeout(() => {
-      this.typeaheadString = "";
-    }, 500);
-  }
 
   override render() {
     if (!this.isOpen) return nothing;
@@ -555,15 +517,17 @@ export class SelectItem extends TW(LitElement) {
         @click=${this.handleClick}
       >
         <slot></slot>
-        ${isSelected
-          ? html`
+        ${
+          isSelected
+            ? html`
               <span
                 class="absolute right-2 flex h-3.5 w-3.5 items-center justify-center"
               >
                 ${unsafeSVG(Check)}
               </span>
             `
-          : nothing}
+            : nothing
+        }
       </div>
     `;
   }

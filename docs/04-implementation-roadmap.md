@@ -31,10 +31,10 @@ export class BaseElement extends TW(LitElement) {
 
 **Files to create:**
 
-- `registry/lib/controllers/has-slot.ts`
-- `registry/lib/controllers/form-control.ts`
-- `registry/lib/controllers/focus-manager.ts`
-- `registry/lib/controllers/keyboard.ts`
+- `@/controllers/has-slot.ts`
+- `@/controllers/form-control.ts`
+- `@/controllers/focus-manager.ts`
+- `@/controllers/keyboard.ts`
 
 **Priority order:**
 

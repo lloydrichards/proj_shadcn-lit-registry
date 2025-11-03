@@ -1,8 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { css, html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { BaseElement } from "../../lib/base-element";
-import { cn } from "@/lib/utils";
+import { BaseElement } from "@/registry/lib/base-element";
+import { cn } from "@/registry/lib/utils";
 
 @customElement("ui-field-set")
 export class FieldSet extends BaseElement {

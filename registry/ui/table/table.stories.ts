@@ -164,11 +164,13 @@ export const WithBadges: Story = {
                 <td class="font-medium">${invoice.invoice}</td>
                 <td>
                   <ui-badge
-                    variant=${invoice.paymentStatus === "Paid"
-                      ? "default"
-                      : invoice.paymentStatus === "Pending"
-                        ? "secondary"
-                        : "destructive"}
+                    variant=${
+                      invoice.paymentStatus === "Paid"
+                        ? "default"
+                        : invoice.paymentStatus === "Pending"
+                          ? "secondary"
+                          : "destructive"
+                    }
                   >
                     ${invoice.paymentStatus}
                   </ui-badge>

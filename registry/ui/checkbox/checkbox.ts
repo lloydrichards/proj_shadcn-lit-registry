@@ -45,47 +45,17 @@ export class Checkbox extends FormElement implements CheckboxProperties {
 
   @state() private _checked = false;
 
-  private _labelClickHandler = (e: Event) => {
-    const label = e.currentTarget as HTMLLabelElement;
-    if (label.htmlFor === this.id && !this.disabled) {
-      e.preventDefault();
-      this._handleClick();
-    }
-  };
-
   override connectedCallback() {
     super.connectedCallback();
     if (this.checked === undefined) {
       this._checked = this.defaultChecked;
     }
-    this._setupLabelDelegation();
+    this.setupLabelDelegation(() => this._handleClick());
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._cleanupLabelDelegation();
-  }
-
-  private _setupLabelDelegation() {
-    if (!this.id) return;
-    const root = this.getRootNode() as Document | ShadowRoot;
-    const labels = root.querySelectorAll(
-      `label[for="${this.id}"]`,
-    ) as NodeListOf<HTMLLabelElement>;
-    labels.forEach((label) => {
-      label.addEventListener("click", this._labelClickHandler);
-    });
-  }
-
-  private _cleanupLabelDelegation() {
-    if (!this.id) return;
-    const root = this.getRootNode() as Document | ShadowRoot;
-    const labels = root.querySelectorAll(
-      `label[for="${this.id}"]`,
-    ) as NodeListOf<HTMLLabelElement>;
-    labels.forEach((label) => {
-      label.removeEventListener("click", this._labelClickHandler);
-    });
+    this.cleanupLabelDelegation();
   }
 
   private get isChecked(): boolean {
@@ -128,8 +98,8 @@ export class Checkbox extends FormElement implements CheckboxProperties {
   ) {
     super.attributeChangedCallback(name, _old, value);
     if (name === "id" && _old !== value) {
-      this._cleanupLabelDelegation();
-      this._setupLabelDelegation();
+      this.cleanupLabelDelegation();
+      this.setupLabelDelegation(() => this._handleClick());
     }
   }
 

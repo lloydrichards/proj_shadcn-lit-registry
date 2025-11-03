@@ -10,8 +10,8 @@ import {
 } from "@floating-ui/dom";
 import { css, html, LitElement, type PropertyValues } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
-import { TW } from "@/lib/tailwindMixin";
-import { cn } from "@/lib/utils";
+import { TW } from "@/registry/lib/tailwindMixin";
+import { cn } from "@/registry/lib/utils";
 
 @customElement("ui-popover")
 export class Popover extends TW(LitElement) {
@@ -208,12 +208,14 @@ export class Popover extends TW(LitElement) {
         data-placement=${this.currentPlacement}
       >
         <slot></slot>
-        ${this.arrow
-          ? html`<div
+        ${
+          this.arrow
+            ? html`<div
               class="absolute w-2 h-2 rotate-45 bg-inherit -z-10"
               part="arrow"
             ></div>`
-          : ""}
+            : ""
+        }
       </div>
     `;
   }

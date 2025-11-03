@@ -60,7 +60,7 @@ grep -q "ElementInternals" registry/lib/form-element.ts && echo "✓ Uses Elemen
 
 ### 🎯 Task 1.3: Create HasSlotController
 
-**File**: `registry/lib/controllers/has-slot.ts`  
+**File**: `@/controllers/has-slot.ts`  
 **Priority**: HIGH  
 **Dependencies**: None
 
@@ -83,7 +83,7 @@ grep -q "ElementInternals" registry/lib/form-element.ts && echo "✓ Uses Elemen
 
 ### 🎯 Task 1.4: Create FormControlController
 
-**File**: `registry/lib/controllers/form-control.ts`  
+**File**: `@/controllers/form-control.ts`  
 **Priority**: HIGH  
 **Dependencies**: None
 

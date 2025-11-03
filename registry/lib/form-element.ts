@@ -370,6 +370,92 @@ export abstract class FormElement
       element.blur();
     }
   }
+
+  /**
+   * Label delegation support
+   * Allows external labels with for="id" to trigger the control
+   */
+  private _labelClickHandler?: (e: Event) => void;
+
+  /**
+   * Setup label delegation for this form control
+   * Call this in connectedCallback() to enable clicking labels to activate the control
+   *
+   * @param onClick - Callback function to execute when label is clicked
+   * @protected
+   *
+   * @example
+   * override connectedCallback() {
+   *   super.connectedCallback();
+   *   this.setupLabelDelegation(() => this._handleClick());
+   * }
+   */
+  protected setupLabelDelegation(onClick: () => void) {
+    if (!this.id) return;
+
+    const handler = (e: Event) => {
+      const label = e.currentTarget as HTMLLabelElement;
+      if (label.htmlFor === this.id && !this.disabled) {
+        e.preventDefault();
+        onClick();
+      }
+    };
+
+    this._labelClickHandler = handler;
+
+    const root = this.getRootNode() as Document | ShadowRoot;
+    const labels = root.querySelectorAll(
+      `label[for="${this.id}"]`,
+    ) as NodeListOf<HTMLLabelElement>;
+    labels.forEach((label) => {
+      label.addEventListener("click", handler);
+    });
+  }
+
+  /**
+   * Cleanup label delegation listeners
+   * Call this in disconnectedCallback() to prevent memory leaks
+   *
+   * @protected
+   *
+   * @example
+   * override disconnectedCallback() {
+   *   super.disconnectedCallback();
+   *   this.cleanupLabelDelegation();
+   * }
+   */
+  protected cleanupLabelDelegation() {
+    const handler = this._labelClickHandler;
+    if (!this.id || !handler) return;
+
+    const root = this.getRootNode() as Document | ShadowRoot;
+    const labels = root.querySelectorAll(
+      `label[for="${this.id}"]`,
+    ) as NodeListOf<HTMLLabelElement>;
+    labels.forEach((label) => {
+      label.removeEventListener("click", handler);
+    });
+  }
+
+  /**
+   * Re-setup label delegation when the id changes
+   * Call this in updated() when the id property changes
+   *
+   * @protected
+   *
+   * @example
+   * override updated(changedProperties: PropertyValues) {
+   *   super.updated(changedProperties);
+   *   if (changedProperties.has("id")) {
+   *     this.updateLabelDelegation();
+   *   }
+   * }
+   */
+  protected updateLabelDelegation() {
+    this.cleanupLabelDelegation();
+    // Re-setup will happen on next update since we need the new id
+    // Components should call setupLabelDelegation in their updated() if id changed
+  }
 }
 
 export default FormElement;

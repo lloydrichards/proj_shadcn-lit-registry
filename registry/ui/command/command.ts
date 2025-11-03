@@ -3,7 +3,7 @@ import { customElement, property, query, state } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Search } from "lucide-static";
 import { TW } from "@/registry/lib/tailwindMixin";
-import { cn } from "@/registry/lib/utils";
+import { cn, uid } from "@/registry/lib/utils";
 
 // Type definitions
 export type FilterFunction = (
@@ -326,9 +326,7 @@ export class CommandInput
   private _setupListboxReference() {
     const list = this.closest("ui-command")?.querySelector("ui-command-list");
     if (list) {
-      this._listboxId =
-        list.id ||
-        `command-list-${Math.random().toString(36).substring(2, 11)}`;
+      this._listboxId = list.id || `command-list-${uid()}`;
       if (!list.id) {
         list.id = this._listboxId;
       }
@@ -573,7 +571,7 @@ export class CommandList extends TW(LitElement) {
         // Ensure item has valid ID before using it
         const itemElement = item as CommandItem;
         if (!itemElement.id) {
-          itemElement.id = `command-item-${Math.random().toString(36).substring(2, 11)}`;
+          itemElement.id = `command-item-${uid()}`;
         }
         currentItemId = itemElement.id;
       }
@@ -663,7 +661,7 @@ export class CommandItem
 
     // Auto-generate ID if not provided
     if (!this.id) {
-      this.id = `command-item-${Math.random().toString(36).substring(2, 11)}`;
+      this.id = `command-item-${uid()}`;
     }
 
     const command = this.closest("ui-command") as Command;
@@ -877,9 +875,7 @@ export class CommandGroup
       return nothing;
     }
 
-    const headingId = this.heading
-      ? `group-heading-${this.id || Math.random().toString(36).substring(2, 11)}`
-      : "";
+    const headingId = this.heading ? `group-heading-${this.id || uid()}` : "";
 
     return html`
       <div
@@ -887,8 +883,9 @@ export class CommandGroup
         aria-labelledby=${headingId || nothing}
         class=${cn("overflow-hidden p-1 text-foreground", this.className)}
       >
-        ${this.heading
-          ? html`
+        ${
+          this.heading
+            ? html`
               <div
                 id=${headingId}
                 role="presentation"
@@ -897,7 +894,8 @@ export class CommandGroup
                 ${this.heading}
               </div>
             `
-          : nothing}
+            : nothing
+        }
         <slot></slot>
       </div>
     `;

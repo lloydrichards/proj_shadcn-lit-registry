@@ -202,7 +202,7 @@ Use reactive controllers for reusable, composable functionality:
 Detect when slots have content to conditionally render containers:
 
 ```typescript
-// registry/lib/controllers/has-slot.ts
+// @/controllers/has-slot.ts
 import { ReactiveController, ReactiveControllerHost } from "lit";
 
 export class HasSlotController implements ReactiveController {
@@ -253,7 +253,7 @@ export class HasSlotController implements ReactiveController {
 Enable form participation for custom inputs:
 
 ```typescript
-// registry/lib/controllers/form-control.ts
+// @/controllers/form-control.ts
 import { ReactiveController, ReactiveControllerHost } from "lit";
 
 interface FormControlHost extends ReactiveControllerHost, HTMLElement {

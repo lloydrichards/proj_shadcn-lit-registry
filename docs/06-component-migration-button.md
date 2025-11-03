@@ -32,8 +32,8 @@ import { html, css, type PropertyValues } from "lit";
 import { customElement, property, state, query } from "lit/decorators.js";
 import { cva, type VariantProps } from "class-variance-authority";
 import { BaseElement } from "@/registry/lib/base-element";
-import { FormControlController } from "@/registry/lib/controllers/form-control";
-import { HasSlotController } from "@/registry/lib/controllers/has-slot";
+import { FormControlController } from "@/controllers/form-control";
+import { HasSlotController } from "@/controllers/has-slot";
 import { cn } from "@/registry/lib/utils";
 import { animations, waitForAnimation } from "@/registry/lib/animations";
 ```
