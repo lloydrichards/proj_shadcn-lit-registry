@@ -307,8 +307,7 @@ export class AccordionContent
     "closed";
   @state() private _hasRenderedOnce = false;
 
-  private _contentId =
-    `accordion-content-${Math.random().toString(36).substring(2, 11)}`;
+  private _contentId = `accordion-content-${Math.random().toString(36).substring(2, 11)}`;
 
   override connectedCallback() {
     super.connectedCallback();

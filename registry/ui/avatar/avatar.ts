@@ -65,9 +65,8 @@ export class Avatar extends TW(LitElement) implements AvatarProperties {
       <span class=${cn(avatarVariants(), this.className)}>
         <slot name="image"></slot>
 
-        ${
-          this.src && !hasImageSlot
-            ? html`
+        ${this.src && !hasImageSlot
+          ? html`
               <img
                 class="aspect-square h-full w-full object-cover"
                 src=${this.src}
@@ -78,19 +77,16 @@ export class Avatar extends TW(LitElement) implements AvatarProperties {
                 style=${this._shouldShowImage ? "" : "display: none;"}
               />
             `
-            : ""
-        }
-        ${
-          this._shouldShowFallback
-            ? html`
+          : ""}
+        ${this._shouldShowFallback
+          ? html`
               <span
                 class="flex h-full w-full items-center justify-center rounded-full bg-muted"
               >
                 <slot></slot>
               </span>
             `
-            : ""
-        }
+          : ""}
       </span>
     `;
   }

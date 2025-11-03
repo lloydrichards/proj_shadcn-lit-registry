@@ -211,27 +211,23 @@ export class Button extends BaseElement implements ButtonProperties {
         aria-busy=${this.loading ? "true" : "false"}
         @click=${this.handleClick}
       >
-        ${
-          hasPrefix
-            ? html`
+        ${hasPrefix
+          ? html`
               <span part="prefix" class="mr-2">
                 <slot name="prefix"></slot>
               </span>
             `
-            : nothing
-        }
+          : nothing}
 
         <span part="content" class=${this.loading ? "opacity-0" : ""}>
           <slot></slot>
         </span>
 
-        ${
-          hasSuffix
-            ? html`
+        ${hasSuffix
+          ? html`
               <span part="suffix" class="ml-2">
-                ${
-                  this.loading
-                    ? html`
+                ${this.loading
+                  ? html`
                       <span
                         part="loading"
                         class=${cn(
@@ -239,15 +235,13 @@ export class Button extends BaseElement implements ButtonProperties {
                           animations.fadeIn,
                         )}
                       >
-                       ${unsafeSVG(LoaderCircle)}
+                        ${unsafeSVG(LoaderCircle)}
                       </span>
                     `
-                    : html`<slot name="suffix"></slot>`
-                }
+                  : html`<slot name="suffix"></slot>`}
               </span>
             `
-            : nothing
-        }
+          : nothing}
       </button>
     `;
   }

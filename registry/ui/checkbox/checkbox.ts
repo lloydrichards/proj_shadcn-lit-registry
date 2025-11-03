@@ -188,32 +188,28 @@ export class Checkbox extends TW(LitElement) implements CheckboxProperties {
         class=${checkboxVariants()}
         ?disabled=${this.disabled}
         ?required=${this.required}
-        aria-checked=${
-          this.indeterminate ? "mixed" : (String(this.isChecked) as "true")
-        }
+        aria-checked=${this.indeterminate
+          ? "mixed"
+          : (String(this.isChecked) as "true")}
         aria-label=${this.ariaLabel || nothing}
         aria-labelledby=${this.ariaLabelledby || nothing}
         aria-describedby=${this.ariaDescribedby || nothing}
-        data-state=${
-          this.indeterminate
-            ? "indeterminate"
-            : this.isChecked
-              ? "checked"
-              : "unchecked"
-        }
+        data-state=${this.indeterminate
+          ? "indeterminate"
+          : this.isChecked
+            ? "checked"
+            : "unchecked"}
         @click=${this._handleClick}
         @keydown=${this._handleKeyDown}
       >
         <span
           class="flex [&>svg]:size-3 items-center justify-center text-current"
         >
-          ${
-            this.indeterminate
-              ? unsafeSVG(Minus)
-              : this.isChecked
-                ? unsafeSVG(Check)
-                : nothing
-          }
+          ${this.indeterminate
+            ? unsafeSVG(Minus)
+            : this.isChecked
+              ? unsafeSVG(Check)
+              : nothing}
         </span>
       </button>
     `;

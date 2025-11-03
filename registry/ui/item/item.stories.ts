@@ -188,11 +188,9 @@ export const WithGroup: Story = {
                 ${unsafeSVG(Plus)}
               </ui-button>
             </ui-item>
-            ${
-              index !== people.length - 1
-                ? html`<ui-item-separator></ui-item-separator>`
-                : ""
-            }
+            ${index !== people.length - 1
+              ? html`<ui-item-separator></ui-item-separator>`
+              : ""}
           `,
         )}
       </ui-item-group>

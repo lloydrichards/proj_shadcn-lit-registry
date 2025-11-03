@@ -555,17 +555,15 @@ export class SelectItem extends TW(LitElement) {
         @click=${this.handleClick}
       >
         <slot></slot>
-        ${
-          isSelected
-            ? html`
+        ${isSelected
+          ? html`
               <span
                 class="absolute right-2 flex h-3.5 w-3.5 items-center justify-center"
               >
                 ${unsafeSVG(Check)}
               </span>
             `
-            : nothing
-        }
+          : nothing}
       </div>
     `;
   }

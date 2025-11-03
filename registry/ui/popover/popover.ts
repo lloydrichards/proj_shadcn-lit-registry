@@ -208,14 +208,12 @@ export class Popover extends TW(LitElement) {
         data-placement=${this.currentPlacement}
       >
         <slot></slot>
-        ${
-          this.arrow
-            ? html`<div
+        ${this.arrow
+          ? html`<div
               class="absolute w-2 h-2 rotate-45 bg-inherit -z-10"
               part="arrow"
             ></div>`
-            : ""
-        }
+          : ""}
       </div>
     `;
   }

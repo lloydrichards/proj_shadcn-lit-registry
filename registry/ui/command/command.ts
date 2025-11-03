@@ -887,9 +887,8 @@ export class CommandGroup
         aria-labelledby=${headingId || nothing}
         class=${cn("overflow-hidden p-1 text-foreground", this.className)}
       >
-        ${
-          this.heading
-            ? html`
+        ${this.heading
+          ? html`
               <div
                 id=${headingId}
                 role="presentation"
@@ -898,8 +897,7 @@ export class CommandGroup
                 ${this.heading}
               </div>
             `
-            : nothing
-        }
+          : nothing}
         <slot></slot>
       </div>
     `;
