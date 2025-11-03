@@ -16,6 +16,7 @@
   "categories": [
     "lib",
     "animation",
+    "infrastructure",
     "web-component"
   ]
 }

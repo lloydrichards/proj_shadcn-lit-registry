@@ -19,6 +19,7 @@
   "categories": [
     "lib",
     "base",
+    "infrastructure",
     "web-component"
   ]
 }

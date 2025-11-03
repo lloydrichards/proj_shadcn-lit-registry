@@ -14,6 +14,20 @@ import { RegistryItemRow } from "../components/registry_item_row";
 const Home = async () => {
   const registryData = await import("@/registry.json");
   const registry = registryData.default;
+
+  // Separate items by type
+  const libItems = registry.items.filter(
+    (item: any) =>
+      item.type === "registry:lib" && !item.categories.includes("controller"),
+  );
+  const controllerItems = registry.items.filter((item: any) =>
+    item.categories.includes("controller"),
+  );
+  const uiItems = registry.items.filter(
+    (item: any) =>
+      item.type === "registry:component" || item.type === "registry:style",
+  );
+
   return (
     <div className="mx-auto flex min-h-svh max-w-3xl flex-col gap-8 px-4 py-8">
       <main className="flex flex-1 flex-col gap-8">
@@ -266,12 +280,42 @@ const Home = async () => {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {/* Library/Infrastructure Section */}
             <TableRow className="hover:bg-background border-b-0">
-              <TableCell className="pt-8 text-xs uppercase">
-                Component <span className="text-muted-foreground">Stories</span>
+              <TableCell className="pt-8 text-xs uppercase font-semibold">
+                Library{" "}
+                <span className="text-muted-foreground font-normal">
+                  (Infrastructure)
+                </span>
               </TableCell>
             </TableRow>
-            {registry.items.map((item) => (
+            {libItems.map((item: any) => (
+              <RegistryItemRow key={item.name} item={item} />
+            ))}
+
+            {/* Controllers Section */}
+            <TableRow className="hover:bg-background border-b-0">
+              <TableCell className="pt-8 text-xs uppercase font-semibold">
+                Controllers{" "}
+                <span className="text-muted-foreground font-normal">
+                  (Reactive Controllers)
+                </span>
+              </TableCell>
+            </TableRow>
+            {controllerItems.map((item: any) => (
+              <RegistryItemRow key={item.name} item={item} />
+            ))}
+
+            {/* UI Components Section */}
+            <TableRow className="hover:bg-background border-b-0">
+              <TableCell className="pt-8 text-xs uppercase font-semibold">
+                Components{" "}
+                <span className="text-muted-foreground font-normal">
+                  (UI Components & Styles)
+                </span>
+              </TableCell>
+            </TableRow>
+            {uiItems.map((item: any) => (
               <RegistryItemRow key={item.name} item={item} />
             ))}
           </TableBody>

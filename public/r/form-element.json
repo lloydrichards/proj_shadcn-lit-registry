@@ -19,6 +19,7 @@
   "categories": [
     "lib",
     "form",
+    "infrastructure",
     "web-component"
   ]
 }
