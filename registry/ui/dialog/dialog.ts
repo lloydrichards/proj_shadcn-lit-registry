@@ -237,6 +237,8 @@ export class DialogContent
   @state() private animationState: "idle" | "entering" | "entered" | "exiting" =
     "idle";
 
+  @state() private _previousOpen?: boolean;
+
   @query("dialog") private dialogElement!: HTMLDialogElement;
 
   private previousFocus?: HTMLElement;
@@ -263,7 +265,13 @@ export class DialogContent
     // Derive animation state from context.open
     const contextOpen = this._dialogContext?.open;
 
-    if (changedProperties.has("_dialogContext")) {
+    // Trigger state update if context changed or dialog open state changed
+    if (
+      changedProperties.has("_dialogContext") ||
+      this._previousOpen !== contextOpen
+    ) {
+      this._previousOpen = contextOpen;
+
       if (contextOpen && this.animationState === "idle") {
         this.animationState = "entering";
       } else if (!contextOpen && this.animationState === "entered") {

@@ -1,9 +1,9 @@
 import { cva } from "class-variance-authority";
-import { html, LitElement, nothing, type PropertyValues } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { html, nothing, type PropertyValues } from "lit";
+import { customElement, property, query, state } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, Minus } from "lucide-static";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { FormElement, type FormValue } from "@/registry/lib/form-element";
 
 export const checkboxVariants = cva(
   "peer size-4 shrink-0 rounded-sm border border-primary shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground",
@@ -20,25 +20,20 @@ export interface CheckboxProperties {
   disabled?: boolean;
   required?: boolean;
   name?: string;
-  value?: string;
+  value?: FormValue;
   ariaLabel?: string | null;
   ariaLabelledby?: string | null;
   ariaDescribedby?: string | null;
 }
 
 @customElement("ui-checkbox")
-export class Checkbox extends TW(LitElement) implements CheckboxProperties {
-  static formAssociated = true;
-  private internals: ElementInternals;
+export class Checkbox extends FormElement implements CheckboxProperties {
+  @query("button") private _button!: HTMLButtonElement;
 
   @property({ type: Boolean }) checked: boolean | undefined = undefined;
   @property({ type: Boolean, attribute: "default-checked" })
   defaultChecked = false;
   @property({ type: Boolean }) indeterminate = false;
-  @property({ type: Boolean }) disabled = false;
-  @property({ type: Boolean }) required = false;
-  @property({ type: String }) name = "";
-  @property({ type: String }) value = "on";
 
   @property({ type: String, attribute: "aria-label" }) accessor ariaLabel:
     | string
@@ -58,25 +53,10 @@ export class Checkbox extends TW(LitElement) implements CheckboxProperties {
     }
   };
 
-  constructor() {
-    super();
-    this.internals = this.attachInternals();
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     if (this.checked === undefined) {
       this._checked = this.defaultChecked;
-    }
-    if (this.shadowRoot) {
-      const sheet = new CSSStyleSheet();
-      sheet.replaceSync(
-        `:host { display: inline-flex; vertical-align: middle; line-height: 1; }`,
-      );
-      this.shadowRoot.adoptedStyleSheets = [
-        ...this.shadowRoot.adoptedStyleSheets,
-        sheet,
-      ];
     }
     this._setupLabelDelegation();
   }
@@ -137,7 +117,7 @@ export class Checkbox extends TW(LitElement) implements CheckboxProperties {
         this.removeAttribute("data-disabled");
       }
 
-      this.internals.setFormValue(this.isChecked ? this.value : null);
+      this.updateFormValue();
     }
   }
 
@@ -153,6 +133,29 @@ export class Checkbox extends TW(LitElement) implements CheckboxProperties {
     }
   }
 
+  /**
+   * Get the form value for this checkbox
+   * Returns the value when checked, null when unchecked
+   */
+  protected getFormValue(): FormValue {
+    return this.isChecked ? this.value : null;
+  }
+
+  /**
+   * Update the form value using the getFormValue method
+   */
+  protected override updateFormValue() {
+    const formValue = this.disabled ? null : this.getFormValue();
+
+    if (this.internals) {
+      if (formValue === null || formValue === undefined) {
+        this.internals.setFormValue(null);
+      } else {
+        this.internals.setFormValue(String(formValue));
+      }
+    }
+  }
+
   private _handleClick() {
     if (this.disabled) return;
 
@@ -160,16 +163,10 @@ export class Checkbox extends TW(LitElement) implements CheckboxProperties {
       this._checked = !this._checked;
     }
 
-    this.dispatchEvent(
-      new CustomEvent("change", {
-        detail: {
-          checked: this.checked !== undefined ? !this.checked : this._checked,
-          indeterminate: false,
-        },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("change", {
+      checked: this.checked !== undefined ? !this.checked : this._checked,
+      indeterminate: false,
+    });
   }
 
   private _handleKeyDown(e: KeyboardEvent) {
@@ -180,6 +177,20 @@ export class Checkbox extends TW(LitElement) implements CheckboxProperties {
     }
   }
 
+  /**
+   * Focus the checkbox button
+   */
+  focus(options?: FocusOptions): void {
+    this._button?.focus(options);
+  }
+
+  /**
+   * Blur the checkbox button
+   */
+  blur(): void {
+    this._button?.blur();
+  }
+
   override render() {
     return html`
       <button
@@ -188,28 +199,32 @@ export class Checkbox extends TW(LitElement) implements CheckboxProperties {
         class=${checkboxVariants()}
         ?disabled=${this.disabled}
         ?required=${this.required}
-        aria-checked=${this.indeterminate
-          ? "mixed"
-          : (String(this.isChecked) as "true")}
+        aria-checked=${
+          this.indeterminate ? "mixed" : (String(this.isChecked) as "true")
+        }
         aria-label=${this.ariaLabel || nothing}
         aria-labelledby=${this.ariaLabelledby || nothing}
         aria-describedby=${this.ariaDescribedby || nothing}
-        data-state=${this.indeterminate
-          ? "indeterminate"
-          : this.isChecked
-            ? "checked"
-            : "unchecked"}
+        data-state=${
+          this.indeterminate
+            ? "indeterminate"
+            : this.isChecked
+              ? "checked"
+              : "unchecked"
+        }
         @click=${this._handleClick}
         @keydown=${this._handleKeyDown}
       >
         <span
           class="flex [&>svg]:size-3 items-center justify-center text-current"
         >
-          ${this.indeterminate
-            ? unsafeSVG(Minus)
-            : this.isChecked
-              ? unsafeSVG(Check)
-              : nothing}
+          ${
+            this.indeterminate
+              ? unsafeSVG(Minus)
+              : this.isChecked
+                ? unsafeSVG(Check)
+                : nothing
+          }
         </span>
       </button>
     `;
