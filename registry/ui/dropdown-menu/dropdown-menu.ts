@@ -1,4 +1,4 @@
-import { css, html, LitElement, nothing, type PropertyValues } from "lit";
+import { css, html, nothing, type PropertyValues } from "lit";
 import {
   customElement,
   property,
@@ -8,7 +8,7 @@ import {
 } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, ChevronRight, Circle } from "lucide-static";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
 import "@/registry/ui/popover/popover";
 
@@ -42,7 +42,7 @@ const isNode = (value: EventTarget | null): value is Node => {
 
 @customElement("ui-dropdown-menu")
 export class DropdownMenu
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuProperties
 {
   static styles = css`
@@ -103,13 +103,7 @@ export class DropdownMenu
         document.removeEventListener("click", this.clickAwayHandler);
       }
 
-      this.dispatchEvent(
-        new CustomEvent("open-change", {
-          detail: { open: this.open },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("open-change", { open: this.open });
     }
   }
 
@@ -145,7 +139,7 @@ export interface DropdownMenuTriggerProperties {
 
 @customElement("ui-dropdown-menu-trigger")
 export class DropdownMenuTrigger
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuTriggerProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -158,12 +152,7 @@ export class DropdownMenuTrigger
   private handleClick = (e: Event) => {
     if (!this.disabled) {
       e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent("trigger-click", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("trigger-click");
     }
   };
 
@@ -200,7 +189,7 @@ export interface DropdownMenuContentProperties {
 
 @customElement("ui-dropdown-menu-content")
 export class DropdownMenuContent
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuContentProperties
 {
   @property({ type: String }) align: "start" | "center" | "end" = "start";
@@ -344,7 +333,7 @@ export interface DropdownMenuItemProperties {
 
 @customElement("ui-dropdown-menu-item")
 export class DropdownMenuItem
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuItemProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -354,19 +343,8 @@ export class DropdownMenuItem
 
   private handleClick = () => {
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("select", {
-          detail: { value: this.textContent },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("select", { value: this.textContent });
+      this.emit("item-select");
     }
   };
 
@@ -416,7 +394,7 @@ export interface DropdownMenuCheckboxItemProperties {
 
 @customElement("ui-dropdown-menu-checkbox-item")
 export class DropdownMenuCheckboxItem
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuCheckboxItemProperties
 {
   @property({ type: Boolean }) checked = false;
@@ -427,13 +405,7 @@ export class DropdownMenuCheckboxItem
   private handleClick = () => {
     if (!this.disabled) {
       this.checked = !this.checked;
-      this.dispatchEvent(
-        new CustomEvent("checked-change", {
-          detail: { checked: this.checked },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("checked-change", { checked: this.checked });
     }
   };
 
@@ -471,7 +443,7 @@ export interface DropdownMenuRadioGroupProperties {
 
 @customElement("ui-dropdown-menu-radio-group")
 export class DropdownMenuRadioGroup
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuRadioGroupProperties
 {
   @property({ type: String }) value = "";
@@ -507,13 +479,7 @@ export class DropdownMenuRadioGroup
     if (e instanceof CustomEvent) {
       e.stopPropagation();
       this.value = e.detail.value;
-      this.dispatchEvent(
-        new CustomEvent("value-change", {
-          detail: { value: this.value },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("value-change", { value: this.value });
     }
   };
 
@@ -534,7 +500,7 @@ export interface DropdownMenuRadioItemProperties {
 
 @customElement("ui-dropdown-menu-radio-item")
 export class DropdownMenuRadioItem
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuRadioItemProperties
 {
   @property({ type: String }) value = "";
@@ -545,19 +511,8 @@ export class DropdownMenuRadioItem
 
   private handleClick = () => {
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("radio-select", {
-          detail: { value: this.value },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("radio-select", { value: this.value });
+      this.emit("item-select");
     }
   };
 
@@ -594,7 +549,7 @@ export interface DropdownMenuSubProperties {
 
 @customElement("ui-dropdown-menu-sub")
 export class DropdownMenuSub
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuSubProperties
 {
   static styles = css`
@@ -686,7 +641,7 @@ export interface DropdownMenuSubTriggerProperties {
 
 @customElement("ui-dropdown-menu-sub-trigger")
 export class DropdownMenuSubTrigger
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuSubTriggerProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -701,36 +656,21 @@ export class DropdownMenuSubTrigger
   private handleClick = (e: Event) => {
     if (!this.disabled) {
       e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-click", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("sub-trigger-click");
     }
   };
 
   private handleMouseEnter = () => {
     if (!this.disabled) {
       this.highlighted = true;
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-mouseenter", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("sub-trigger-mouseenter");
     }
   };
 
   private handleMouseLeave = () => {
     this.highlighted = false;
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-mouseleave", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("sub-trigger-mouseleave");
     }
   };
 
@@ -777,21 +717,11 @@ export class DropdownMenuSubContent extends DropdownMenuContent {
   }
 
   private handleMouseEnter = () => {
-    this.dispatchEvent(
-      new CustomEvent("sub-content-mouseenter", {
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("sub-content-mouseenter");
   };
 
   private handleMouseLeave = () => {
-    this.dispatchEvent(
-      new CustomEvent("sub-content-mouseleave", {
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("sub-content-mouseleave");
   };
 
   override render() {
@@ -810,7 +740,7 @@ export class DropdownMenuSubContent extends DropdownMenuContent {
 }
 
 @customElement("ui-dropdown-menu-separator")
-export class DropdownMenuSeparator extends TW(LitElement) {
+export class DropdownMenuSeparator extends BaseElement {
   override render() {
     return html`
       <div
@@ -828,7 +758,7 @@ export interface DropdownMenuLabelProperties {
 
 @customElement("ui-dropdown-menu-label")
 export class DropdownMenuLabel
-  extends TW(LitElement)
+  extends BaseElement
   implements DropdownMenuLabelProperties
 {
   @property({ type: Boolean }) inset = false;
@@ -849,7 +779,7 @@ export class DropdownMenuLabel
 }
 
 @customElement("ui-dropdown-menu-group")
-export class DropdownMenuGroup extends TW(LitElement) {
+export class DropdownMenuGroup extends BaseElement {
   override render() {
     return html`
       <div role="group">
@@ -860,7 +790,7 @@ export class DropdownMenuGroup extends TW(LitElement) {
 }
 
 @customElement("ui-dropdown-menu-shortcut")
-export class DropdownMenuShortcut extends TW(LitElement) {
+export class DropdownMenuShortcut extends BaseElement {
   override render() {
     return html`
       <span class="ml-auto text-xs tracking-widest text-muted-foreground">

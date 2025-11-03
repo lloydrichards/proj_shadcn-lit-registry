@@ -1,4 +1,4 @@
-import { css, html, LitElement, nothing, type PropertyValues } from "lit";
+import { css, html, nothing, type PropertyValues } from "lit";
 import {
   customElement,
   property,
@@ -9,7 +9,7 @@ import {
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, ChevronRight, Circle } from "lucide-static";
 
-import { TW } from "@/registry/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
 import "@/registry/ui/popover/popover";
 
@@ -49,10 +49,7 @@ const isNode = (value: EventTarget | null): value is Node => {
 };
 
 @customElement("ui-context-menu")
-export class ContextMenu
-  extends TW(LitElement)
-  implements ContextMenuProperties
-{
+export class ContextMenu extends BaseElement implements ContextMenuProperties {
   static styles = css`
     :host {
       display: contents;
@@ -130,12 +127,7 @@ export class ContextMenu
       } else {
         document.removeEventListener("click", this.clickAwayHandler, true);
         document.removeEventListener("keydown", this.escapeHandler);
-        this.dispatchEvent(
-          new CustomEvent("context-menu-close", {
-            bubbles: true,
-            composed: true,
-          }),
-        );
+        this.emit("context-menu-close");
       }
     }
   }
@@ -165,13 +157,7 @@ export class ContextMenu
 
     this.open = true;
 
-    this.dispatchEvent(
-      new CustomEvent("context-menu-open", {
-        detail: { x: this.cursorX, y: this.cursorY },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("context-menu-open", { x: this.cursorX, y: this.cursorY });
   };
 
   private handleItemSelect = () => {
@@ -207,7 +193,7 @@ export interface ContextMenuContentProperties {
 
 @customElement("ui-context-menu-content")
 export class ContextMenuContent
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuContentProperties
 {
   @property({ type: String }) align: "start" | "center" | "end" = "start";
@@ -343,7 +329,7 @@ export interface ContextMenuItemProperties {
 
 @customElement("ui-context-menu-item")
 export class ContextMenuItem
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuItemProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -353,19 +339,8 @@ export class ContextMenuItem
 
   private handleClick = () => {
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("select", {
-          detail: { value: this.textContent },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("select", { value: this.textContent });
+      this.emit("item-select");
     }
   };
 
@@ -415,7 +390,7 @@ export interface ContextMenuCheckboxItemProperties {
 
 @customElement("ui-context-menu-checkbox-item")
 export class ContextMenuCheckboxItem
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuCheckboxItemProperties
 {
   @property({ type: Boolean }) checked = false;
@@ -426,19 +401,8 @@ export class ContextMenuCheckboxItem
   private handleClick = () => {
     if (!this.disabled) {
       this.checked = !this.checked;
-      this.dispatchEvent(
-        new CustomEvent("checked-change", {
-          detail: { checked: this.checked },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("checked-change", { checked: this.checked });
+      this.emit("item-select");
     }
   };
 
@@ -476,7 +440,7 @@ export interface ContextMenuRadioGroupProperties {
 
 @customElement("ui-context-menu-radio-group")
 export class ContextMenuRadioGroup
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuRadioGroupProperties
 {
   @property({ type: String }) value = "";
@@ -510,13 +474,7 @@ export class ContextMenuRadioGroup
     if (!(e instanceof CustomEvent)) return;
     e.stopPropagation();
     this.value = e.detail.value;
-    this.dispatchEvent(
-      new CustomEvent("value-change", {
-        detail: { value: this.value },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("value-change", { value: this.value });
   };
 
   override render() {
@@ -536,7 +494,7 @@ export interface ContextMenuRadioItemProperties {
 
 @customElement("ui-context-menu-radio-item")
 export class ContextMenuRadioItem
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuRadioItemProperties
 {
   @property({ type: String }) value = "";
@@ -547,19 +505,8 @@ export class ContextMenuRadioItem
 
   private handleClick = () => {
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("radio-select", {
-          detail: { value: this.value },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("radio-select", { value: this.value });
+      this.emit("item-select");
     }
   };
 
@@ -596,7 +543,7 @@ export interface ContextMenuSubProperties {
 
 @customElement("ui-context-menu-sub")
 export class ContextMenuSub
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuSubProperties
 {
   static styles = css`
@@ -660,7 +607,7 @@ export interface ContextMenuSubTriggerProperties {
 
 @customElement("ui-context-menu-sub-trigger")
 export class ContextMenuSubTrigger
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuSubTriggerProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -675,24 +622,14 @@ export class ContextMenuSubTrigger
   private handleClick = (e: Event) => {
     if (!this.disabled) {
       e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-click", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("sub-trigger-click");
     }
   };
 
   private handleMouseEnter = () => {
     if (!this.disabled) {
       this.highlighted = true;
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-mouseenter", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("sub-trigger-mouseenter");
     }
   };
 
@@ -732,7 +669,7 @@ export class ContextMenuSubTrigger
 export class ContextMenuSubContent extends ContextMenuContent {}
 
 @customElement("ui-context-menu-separator")
-export class ContextMenuSeparator extends TW(LitElement) {
+export class ContextMenuSeparator extends BaseElement {
   override render() {
     return html`
       <div
@@ -750,7 +687,7 @@ export interface ContextMenuLabelProperties {
 
 @customElement("ui-context-menu-label")
 export class ContextMenuLabel
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuLabelProperties
 {
   @property({ type: Boolean }) inset = false;
@@ -771,7 +708,7 @@ export class ContextMenuLabel
 }
 
 @customElement("ui-context-menu-group")
-export class ContextMenuGroup extends TW(LitElement) {
+export class ContextMenuGroup extends BaseElement {
   override render() {
     return html`
       <div role="group">
@@ -782,7 +719,7 @@ export class ContextMenuGroup extends TW(LitElement) {
 }
 
 @customElement("ui-context-menu-shortcut")
-export class ContextMenuShortcut extends TW(LitElement) {
+export class ContextMenuShortcut extends BaseElement {
   override render() {
     return html`
       <span class="ml-auto text-xs tracking-widest text-muted-foreground">

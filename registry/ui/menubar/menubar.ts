@@ -1,7 +1,7 @@
-import { TW } from "@/registry/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
 import "@/registry/ui/popover/popover";
-import { css, html, LitElement, nothing, type PropertyValues } from "lit";
+import { css, html, nothing, type PropertyValues } from "lit";
 import {
   customElement,
   property,
@@ -40,7 +40,7 @@ const isNode = (value: EventTarget | null): value is Node => {
 };
 
 @customElement("ui-menubar")
-export class Menubar extends TW(LitElement) implements MenubarProperties {
+export class Menubar extends BaseElement implements MenubarProperties {
   @property({ type: String }) value = "";
 
   @queryAssignedElements({ selector: "ui-menubar-menu" })
@@ -87,13 +87,7 @@ export class Menubar extends TW(LitElement) implements MenubarProperties {
         document.removeEventListener("click", this.clickAwayHandler);
       }
 
-      this.dispatchEvent(
-        new CustomEvent("value-change", {
-          detail: { value: this.value },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("value-change", { value: this.value });
     }
   }
 
@@ -223,10 +217,7 @@ export interface MenubarMenuProperties {
 }
 
 @customElement("ui-menubar-menu")
-export class MenubarMenu
-  extends TW(LitElement)
-  implements MenubarMenuProperties
-{
+export class MenubarMenu extends BaseElement implements MenubarMenuProperties {
   static styles = css`
     :host {
       display: contents;
@@ -290,7 +281,7 @@ export interface MenubarTriggerProperties {
 
 @customElement("ui-menubar-trigger")
 export class MenubarTrigger
-  extends TW(LitElement)
+  extends BaseElement
   implements MenubarTriggerProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -299,12 +290,7 @@ export class MenubarTrigger
   private handleClick = (e: Event) => {
     if (!this.disabled) {
       e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent("menubar-trigger-click", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("menubar-trigger-click");
     }
   };
 
@@ -342,7 +328,7 @@ export interface MenubarContentProperties {
 
 @customElement("ui-menubar-content")
 export class MenubarContent
-  extends TW(LitElement)
+  extends BaseElement
   implements MenubarContentProperties
 {
   @property({ type: String }) align: "start" | "center" | "end" = "start";
@@ -532,10 +518,7 @@ export interface MenubarItemProperties {
 }
 
 @customElement("ui-menubar-item")
-export class MenubarItem
-  extends TW(LitElement)
-  implements MenubarItemProperties
-{
+export class MenubarItem extends BaseElement implements MenubarItemProperties {
   @property({ type: Boolean }) disabled = false;
   @property({ type: Boolean }) inset = false;
 
@@ -543,19 +526,8 @@ export class MenubarItem
 
   private handleClick = () => {
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("select", {
-          detail: { value: this.textContent },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("menubar-item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("select", { value: this.textContent });
+      this.emit("menubar-item-select");
     }
   };
 
@@ -605,7 +577,7 @@ export interface MenubarCheckboxItemProperties {
 
 @customElement("ui-menubar-checkbox-item")
 export class MenubarCheckboxItem
-  extends TW(LitElement)
+  extends BaseElement
   implements MenubarCheckboxItemProperties
 {
   @property({ type: Boolean }) checked = false;
@@ -616,13 +588,7 @@ export class MenubarCheckboxItem
   private handleClick = () => {
     if (!this.disabled) {
       this.checked = !this.checked;
-      this.dispatchEvent(
-        new CustomEvent("checked-change", {
-          detail: { checked: this.checked },
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("checked-change", { checked: this.checked });
     }
   };
 
@@ -660,7 +626,7 @@ export interface MenubarRadioGroupProperties {
 
 @customElement("ui-menubar-radio-group")
 export class MenubarRadioGroup
-  extends TW(LitElement)
+  extends BaseElement
   implements MenubarRadioGroupProperties
 {
   @property({ type: String }) value = "";
@@ -702,13 +668,7 @@ export class MenubarRadioGroup
     if (!(e instanceof CustomEvent)) return;
     e.stopPropagation();
     this.value = e.detail.value;
-    this.dispatchEvent(
-      new CustomEvent("value-change", {
-        detail: { value: this.value },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("value-change", { value: this.value });
   };
 
   override render() {
@@ -728,7 +688,7 @@ export interface MenubarRadioItemProperties {
 
 @customElement("ui-menubar-radio-item")
 export class MenubarRadioItem
-  extends TW(LitElement)
+  extends BaseElement
   implements MenubarRadioItemProperties
 {
   @property({ type: String }) value = "";
@@ -739,19 +699,8 @@ export class MenubarRadioItem
 
   private handleClick = () => {
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("radio-select", {
-          detail: { value: this.value },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("menubar-item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("radio-select", { value: this.value });
+      this.emit("menubar-item-select");
     }
   };
 
@@ -787,7 +736,7 @@ export interface MenubarSubProperties {
 }
 
 @customElement("ui-menubar-sub")
-export class MenubarSub extends TW(LitElement) implements MenubarSubProperties {
+export class MenubarSub extends BaseElement implements MenubarSubProperties {
   static styles = css`
     :host {
       display: contents;
@@ -831,7 +780,7 @@ export interface MenubarSubTriggerProperties {
 
 @customElement("ui-menubar-sub-trigger")
 export class MenubarSubTrigger
-  extends TW(LitElement)
+  extends BaseElement
   implements MenubarSubTriggerProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -897,21 +846,11 @@ export class MenubarSubContent extends MenubarContent {
   }
 
   private handleMouseEnter = () => {
-    this.dispatchEvent(
-      new CustomEvent("sub-content-mouseenter", {
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("sub-content-mouseenter");
   };
 
   private handleMouseLeave = () => {
-    this.dispatchEvent(
-      new CustomEvent("sub-content-mouseleave", {
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("sub-content-mouseleave");
   };
 
   protected override handleKeyDown(e: KeyboardEvent) {
@@ -1042,7 +981,7 @@ export class MenubarSubContent extends MenubarContent {
 }
 
 @customElement("ui-menubar-separator")
-export class MenubarSeparator extends TW(LitElement) {
+export class MenubarSeparator extends BaseElement {
   override render() {
     return html`
       <div
@@ -1060,7 +999,7 @@ export interface MenubarLabelProperties {
 
 @customElement("ui-menubar-label")
 export class MenubarLabel
-  extends TW(LitElement)
+  extends BaseElement
   implements MenubarLabelProperties
 {
   @property({ type: Boolean }) inset = false;
@@ -1081,7 +1020,7 @@ export class MenubarLabel
 }
 
 @customElement("ui-menubar-group")
-export class MenubarGroup extends TW(LitElement) {
+export class MenubarGroup extends BaseElement {
   override render() {
     return html`
       <div role="group">
@@ -1092,7 +1031,7 @@ export class MenubarGroup extends TW(LitElement) {
 }
 
 @customElement("ui-menubar-shortcut")
-export class MenubarShortcut extends TW(LitElement) {
+export class MenubarShortcut extends BaseElement {
   override render() {
     return html`
       <span class="ml-auto text-xs tracking-widest text-muted-foreground">

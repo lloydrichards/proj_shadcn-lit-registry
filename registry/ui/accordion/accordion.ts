@@ -1,11 +1,9 @@
-import { html, LitElement, nothing, type PropertyValues } from "lit";
+import { html, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { ChevronDown } from "lucide-static";
-import { TW } from "@/registry/lib/tailwindMixin";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
-
-const TwLitElement = TW(LitElement);
 
 /**
  * Accordion component properties and events
@@ -39,7 +37,7 @@ export interface AccordionValueChangeEvent extends CustomEvent {
  * Root accordion container managing state
  */
 @customElement("ui-accordion")
-export class Accordion extends TwLitElement implements AccordionProperties {
+export class Accordion extends BaseElement implements AccordionProperties {
   @property({ type: String }) type: "single" | "multiple" = "single";
   @property({ type: String }) value = "";
   @property({ type: String, attribute: "default-value" }) defaultValue = "";
@@ -110,13 +108,7 @@ export class Accordion extends TwLitElement implements AccordionProperties {
     const value =
       this.type === "single" ? this.value : Array.from(this._openValues);
 
-    this.dispatchEvent(
-      new CustomEvent("value-change", {
-        detail: { value },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("value-change", { value });
   }
 
   private updateItems() {
@@ -150,7 +142,7 @@ export class Accordion extends TwLitElement implements AccordionProperties {
  */
 @customElement("ui-accordion-item")
 export class AccordionItem
-  extends TwLitElement
+  extends BaseElement
   implements AccordionItemProperties
 {
   @property({ type: String }) value = "";
@@ -214,7 +206,7 @@ export class AccordionItem
  */
 @customElement("ui-accordion-trigger")
 export class AccordionTrigger
-  extends TwLitElement
+  extends BaseElement
   implements AccordionTriggerProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -247,13 +239,7 @@ export class AccordionTrigger
       return;
     }
 
-    this.dispatchEvent(
-      new CustomEvent("accordion-trigger-click", {
-        detail: { value: item.value },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("accordion-trigger-click", { value: item.value });
   };
 
   override render() {
@@ -297,7 +283,7 @@ export class AccordionTrigger
  */
 @customElement("ui-accordion-content")
 export class AccordionContent
-  extends TwLitElement
+  extends BaseElement
   implements AccordionContentProperties
 {
   @property({ type: Boolean }) forceMount = false;
@@ -307,7 +293,8 @@ export class AccordionContent
     "closed";
   @state() private _hasRenderedOnce = false;
 
-  private _contentId = `accordion-content-${Math.random().toString(36).substring(2, 11)}`;
+  private _contentId =
+    `accordion-content-${Math.random().toString(36).substring(2, 11)}`;
 
   override connectedCallback() {
     super.connectedCallback();
