@@ -84,25 +84,6 @@ export class BaseElement extends TW(LitElement) {
     }
   }
 
-  /**
-   * Helper to check if a slot has content
-   * @deprecated Use HasSlotController instead for reactive updates
-   */
-  protected hasSlotContent(slotName = ""): boolean {
-    const slot = this.shadowRoot?.querySelector(
-      slotName ? `slot[name="${slotName}"]` : "slot:not([name])"
-    ) as HTMLSlotElement | null;
-
-    if (!slot) return false;
-
-    const nodes = slot.assignedNodes({ flatten: true });
-    return nodes.some((node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return node.textContent?.trim() !== "";
-      }
-      return node.nodeType === Node.ELEMENT_NODE;
-    });
-  }
 }
 
 export default BaseElement;
@@ -114,7 +95,10 @@ export default BaseElement;
 - [ ] emit() method creates events with composed: true
 - [ ] Dependencies auto-register on connectedCallback
 - [ ] className property is reactive
-- [ ] hasSlotContent works for named and default slots
+
+**Note on Slot Detection**: For reactive slot content detection, use Lit's built-in
+`@queryAssignedElements` decorator instead of a custom controller. For simple non-reactive
+checks, use the `hasSlottedContent()` utility function from `registry/lib/utils.ts`.
 
 ---
 
@@ -138,9 +122,9 @@ checkbox, etc.)
  * 4. Accessible by default with ARIA attributes
  */
 
+import type { PropertyValues } from "lit";
 import { property } from "lit/decorators.js";
 import { BaseElement } from "./base-element";
-import { FormControlController } from "./controllers/form-control";
 
 export interface FormElementProperties {
   name?: string;
@@ -159,11 +143,11 @@ export abstract class FormElement
   // Enable native form participation (where supported)
   static formAssociated = true;
 
-  // Form controller handles form integration logic
-  protected formController: FormControlController;
-
   // ElementInternals for native form participation
   protected internals?: ElementInternals;
+
+  // Form element reference
+  private _form: HTMLFormElement | null = null;
 
   // Form properties
   @property({ type: String }) name = "";
@@ -181,9 +165,6 @@ export abstract class FormElement
   constructor() {
     super();
 
-    // Initialize form controller
-    this.formController = new FormControlController(this);
-
     // Attach ElementInternals if available
     if ("attachInternals" in this) {
       this.internals = this.attachInternals();
@@ -198,8 +179,25 @@ export abstract class FormElement
       this.defaultValue = this.value;
     }
 
+    // Find and attach to form
+    this._form = this._findForm();
+    if (this._form) {
+      this._form.addEventListener("submit", this._handleFormSubmit);
+      this._form.addEventListener("reset", this._handleFormReset);
+    }
+
     // Update form value
     this.updateFormValue();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    // Cleanup form listeners
+    if (this._form) {
+      this._form.removeEventListener("submit", this._handleFormSubmit);
+      this._form.removeEventListener("reset", this._handleFormReset);
+    }
   }
 
   override updated(changedProperties: PropertyValues) {
@@ -221,7 +219,42 @@ export abstract class FormElement
   }
 
   /**
-   * Update the form value using ElementInternals or hidden input
+   * Find the form this element belongs to
+   */
+  private _findForm(): HTMLFormElement | null {
+    // Check for form attribute (allows associating with a form by ID)
+    if (this.form) {
+      return document.getElementById(this.form) as HTMLFormElement;
+    }
+
+    // Use ElementInternals.form if available (preferred)
+    if (this.internals?.form) {
+      return this.internals.form;
+    }
+
+    // Fallback to closest form ancestor
+    return this.closest("form");
+  }
+
+  /**
+   * Handle form submission - validate before allowing submit
+   */
+  private _handleFormSubmit = (event: Event) => {
+    if (!this.reportValidity()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  };
+
+  /**
+   * Handle form reset - restore default value
+   */
+  private _handleFormReset = () => {
+    this.reset();
+  };
+
+  /**
+   * Update the form value using ElementInternals
    */
   protected updateFormValue() {
     const formValue = this.disabled ? null : this.value;
@@ -381,10 +414,14 @@ export default FormElement;
 - [ ] Validation API implemented
 - [ ] Reset restores defaultValue
 - [ ] Form association via form attribute works
+- [ ] Form submit/reset event handling works
+
+**Note on Form Integration**: FormElement handles all form integration internally using
+ElementInternals API (95%+ browser support). No separate controller is needed.
 
 ---
 
-## Task 3: Create HasSlotController
+## Task 3: Slot Detection Patterns
 
 ### File: `registry/lib/controllers/has-slot.ts`
 

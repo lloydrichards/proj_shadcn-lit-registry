@@ -1,6 +1,11 @@
 import { cva } from "class-variance-authority";
 import { html, LitElement, type PropertyValues } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import {
+  customElement,
+  property,
+  queryAssignedElements,
+  state,
+} from "lit/decorators.js";
 import { TW } from "@/registry/lib/tailwindMixin";
 import { cn } from "@/registry/lib/utils";
 
@@ -22,6 +27,9 @@ export class Avatar extends TW(LitElement) implements AvatarProperties {
 
   @state() private _imageLoaded = false;
   @state() private _imageError = false;
+
+  @queryAssignedElements({ slot: "image", flatten: true })
+  private _imageSlot!: HTMLElement[];
 
   override updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
@@ -51,7 +59,7 @@ export class Avatar extends TW(LitElement) implements AvatarProperties {
   }
 
   override render() {
-    const hasImageSlot = this.querySelector('[slot="image"]');
+    const hasImageSlot = this._imageSlot.length > 0;
 
     return html`
       <span class=${cn(avatarVariants(), this.className)}>
