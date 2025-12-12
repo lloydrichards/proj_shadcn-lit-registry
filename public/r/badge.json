@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "badge",
-  "type": "registry:component",
   "title": "Badge",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A badge component built with Lit and styled using Tailwind CSS. Supports multiple variants for different use cases.",
@@ -22,5 +21,6 @@
     "ui",
     "badge",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

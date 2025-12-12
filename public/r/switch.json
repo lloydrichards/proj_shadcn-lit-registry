@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "switch",
-  "type": "registry:component",
   "title": "Switch",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A control that allows the user to toggle between checked and not checked. Built with Lit and styled using Tailwind CSS. Supports controlled and uncontrolled modes with form integration.",
@@ -23,5 +22,6 @@
     "form",
     "switch",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

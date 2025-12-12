@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "avatar",
-  "type": "registry:component",
   "title": "Avatar",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "An image element with a fallback for representing the user. Built with Lit and styled using Tailwind CSS.",
@@ -22,5 +21,6 @@
     "ui",
     "avatar",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "field",
-  "type": "registry:component",
   "title": "Field",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "Form field components for creating accessible form layouts with labels, descriptions, and error messages. Includes fieldset, legend, and field grouping utilities.",
@@ -25,5 +24,6 @@
     "ui",
     "form",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "collapsible",
-  "type": "registry:component",
   "title": "Collapsible",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "An interactive component which expands/collapses a panel. Useful for showing and hiding content with smooth animations and accessibility features.",
@@ -24,5 +23,6 @@
     "ui",
     "collapsible",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "tailwind-mixin",
-  "type": "registry:lib",
   "title": "Tailwind Mixin",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A set of Tailwind CSS mixins for Lit components, enabling easy integration of Tailwind styles within web components.",
@@ -32,5 +31,6 @@
   "categories": [
     "ui",
     "web-component"
-  ]
+  ],
+  "type": "registry:lib"
 }

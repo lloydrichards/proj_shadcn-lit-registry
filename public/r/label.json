@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "label",
-  "type": "registry:component",
   "title": "Label",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "Renders an accessible label associated with controls.",
@@ -22,5 +21,6 @@
     "ui",
     "form",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

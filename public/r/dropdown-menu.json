@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "dropdown-menu",
-  "type": "registry:component",
   "title": "Dropdown Menu",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "Displays a menu to the user—such as a set of actions or functions—triggered by a button. Supports nested submenus, checkbox items, radio groups, keyboard navigation, and accessibility features.",
@@ -29,5 +28,6 @@
     "menu",
     "dropdown",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

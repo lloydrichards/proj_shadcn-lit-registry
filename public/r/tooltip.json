@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "tooltip",
-  "type": "registry:component",
   "title": "Tooltip",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A tooltip component that displays information when an element receives keyboard focus or the mouse hovers over it. Built with Lit and uses Floating UI for smart positioning.",
@@ -29,5 +28,6 @@
     "ui",
     "tooltip",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "tabs",
-  "type": "registry:component",
   "title": "Tabs",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A set of layered sections of content—known as tab panels—that are displayed one at a time. Built with Lit and styled using Tailwind CSS. Features keyboard navigation and accessible ARIA attributes.",
@@ -22,5 +21,6 @@
     "ui",
     "tabs",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

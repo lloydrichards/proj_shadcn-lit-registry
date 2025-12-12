@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "button",
-  "type": "registry:component",
   "title": "Button",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "An atomic button component built with Lit and styled using Tailwind CSS. Supports multiple variants and sizes for versatile use in web applications.",
@@ -24,5 +23,6 @@
     "ui",
     "button",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

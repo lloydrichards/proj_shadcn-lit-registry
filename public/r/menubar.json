@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "menubar",
-  "type": "registry:component",
   "title": "Menubar",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A visually persistent menu common in desktop applications that provides quick access to a consistent set of commands. Features horizontal keyboard navigation and accessible ARIA attributes.",
@@ -29,5 +28,6 @@
     "navigation",
     "menu",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

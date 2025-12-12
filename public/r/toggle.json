@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "toggle",
-  "type": "registry:component",
   "title": "Toggle",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A two-state button that can be either on or off. Built with Lit and styled using Tailwind CSS. Supports multiple variants and sizes with form integration.",
@@ -25,5 +24,6 @@
     "toggle",
     "button",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "accordion",
-  "type": "registry:component",
   "title": "Accordion",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A vertically stacked set of interactive headings that each reveal a section of content. Supports single and multiple open items with smooth animations and full keyboard navigation.",
@@ -24,5 +23,6 @@
     "ui",
     "accordion",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "popover",
-  "type": "registry:component",
   "title": "Popover",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A popover component built with Lit and styled using Tailwind CSS. Uses Floating UI for positioning with support for flip, shift, and arrow options.",
@@ -28,5 +27,6 @@
     "ui",
     "popover",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

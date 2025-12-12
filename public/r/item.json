@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "item",
-  "type": "registry:component",
   "title": "Item",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A versatile item component using named slots for flexible content composition. Includes group and separator components for organizing lists.",
@@ -32,5 +31,6 @@
     "ui",
     "list",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

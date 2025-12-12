@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "textarea",
-  "type": "registry:component",
   "title": "Textarea",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "Displays a form textarea or a component that looks like a textarea.",
@@ -22,5 +21,6 @@
     "ui",
     "form",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "context-menu",
-  "type": "registry:component",
   "title": "Context Menu",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "Displays a menu to the user at the cursor position when right-clicking on a trigger area. Supports checkboxes, radio groups, nested submenus, keyboard navigation, and accessibility features.",
@@ -29,5 +28,6 @@
     "menu",
     "context-menu",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

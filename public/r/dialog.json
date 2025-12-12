@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "dialog",
-  "type": "registry:component",
   "title": "Dialog",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "A modal dialog component that overlays content on the primary window. Uses native HTML dialog element with smooth animations, focus management, and accessibility features. Supports ESC key and backdrop click to close.",
@@ -20,5 +19,6 @@
     "dialog",
     "modal",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }

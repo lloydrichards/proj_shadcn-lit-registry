@@ -1,7 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "toast",
-  "type": "registry:component",
   "title": "Toast",
   "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
   "description": "An opinionated toast notification component for displaying messages. Built with Lit and styled using Tailwind CSS. Supports success, error, info, warning, and loading states with icons. Features promise support, action buttons, and multiple visual variants.",
@@ -28,5 +27,6 @@
     "toast",
     "notification",
     "web-component"
-  ]
+  ],
+  "type": "registry:component"
 }
