@@ -1,8 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { html, LitElement, nothing } from "lit";
+import { html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { TW } from "@/lib/tailwindMixin";
-import { cn } from "@/lib/utils";
+import { BaseElement } from "@/registry/lib/base-element";
+import { cn } from "@/registry/lib/utils";
 
 export const badgeVariants = cva(
   "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
@@ -27,7 +27,7 @@ export const badgeVariants = cva(
 export type BadgeVariants = VariantProps<typeof badgeVariants>;
 
 @customElement("ui-badge")
-export class Badge extends TW(LitElement) {
+export class Badge extends BaseElement {
   @property({ type: String }) variant: BadgeVariants["variant"] = "default";
 
   @property({ type: String, attribute: "aria-label" }) accessor ariaLabel:

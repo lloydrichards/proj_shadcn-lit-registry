@@ -1,7 +1,16 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { html, LitElement, nothing, type PropertyValues } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import { TW } from "@/lib/tailwindMixin";
+import { css, html, nothing, type PropertyValues } from "lit";
+import {
+  customElement,
+  property,
+  query,
+  queryAssignedElements,
+} from "lit/decorators.js";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+import { LoaderCircle } from "lucide-static";
+import { animations } from "@/registry/lib/animations";
+import { BaseElement } from "@/registry/lib/base-element";
+import { cn } from "@/registry/lib/utils";
 
 export const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -37,84 +46,251 @@ export const buttonVariants = cva(
 
 type ButtonVariants = VariantProps<typeof buttonVariants>;
 
-export type ButtonProperties = {
+export interface ButtonProperties {
   variant?: ButtonVariants["variant"];
   size?: ButtonVariants["size"];
-  type: "button" | "submit" | "reset";
-  disabled: boolean;
-  ariaLabel: string | null;
-  ariaDescribedby: string | null;
-  ariaLabelledby: string | null;
-};
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+  loading?: boolean;
+  ariaLabel?: string | null;
+  ariaDescribedby?: string | null;
+  ariaLabelledby?: string | null;
+}
 
+/**
+ * @element ui-button
+ * @slot - Default content
+ * @slot prefix - Content before the label
+ * @slot suffix - Content after the label
+ * @csspart base - The button element
+ * @csspart prefix - The prefix container
+ * @csspart content - The main content
+ * @csspart suffix - The suffix container
+ * @csspart loading - The loading spinner
+ * @fires click - Standard click event
+ * @fires button-click - Custom click event with detail
+ * @fires button-state-change - Emitted when disabled or loading state changes
+ * @fires button-loading-start - Emitted when loading starts
+ * @fires button-loading-end - Emitted when loading ends
+ */
 @customElement("ui-button")
-export class Button extends TW(LitElement) implements ButtonVariants {
-  static formAssociated = true;
-  private internals: ElementInternals;
+export class Button extends BaseElement implements ButtonProperties {
+  // Properties
+  @property({ type: String })
+  variant: ButtonVariants["variant"] = "default";
 
-  @property({ type: String }) variant: ButtonVariants["variant"] = "default";
-  @property({ type: String }) size: ButtonVariants["size"] = "default";
-  @property({ type: String }) type: "button" | "submit" | "reset" = "button";
-  @property({ type: Boolean }) disabled = false;
+  @property({ type: String })
+  size: ButtonVariants["size"] = "default";
 
-  @property({ type: String, attribute: "aria-label" }) accessor ariaLabel:
-    | string
-    | null = null;
+  @property({ type: String, reflect: true })
+  type: "button" | "submit" | "reset" = "button";
+
+  @property({ type: Boolean, reflect: true }) disabled = false;
+
+  @property({ type: Boolean, reflect: true }) loading = false;
+
+  // Accessibility properties
+  @property({ type: String, attribute: "aria-label" })
+  ariaLabel: string | null = null;
+
   @property({ type: String, attribute: "aria-describedby" })
-  accessor ariaDescribedby: string | null = null;
+  ariaDescribedby: string | null = null;
+
   @property({ type: String, attribute: "aria-labelledby" })
-  accessor ariaLabelledby: string | null = null;
+  ariaLabelledby: string | null = null;
 
-  constructor() {
-    super();
-    this.internals = this.attachInternals();
-  }
+  // Query for the button element
+  @query("button") private button!: HTMLButtonElement;
 
-  private get isDisabled() {
-    return this.disabled;
-  }
+  // Reactive slot detection
+  @queryAssignedElements({ slot: "prefix", flatten: true })
+  private _prefixElements!: HTMLElement[];
 
-  private get buttonClasses() {
-    return buttonVariants({ variant: this.variant, size: this.size });
-  }
+  @queryAssignedElements({ slot: "suffix", flatten: true })
+  private _suffixElements!: HTMLElement[];
 
-  override updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
+  // Minimal styles for layout
+  static styles = css`
+    :host {
+      display: inline-block;
+    }
+    :host([disabled]),
+    :host([loading]) {
+      pointer-events: none;
+    }
+    ::slotted(*) {
+      pointer-events: none;
+    }
+  `;
+
+  override willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties);
 
     if (changedProperties.has("disabled")) {
-      this.setAttribute("aria-disabled", String(this.isDisabled));
+      // Emit state change event
+      this.emit("button-state-change", {
+        disabled: this.disabled,
+        loading: this.loading,
+      });
+    }
+
+    if (changedProperties.has("loading")) {
+      // Handle loading state animation
+      if (this.loading) {
+        this.emit("button-loading-start");
+      } else {
+        this.emit("button-loading-end");
+      }
     }
   }
 
   private handleClick(e: Event) {
-    if (this.type === "submit" && this.internals.form) {
+    // Prevent click when disabled or loading
+    if (this.disabled || this.loading) {
       e.preventDefault();
-      this.internals.form.requestSubmit();
-    } else if (this.type === "reset" && this.internals.form) {
-      e.preventDefault();
-      this.internals.form.reset();
+      e.stopPropagation();
+      return;
     }
+
+    // Handle form submission
+    if (this.type === "submit") {
+      const form = this.closest("form");
+      if (form) {
+        e.preventDefault();
+        // Validate form
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+        // Submit form
+        form.requestSubmit();
+      }
+    } else if (this.type === "reset") {
+      const form = this.closest("form");
+      if (form) {
+        e.preventDefault();
+        form.reset();
+      }
+    }
+
+    // Emit custom event
+    this.emit("button-click", {
+      type: this.type,
+      variant: this.variant,
+    });
   }
 
   override render() {
+    const hasPrefix = this._prefixElements.length > 0;
+    const hasSuffix = this._suffixElements.length > 0 || this.loading;
+
     return html`
       <button
+        part="base"
         type=${this.type}
-        class=${this.buttonClasses}
-        ?disabled=${this.isDisabled}
+        class=${cn(
+          buttonVariants({ variant: this.variant, size: this.size }),
+          this.loading && "relative",
+          this.className,
+        )}
+        ?disabled=${this.disabled || this.loading}
         aria-label=${this.ariaLabel || nothing}
         aria-describedby=${this.ariaDescribedby || nothing}
         aria-labelledby=${this.ariaLabelledby || nothing}
+        aria-disabled=${this.disabled || this.loading ? "true" : "false"}
+        aria-busy=${this.loading ? "true" : "false"}
         @click=${this.handleClick}
       >
-        <slot></slot>
+        ${
+          hasPrefix
+            ? html`
+              <span part="prefix" class="mr-2">
+                <slot name="prefix"></slot>
+              </span>
+            `
+            : nothing
+        }
+
+        <span part="content" class=${this.loading ? "opacity-0" : ""}>
+          <slot></slot>
+        </span>
+
+        ${
+          hasSuffix
+            ? html`
+              <span part="suffix" class="ml-2">
+                ${
+                  this.loading
+                    ? html`
+                      <span
+                        part="loading"
+                        class=${cn(
+                          "absolute inset-0 flex items-center justify-center [&>svg]:animate-spin",
+                          animations.fadeIn,
+                        )}
+                      >
+                        ${unsafeSVG(LoaderCircle)}
+                      </span>
+                    `
+                    : html`<slot name="suffix"></slot>`
+                }
+              </span>
+            `
+            : nothing
+        }
       </button>
     `;
+  }
+
+  // Public API methods
+  /**
+   * Focuses the button element
+   * @param options - Focus options
+   */
+  override focus(options?: FocusOptions) {
+    this.button?.focus(options);
+  }
+
+  /**
+   * Removes focus from the button element
+   */
+  override blur() {
+    this.button?.blur();
+  }
+
+  /**
+   * Programmatically clicks the button
+   */
+  click() {
+    this.button?.click();
+  }
+
+  /**
+   * Set loading state programmatically
+   * @param loading - Whether the button should be in loading state
+   */
+  setLoading(loading: boolean) {
+    this.loading = loading;
+  }
+
+  /**
+   * Check if button can submit a form
+   * @returns True if button is a submit button and not disabled or loading
+   */
+  get canSubmit(): boolean {
+    return this.type === "submit" && !this.disabled && !this.loading;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
     "ui-button": Button;
+  }
+
+  interface HTMLElementEventMap {
+    "button-click": CustomEvent<{ type: string; variant?: string }>;
+    "button-state-change": CustomEvent<{ disabled: boolean; loading: boolean }>;
+    "button-loading-start": CustomEvent;
+    "button-loading-end": CustomEvent;
   }
 }

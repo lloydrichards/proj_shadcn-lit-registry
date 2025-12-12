@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "animations",
+  "type": "registry:lib",
+  "title": "Animations",
+  "author": "Lloyd Richards <lloyd.d.richards@gmail.com>",
+  "description": "Animation utilities for Lit components using the Web Animations API. Includes helpers for enter/exit animations, slide transitions, and fade effects with promises and event support.",
+  "dependencies": [],
+  "files": [
+    {
+      "path": "registry/lib/animations.ts",
+      "content": "/**\n * Animation utilities using Tailwind classes\n * Respects prefers-reduced-motion\n */\n\n/**\n * Check if user prefers reduced motion\n */\nexport function prefersReducedMotion(): boolean {\n  return window.matchMedia(\"(prefers-reduced-motion: reduce)\").matches;\n}\n\n/**\n * Get animation duration in milliseconds\n */\nexport function getAnimationDuration(element: HTMLElement): number {\n  if (prefersReducedMotion()) return 0;\n\n  const style = getComputedStyle(element);\n  const duration = style.animationDuration || style.transitionDuration || \"0s\";\n\n  // Convert to milliseconds\n  if (duration.endsWith(\"ms\")) {\n    return parseFloat(duration);\n  } else if (duration.endsWith(\"s\")) {\n    return parseFloat(duration) * 1000;\n  }\n\n  return 0;\n}\n\n/**\n * Wait for animation to complete\n */\nexport function waitForAnimation(element: HTMLElement): Promise<void> {\n  return new Promise((resolve) => {\n    if (prefersReducedMotion()) {\n      resolve();\n      return;\n    }\n\n    const duration = getAnimationDuration(element);\n    if (duration === 0) {\n      resolve();\n      return;\n    }\n\n    // Listen for animationend or transitionend\n    const handleEnd = () => {\n      element.removeEventListener(\"animationend\", handleEnd);\n      element.removeEventListener(\"transitionend\", handleEnd);\n      resolve();\n    };\n\n    element.addEventListener(\"animationend\", handleEnd);\n    element.addEventListener(\"transitionend\", handleEnd);\n\n    // Fallback timeout\n    setTimeout(() => {\n      element.removeEventListener(\"animationend\", handleEnd);\n      element.removeEventListener(\"transitionend\", handleEnd);\n      resolve();\n    }, duration + 50);\n  });\n}\n\n/**\n * Tailwind animation classes\n */\nexport const animations = {\n  // Fade\n  fadeIn: \"animate-in fade-in-0\",\n  fadeOut: \"animate-out fade-out-0\",\n\n  // Zoom\n  zoomIn: \"animate-in zoom-in-95\",\n  zoomOut: \"animate-out zoom-out-95\",\n\n  // Slide\n  slideInFromTop: \"animate-in slide-in-from-top-2\",\n  slideInFromBottom: \"animate-in slide-in-from-bottom-2\",\n  slideInFromLeft: \"animate-in slide-in-from-left-2\",\n  slideInFromRight: \"animate-in slide-in-from-right-2\",\n  slideOutToTop: \"animate-out slide-out-to-top-2\",\n  slideOutToBottom: \"animate-out slide-out-to-bottom-2\",\n  slideOutToLeft: \"animate-out slide-out-to-left-2\",\n  slideOutToRight: \"animate-out slide-out-to-right-2\",\n\n  // Accordion\n  accordionDown: \"data-[state=open]:animate-accordion-down\",\n  accordionUp: \"data-[state=closed]:animate-accordion-up\",\n\n  // Collapsible\n  collapsibleDown: \"data-[state=open]:animate-collapsible-down\",\n  collapsibleUp: \"data-[state=closed]:animate-collapsible-up\",\n\n  // Dialog/Modal\n  dialogShow: \"animate-in fade-in-0 zoom-in-95\",\n  dialogHide: \"animate-out fade-out-0 zoom-out-95\",\n\n  // Popover/Dropdown\n  popoverShow: \"animate-in fade-in-0 zoom-in-95\",\n  popoverHide: \"animate-out fade-out-0 zoom-out-95\",\n\n  // Toast\n  toastSlideIn: \"animate-in slide-in-from-top-full\",\n  toastSwipeOut: \"animate-out slide-out-to-right-full\",\n} as const;\n\n/**\n * Apply animation classes conditionally\n */\nexport function animationClasses(\n  state: \"entering\" | \"entered\" | \"exiting\" | \"exited\",\n  enterClasses = animations.fadeIn,\n  exitClasses = animations.fadeOut,\n): string {\n  if (prefersReducedMotion()) return \"\";\n\n  switch (state) {\n    case \"entering\":\n      return enterClasses;\n    case \"exiting\":\n      return exitClasses;\n    default:\n      return \"\";\n  }\n}\n\nexport default {\n  prefersReducedMotion,\n  getAnimationDuration,\n  waitForAnimation,\n  animations,\n  animationClasses,\n};\n",
+      "type": "registry:lib"
+    }
+  ],
+  "categories": [
+    "lib",
+    "animation",
+    "infrastructure",
+    "web-component"
+  ]
+}

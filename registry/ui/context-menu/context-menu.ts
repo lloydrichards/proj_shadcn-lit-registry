@@ -1,4 +1,4 @@
-import { css, html, LitElement, nothing, type PropertyValues } from "lit";
+import { css, html, nothing, type PropertyValues } from "lit";
 import {
   customElement,
   property,
@@ -8,8 +8,9 @@ import {
 } from "lit/decorators.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import { Check, ChevronRight, Circle } from "lucide-static";
-
-import { TW } from "@/registry/lib/tailwindMixin";
+import { ClickAwayController } from "@/controllers/click-away-controller";
+import { MenuNavigationController } from "@/controllers/menu-navigation-controller";
+import { BaseElement } from "@/registry/lib/base-element";
 import { cn } from "@/registry/lib/utils";
 import "@/registry/ui/popover/popover";
 
@@ -44,15 +45,8 @@ export function isMenuItemElement(
   return validTags.includes(element.tagName);
 }
 
-const isNode = (value: EventTarget | null): value is Node => {
-  return value instanceof Node;
-};
-
 @customElement("ui-context-menu")
-export class ContextMenu
-  extends TW(LitElement)
-  implements ContextMenuProperties
-{
+export class ContextMenu extends BaseElement implements ContextMenuProperties {
   static styles = css`
     :host {
       display: contents;
@@ -69,27 +63,38 @@ export class ContextMenu
 
   @query("ui-popover") popoverElement?: HTMLElement;
 
-  private clickAwayHandler = (e: MouseEvent) => {
-    if (!this.open) return;
+  // Click-away controller (uses capture mode for context menus)
+  private clickAway = new ClickAwayController(this, {
+    onClickAway: () => {
+      this.open = false;
+    },
+    isActive: () => this.open,
+    excludeElements: () => {
+      const elements: HTMLElement[] = [];
 
-    if (!isNode(e.target)) return;
+      // Exclude context menu content
+      const content = this.querySelector("ui-context-menu-content");
+      if (content) elements.push(content);
 
-    if (this.querySelector("ui-context-menu-content")?.contains(e.target))
-      return;
-    if (this.querySelector("ui-popover")?.contains(e.target)) return;
+      // Exclude popover
+      const popover = this.querySelector("ui-popover");
+      if (popover) elements.push(popover as HTMLElement);
 
-    const triggerSlot = this.shadowRoot?.querySelector<HTMLSlotElement>(
-      'slot[name="trigger"]',
-    );
-    if (triggerSlot) {
-      const assignedElements = triggerSlot.assignedElements({ flatten: true });
-      for (const el of assignedElements) {
-        if (el.contains(e.target)) return;
+      // Exclude trigger slot elements
+      const triggerSlot = this.shadowRoot?.querySelector<HTMLSlotElement>(
+        'slot[name="trigger"]',
+      );
+      if (triggerSlot) {
+        const assignedElements = triggerSlot.assignedElements({
+          flatten: true,
+        });
+        elements.push(...(assignedElements as HTMLElement[]));
       }
-    }
 
-    this.open = false;
-  };
+      return elements;
+    },
+    useCapture: true,
+  });
 
   private escapeHandler = (e: KeyboardEvent) => {
     if (e.key === "Escape" && this.open) {
@@ -106,7 +111,6 @@ export class ContextMenu
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.removeEventListener("item-select", this.handleItemSelect);
-    document.removeEventListener("click", this.clickAwayHandler, true);
     document.removeEventListener("keydown", this.escapeHandler);
   }
 
@@ -114,9 +118,10 @@ export class ContextMenu
     super.updated(changedProperties);
 
     if (changedProperties.has("open")) {
+      this.clickAway.update();
+
       if (this.open) {
         setTimeout(() => {
-          document.addEventListener("click", this.clickAwayHandler, true);
           document.addEventListener("keydown", this.escapeHandler);
         }, 100);
         const content = this.querySelector("ui-context-menu-content");
@@ -128,14 +133,8 @@ export class ContextMenu
           }, 0);
         }
       } else {
-        document.removeEventListener("click", this.clickAwayHandler, true);
         document.removeEventListener("keydown", this.escapeHandler);
-        this.dispatchEvent(
-          new CustomEvent("context-menu-close", {
-            bubbles: true,
-            composed: true,
-          }),
-        );
+        this.emit("context-menu-close");
       }
     }
   }
@@ -165,13 +164,7 @@ export class ContextMenu
 
     this.open = true;
 
-    this.dispatchEvent(
-      new CustomEvent("context-menu-open", {
-        detail: { x: this.cursorX, y: this.cursorY },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("context-menu-open", { x: this.cursorX, y: this.cursorY });
   };
 
   private handleItemSelect = () => {
@@ -207,7 +200,7 @@ export interface ContextMenuContentProperties {
 
 @customElement("ui-context-menu-content")
 export class ContextMenuContent
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuContentProperties
 {
   @property({ type: String }) align: "start" | "center" | "end" = "start";
@@ -216,23 +209,66 @@ export class ContextMenuContent
   @property({ type: Boolean }) avoidCollisions = true;
   @property({ type: Number }) collisionPadding = 8;
 
-  @state() private isOpen = false;
+  @state() protected isOpen = false;
   @state() private highlightedIndex = -1;
-  @state() private typeaheadString = "";
-  private typeaheadTimeout?: number;
 
   @queryAssignedElements({ flatten: true })
   private items!: HTMLElement[];
+
+  private observer?: MutationObserver;
+
+  // Menu navigation controller
+  private navigation = new MenuNavigationController(this, {
+    getItems: () => this.getNavigableItems(),
+    getHighlightedIndex: () => this.highlightedIndex,
+    setHighlightedIndex: (index) => {
+      this.highlightedIndex = index;
+    },
+    onSelect: (item) => item.click(),
+    onEscape: () => {
+      const menu = this.closest("ui-context-menu");
+      if (menu) menu.open = false;
+    },
+  });
 
   override connectedCallback() {
     super.connectedCallback();
     const menu = this.closest("ui-context-menu");
     if (menu) {
       this.isOpen = menu.open;
-      const observer = new MutationObserver(() => {
+      this.observer = new MutationObserver(() => {
         this.isOpen = menu.open;
       });
-      observer.observe(menu, { attributes: true, attributeFilter: ["open"] });
+      this.observer.observe(menu, {
+        attributes: true,
+        attributeFilter: ["open"],
+      });
+    }
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.observer?.disconnect();
+  }
+
+  override willUpdate(changed: PropertyValues) {
+    super.willUpdate(changed);
+
+    // Update highlighted state when index changes
+    if (changed.has("highlightedIndex")) {
+      const items = this.getNavigableItems();
+      items.forEach((item, index) => {
+        item.highlighted = index === this.highlightedIndex;
+      });
+    }
+  }
+
+  override updated(changed: PropertyValues) {
+    super.updated(changed);
+
+    // Reset navigation state when menu closes
+    if (changed.has("isOpen") && !this.isOpen) {
+      this.navigation.reset();
     }
   }
 
@@ -244,76 +280,8 @@ export class ContextMenuContent
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
-    const navItems = this.getNavigableItems();
-    if (navItems.length === 0) return;
-
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        this.highlightedIndex = Math.min(
-          this.highlightedIndex + 1,
-          navItems.length - 1,
-        );
-        this.updateHighlighted(navItems);
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
-        this.updateHighlighted(navItems);
-        break;
-      case "Home":
-        e.preventDefault();
-        this.highlightedIndex = 0;
-        this.updateHighlighted(navItems);
-        break;
-      case "End":
-        e.preventDefault();
-        this.highlightedIndex = navItems.length - 1;
-        this.updateHighlighted(navItems);
-        break;
-      case "Enter":
-      case " ":
-        e.preventDefault();
-        if (this.highlightedIndex >= 0) {
-          navItems[this.highlightedIndex]?.click();
-        }
-        break;
-      case "Escape": {
-        e.preventDefault();
-        const menu = this.closest("ui-context-menu");
-        if (menu) menu.open = false;
-        break;
-      }
-      default:
-        if (e.key.length === 1) {
-          this.handleTypeahead(e.key, navItems);
-        }
-    }
+    this.navigation.handleKeyDown(e);
   };
-
-  private handleTypeahead(char: string, items: HTMLElement[]) {
-    clearTimeout(this.typeaheadTimeout);
-    this.typeaheadString += char.toLowerCase();
-
-    const matchIndex = items.findIndex((item) =>
-      item.textContent?.toLowerCase().startsWith(this.typeaheadString),
-    );
-
-    if (matchIndex >= 0) {
-      this.highlightedIndex = matchIndex;
-      this.updateHighlighted(items);
-    }
-
-    this.typeaheadTimeout = window.setTimeout(() => {
-      this.typeaheadString = "";
-    }, 500);
-  }
-
-  private updateHighlighted(items: MenuItemWithProperties[]) {
-    items.forEach((item, index) => {
-      item.highlighted = index === this.highlightedIndex;
-    });
-  }
 
   override render() {
     if (!this.isOpen) return nothing;
@@ -343,7 +311,7 @@ export interface ContextMenuItemProperties {
 
 @customElement("ui-context-menu-item")
 export class ContextMenuItem
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuItemProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -353,19 +321,8 @@ export class ContextMenuItem
 
   private handleClick = () => {
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("select", {
-          detail: { value: this.textContent },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("select", { value: this.textContent });
+      this.emit("item-select");
     }
   };
 
@@ -415,7 +372,7 @@ export interface ContextMenuCheckboxItemProperties {
 
 @customElement("ui-context-menu-checkbox-item")
 export class ContextMenuCheckboxItem
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuCheckboxItemProperties
 {
   @property({ type: Boolean }) checked = false;
@@ -426,20 +383,19 @@ export class ContextMenuCheckboxItem
   private handleClick = () => {
     if (!this.disabled) {
       this.checked = !this.checked;
-      this.dispatchEvent(
-        new CustomEvent("checked-change", {
-          detail: { checked: this.checked },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("checked-change", { checked: this.checked });
+      this.emit("item-select");
     }
+  };
+
+  private handleMouseEnter = () => {
+    if (!this.disabled) {
+      this.highlighted = true;
+    }
+  };
+
+  private handleMouseLeave = () => {
+    this.highlighted = false;
   };
 
   override render() {
@@ -453,11 +409,15 @@ export class ContextMenuCheckboxItem
           "relative flex cursor-default select-none items-center gap-2 rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors",
           "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
           "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
           this.className,
         )}
         data-state=${this.checked ? "checked" : "unchecked"}
         ?data-disabled=${this.disabled}
+        ?data-highlighted=${this.highlighted}
         @click=${this.handleClick}
+        @mouseenter=${this.handleMouseEnter}
+        @mouseleave=${this.handleMouseLeave}
       >
         <span
           class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center"
@@ -476,7 +436,7 @@ export interface ContextMenuRadioGroupProperties {
 
 @customElement("ui-context-menu-radio-group")
 export class ContextMenuRadioGroup
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuRadioGroupProperties
 {
   @property({ type: String }) value = "";
@@ -510,13 +470,7 @@ export class ContextMenuRadioGroup
     if (!(e instanceof CustomEvent)) return;
     e.stopPropagation();
     this.value = e.detail.value;
-    this.dispatchEvent(
-      new CustomEvent("value-change", {
-        detail: { value: this.value },
-        bubbles: true,
-        composed: true,
-      }),
-    );
+    this.emit("value-change", { value: this.value });
   };
 
   override render() {
@@ -536,7 +490,7 @@ export interface ContextMenuRadioItemProperties {
 
 @customElement("ui-context-menu-radio-item")
 export class ContextMenuRadioItem
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuRadioItemProperties
 {
   @property({ type: String }) value = "";
@@ -547,20 +501,19 @@ export class ContextMenuRadioItem
 
   private handleClick = () => {
     if (!this.disabled) {
-      this.dispatchEvent(
-        new CustomEvent("radio-select", {
-          detail: { value: this.value },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("item-select", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("radio-select", { value: this.value });
+      this.emit("item-select");
     }
+  };
+
+  private handleMouseEnter = () => {
+    if (!this.disabled) {
+      this.highlighted = true;
+    }
+  };
+
+  private handleMouseLeave = () => {
+    this.highlighted = false;
   };
 
   override render() {
@@ -574,10 +527,14 @@ export class ContextMenuRadioItem
           "relative flex cursor-default select-none items-center gap-2 rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors",
           "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
           "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
           this.className,
         )}
         ?data-disabled=${this.disabled}
+        ?data-highlighted=${this.highlighted}
         @click=${this.handleClick}
+        @mouseenter=${this.handleMouseEnter}
+        @mouseleave=${this.handleMouseLeave}
       >
         <span
           class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center"
@@ -596,7 +553,7 @@ export interface ContextMenuSubProperties {
 
 @customElement("ui-context-menu-sub")
 export class ContextMenuSub
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuSubProperties
 {
   static styles = css`
@@ -660,7 +617,7 @@ export interface ContextMenuSubTriggerProperties {
 
 @customElement("ui-context-menu-sub-trigger")
 export class ContextMenuSubTrigger
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuSubTriggerProperties
 {
   @property({ type: Boolean }) disabled = false;
@@ -675,24 +632,14 @@ export class ContextMenuSubTrigger
   private handleClick = (e: Event) => {
     if (!this.disabled) {
       e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-click", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("sub-trigger-click");
     }
   };
 
   private handleMouseEnter = () => {
     if (!this.disabled) {
       this.highlighted = true;
-      this.dispatchEvent(
-        new CustomEvent("sub-trigger-mouseenter", {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.emit("sub-trigger-mouseenter");
     }
   };
 
@@ -732,7 +679,7 @@ export class ContextMenuSubTrigger
 export class ContextMenuSubContent extends ContextMenuContent {}
 
 @customElement("ui-context-menu-separator")
-export class ContextMenuSeparator extends TW(LitElement) {
+export class ContextMenuSeparator extends BaseElement {
   override render() {
     return html`
       <div
@@ -750,7 +697,7 @@ export interface ContextMenuLabelProperties {
 
 @customElement("ui-context-menu-label")
 export class ContextMenuLabel
-  extends TW(LitElement)
+  extends BaseElement
   implements ContextMenuLabelProperties
 {
   @property({ type: Boolean }) inset = false;
@@ -771,7 +718,7 @@ export class ContextMenuLabel
 }
 
 @customElement("ui-context-menu-group")
-export class ContextMenuGroup extends TW(LitElement) {
+export class ContextMenuGroup extends BaseElement {
   override render() {
     return html`
       <div role="group">
@@ -782,7 +729,7 @@ export class ContextMenuGroup extends TW(LitElement) {
 }
 
 @customElement("ui-context-menu-shortcut")
-export class ContextMenuShortcut extends TW(LitElement) {
+export class ContextMenuShortcut extends BaseElement {
   override render() {
     return html`
       <span class="ml-auto text-xs tracking-widest text-muted-foreground">

@@ -10,8 +10,8 @@ import {
 } from "@floating-ui/dom";
 import { css, html, LitElement, type PropertyValues } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
-import { TW } from "@/lib/tailwindMixin";
-import { cn } from "@/lib/utils";
+import { TW } from "@/registry/lib/tailwindMixin";
+import { cn } from "@/registry/lib/utils";
 
 @customElement("ui-popover")
 export class Popover extends TW(LitElement) {
